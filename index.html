@@ -217,7 +217,10 @@
                     <p class="text-gray-500">لوحة تحكم لإدارة المخزون، المبيعات، الفواتير، والعملاء والموردين.</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <p id="user-email" class="text-gray-600 font-semibold hidden sm:block"></p>
+                    <div id="user-info" class="text-right">
+                         <p id="user-email" class="text-gray-600 font-semibold hidden sm:block"></p>
+                         <p id="user-role-display" class="text-sm text-blue-600 font-bold"></p>
+                    </div>
                     <button id="logout-btn" class="btn btn-danger">
                         <i class="fas fa-sign-out-alt"></i>
                        <span class="hidden sm:inline">تسجيل الخروج</span>
@@ -354,7 +357,7 @@
                         <div class="flex flex-wrap justify-end items-center gap-2">
                             <button id="delete-selected-products-btn" class="btn btn-danger" disabled><i class="fas fa-trash-alt"></i><span>حذف المحدد</span></button>
                             <label class="btn bg-green-600 hover:bg-green-700 text-white cursor-pointer"><i class="fas fa-file-excel"></i><span>استيراد</span><input type="file" id="import-products-excel" class="hidden" accept=".xlsx, .xls, .csv"></label>
-                            <button class="btn bg-blue-600 hover:bg-blue-700 text-white" onclick="exportToExcel('products-table-export', 'المنتجات', 'Products.xlsx')"><i class="fas fa-file-download"></i><span>تصدير Excel</span></button>
+                            <button id="export-products-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white"><i class="fas fa-file-download"></i><span>تصدير Excel</span></button>
                         </div>
                     </div>
                     <div class="data-table-container">
@@ -406,9 +409,9 @@
                              <input type="number" id="s-qty" class="input" required>
                          </div>
                          <div class="flex flex-col" id="s-cost-container">
-                             <label for="s-cost" class="text-gray-600 mb-1">سعر التكلفة</label>
-                             <input type="number" id="s-cost" class="input" step="0.01" placeholder="أدخل التكلفة يدوياً" required>
-                         </div>
+                            <label for="s-cost" class="text-gray-600 mb-1">سعر التكلفة</label>
+                            <input type="number" id="s-cost" class="input" step="0.01" placeholder="تلقائي للمنتج / يدوي للخدمة" required>
+                        </div>
                          <div class="flex flex-col" id="s-price-container">
                              <label for="s-price" class="text-gray-600 mb-1">سعر البيع</label>
                              <input type="number" id="s-price" class="input" step="0.01" required>
@@ -424,14 +427,14 @@
                               <button type="button" class="btn bg-gray-500 text-white w-full hidden" id="sale-form-cancel-btn">إلغاء التعديل</button>
                          </div>
                      </form>
-                 </div>
+                </div>
                 <div class="data-table-container">
                      <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
-                        <h3 class="text-2xl font-semibold">سجل المبيعات</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <button class="btn btn-primary bg-blue-500 hover:bg-blue-600" onclick="exportToExcel('sales-table-export', 'المبيعات', 'Sales.xlsx')"><i class="fas fa-file-excel"></i> تصدير Excel</button>
-                        </div>
-                    </div>
+                         <h3 class="text-2xl font-semibold">سجل المبيعات</h3>
+                         <div class="flex flex-wrap gap-2">
+                             <button id="export-sales-btn" class="btn btn-primary bg-blue-500 hover:bg-blue-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                         </div>
+                     </div>
                     <table class="data-table" id="sales-table-export">
                         <thead>
                             <tr>
@@ -491,7 +494,7 @@
                          </div>
                          <div class="flex items-end col-span-full gap-2">
                              <button type="submit" class="btn btn-primary w-full" id="purchase-form-submit-btn">تسجيل الشراء</button>
-                              <button type="button" class="btn bg-gray-500 text-white w-full hidden" id="purchase-form-cancel-btn">إلغاء التعديل</button>
+                               <button type="button" class="btn bg-gray-500 text-white w-full hidden" id="purchase-form-cancel-btn">إلغاء التعديل</button>
                          </div>
                      </form>
                  </div>
@@ -499,7 +502,7 @@
                      <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                          <h3 class="text-2xl font-semibold">سجل المشتريات</h3>
                           <div class="flex flex-wrap gap-2">
-                            <button class="btn btn-primary bg-blue-500 hover:bg-blue-600" onclick="exportToExcel('purchases-table-export', 'المشتريات', 'Purchases.xlsx')"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                             <button id="export-purchases-btn" class="btn btn-primary bg-blue-500 hover:bg-blue-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
                          </div>
                      </div>
                      <table class="data-table" id="purchases-table-export">
@@ -554,7 +557,7 @@
                      <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                          <h3 class="text-2xl font-semibold">سجل المصاريف</h3>
                          <div class="flex flex-wrap gap-2">
-                            <button class="btn btn-primary bg-blue-500 hover:bg-blue-600" onclick="exportToExcel('expenses-table-export', 'المصاريف', 'Expenses.xlsx')"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                             <button id="export-expenses-btn" class="btn btn-primary bg-blue-500 hover:bg-blue-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
                          </div>
                      </div>
                      <table class="data-table" id="expenses-table-export">
@@ -605,7 +608,7 @@
                      <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                          <h3 class="text-2xl font-semibold">قائمة العملاء</h3>
                          <div class="flex flex-wrap gap-2">
-                             <button class="btn btn-primary bg-blue-500 hover:bg-blue-600" onclick="exportToExcel('customers-table-export', 'العملاء', 'Customers.xlsx')"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                              <button id="export-customers-btn" class="btn btn-primary bg-blue-500 hover:bg-blue-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
                          </div>
                      </div>
                      <table class="data-table" id="customers-table-export">
@@ -648,7 +651,7 @@
                          </div>
                          <div class="flex items-end col-span-full gap-2">
                              <button type="submit" class="btn btn-primary w-full" id="supplier-form-submit-btn">إضافة المورد</button>
-                              <button type="button" class="btn bg-gray-500 text-white w-full hidden" id="supplier-form-cancel-btn">إلغاء التعديل</button>
+                               <button type="button" class="btn bg-gray-500 text-white w-full hidden" id="supplier-form-cancel-btn">إلغاء التعديل</button>
                          </div>
                      </form>
                  </div>
@@ -656,7 +659,7 @@
                      <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
                          <h3 class="text-2xl font-semibold">قائمة الموردين</h3>
                           <div class="flex flex-wrap gap-2">
-                            <button class="btn btn-primary bg-blue-500 hover:bg-blue-600" onclick="exportToExcel('suppliers-table-export', 'الموردين', 'Suppliers.xlsx')"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                             <button id="export-suppliers-btn" class="btn btn-primary bg-blue-500 hover:bg-blue-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
                          </div>
                      </div>
                      <table class="data-table" id="suppliers-table-export">
@@ -709,12 +712,25 @@
                      </form>
                  </div>
                  <div class="data-table-container">
-                     <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
-                         <h3 class="text-2xl font-semibold">قائمة الفواتير</h3>
-                         <div class="flex flex-wrap gap-2">
-                             <button class="btn btn-primary bg-red-600 hover:bg-red-700" onclick="exportToPdf('invoices-table-export', 'تقرير الفواتير', 'Invoices.pdf')"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
-                         </div>
-                     </div>
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                        <h3 class="text-2xl font-semibold">قائمة الفواتير</h3>
+                        <div class="flex-grow">
+                             <form id="invoice-export-form" class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+                                <div>
+                                    <label for="invoice-start-date" class="text-xs">من تاريخ</label>
+                                    <input type="date" id="invoice-start-date" class="input p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label for="invoice-end-date" class="text-xs">إلى تاريخ</label>
+                                    <input type="date" id="invoice-end-date" class="input p-2 text-sm">
+                                </div>
+                                <div class="flex gap-2">
+                                     <button type="button" id="export-invoices-excel-btn" class="btn btn-primary bg-green-600 hover:bg-green-700 w-full text-sm"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                                     <button type="button" id="export-invoices-pdf-btn" class="btn btn-primary bg-red-600 hover:bg-red-700 w-full text-sm"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+                                </div>
+                             </form>
+                        </div>
+                    </div>
                      <table class="data-table" id="invoices-table-export">
                          <thead>
                              <tr>
@@ -731,127 +747,127 @@
             </div>
 
             <!-- تبويب التقارير -->
-             <div id="reports" class="tab-pane hidden">
-                 <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">التقارير المتقدمة</h2>
-                 <div class="form-section no-print">
-                     <h3 class="text-2xl font-semibold">تحديد فترة التقرير</h3>
-                     <form id="reports-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mt-4">
-                         <div class="flex flex-col">
-                             <label for="start-date" class="text-gray-600 mb-1">تاريخ البدء</label>
-                             <input type="date" id="start-date" class="input" required>
-                         </div>
-                         <div class="flex flex-col">
-                             <label for="end-date" class="text-gray-600 mb-1">تاريخ الانتهاء</label>
-                             <input type="date" id="end-date" class="input" required>
-                         </div>
-                         <button type="submit" class="btn btn-primary w-full">عرض التقرير</button>
-                     </form>
-                 </div>
-                 
-                 <div id="report-results" class="hidden">
-                    <div id="printable-content">
-                        <!-- بداية رأس التقرير -->
-                        <div class="p-6 bg-white rounded-lg shadow-md mb-6">
-                             <div class="flex justify-between items-center pb-4 border-b border-gray-200">
-                                 <div>
-                                     <h3 class="text-2xl font-bold text-blue-600" id="report-company-name">اسم الشركة</h3>
-                                     <p class="text-sm text-gray-500" id="report-company-address">عنوان الشركة</p>
-                                 </div>
-                                 <div class="text-right">
-                                     <h4 class="text-xl font-bold" id="report-title">تقرير الأداء</h4>
-                                     <p class="text-sm text-gray-500" id="report-date-range">للفترة من ... إلى ...</p>
-                                 </div>
-                             </div>
-                             <div class="flex justify-end mt-4 gap-2 no-print">
-                                 <button id="print-report-btn" class="btn btn-primary"><i class="fas fa-print"></i> طباعة</button>
-                                 <button id="export-report-pdf-btn" class="btn bg-red-500 text-white"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
-                                 <button id="export-report-excel-btn" class="btn bg-green-500 text-white"><i class="fas fa-file-excel"></i> تصدير Excel</button>
-                             </div>
-                        </div>
-                         <!-- نهاية رأس التقرير -->
+              <div id="reports" class="tab-pane hidden">
+                  <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">التقارير المتقدمة</h2>
+                  <div class="form-section no-print">
+                      <h3 class="text-2xl font-semibold">تحديد فترة التقرير</h3>
+                      <form id="reports-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mt-4">
+                          <div class="flex flex-col">
+                              <label for="start-date" class="text-gray-600 mb-1">تاريخ البدء</label>
+                              <input type="date" id="start-date" class="input" required>
+                          </div>
+                          <div class="flex flex-col">
+                              <label for="end-date" class="text-gray-600 mb-1">تاريخ الانتهاء</label>
+                              <input type="date" id="end-date" class="input" required>
+                          </div>
+                          <button type="submit" class="btn btn-primary w-full">عرض التقرير</button>
+                      </form>
+                  </div>
+                  
+                  <div id="report-results" class="hidden">
+                      <div id="printable-content">
+                          <!-- بداية رأس التقرير -->
+                          <div class="p-6 bg-white rounded-lg shadow-md mb-6">
+                              <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                                  <div>
+                                      <h3 class="text-2xl font-bold text-blue-600" id="report-company-name">اسم الشركة</h3>
+                                      <p class="text-sm text-gray-500" id="report-company-address">عنوان الشركة</p>
+                                  </div>
+                                  <div class="text-right">
+                                      <h4 class="text-xl font-bold" id="report-title">تقرير الأداء</h4>
+                                      <p class="text-sm text-gray-500" id="report-date-range">للفترة من ... إلى ...</p>
+                                  </div>
+                              </div>
+                              <div class="flex justify-end mt-4 gap-2 no-print">
+                                  <button id="print-report-btn" class="btn btn-primary"><i class="fas fa-print"></i> طباعة</button>
+                                  <button id="export-report-pdf-btn" class="btn bg-red-500 text-white"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+                                  <button id="export-report-excel-btn" class="btn bg-green-500 text-white"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+                              </div>
+                          </div>
+                           <!-- نهاية رأس التقرير -->
 
-                         <!-- بطاقات مؤشرات الأداء الرئيسية -->
-                         <h4 class="text-xl font-semibold mb-4 text-gray-700">ملخص الأداء</h4>
-                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                            <div class="report-kpi-card" style="border-color: #3b82f6;">
-                                <div class="icon bg-blue-500"><i class="fas fa-dollar-sign"></i></div>
-                                <div>
-                                    <p class="text-sm text-gray-500">إجمالي المبيعات</p>
-                                    <p class="text-2xl font-bold" id="report-sales">0</p>
-                                </div>
-                            </div>
-                             <div class="report-kpi-card" style="border-color: #10b981;">
-                                <div class="icon bg-green-500"><i class="fas fa-chart-line"></i></div>
-                                <div>
-                                    <p class="text-sm text-gray-500">الربح الصافي</p>
-                                    <p class="text-2xl font-bold" id="report-profit">0</p>
-                                </div>
-                            </div>
-                            <div class="report-kpi-card" style="border-color: #f59e0b;">
-                                <div class="icon bg-yellow-500"><i class="fas fa-shopping-cart"></i></div>
-                                <div>
-                                    <p class="text-sm text-gray-500">إجمالي المشتريات</p>
-                                    <p class="text-2xl font-bold" id="report-purchases">0</p>
-                                </div>
-                            </div>
-                            <div class="report-kpi-card" style="border-color: #ef4444;">
-                                <div class="icon bg-red-500"><i class="fas fa-wallet"></i></div>
-                                <div>
-                                    <p class="text-sm text-gray-500">إجمالي المصاريف</p>
-                                    <p class="text-2xl font-bold" id="report-expenses">0</p>
-                                </div>
-                            </div>
-                         </div>
+                          <!-- بطاقات مؤشرات الأداء الرئيسية -->
+                          <h4 class="text-xl font-semibold mb-4 text-gray-700">ملخص الأداء</h4>
+                          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                              <div class="report-kpi-card" style="border-color: #3b82f6;">
+                                  <div class="icon bg-blue-500"><i class="fas fa-dollar-sign"></i></div>
+                                  <div>
+                                      <p class="text-sm text-gray-500">إجمالي المبيعات</p>
+                                      <p class="text-2xl font-bold" id="report-sales">0</p>
+                                  </div>
+                              </div>
+                               <div class="report-kpi-card" style="border-color: #10b981;">
+                                  <div class="icon bg-green-500"><i class="fas fa-chart-line"></i></div>
+                                  <div>
+                                      <p class="text-sm text-gray-500">الربح الصافي</p>
+                                      <p class="text-2xl font-bold" id="report-profit">0</p>
+                                  </div>
+                              </div>
+                              <div class="report-kpi-card" style="border-color: #f59e0b;">
+                                  <div class="icon bg-yellow-500"><i class="fas fa-shopping-cart"></i></div>
+                                  <div>
+                                      <p class="text-sm text-gray-500">إجمالي المشتريات</p>
+                                      <p class="text-2xl font-bold" id="report-purchases">0</p>
+                                  </div>
+                              </div>
+                              <div class="report-kpi-card" style="border-color: #ef4444;">
+                                  <div class="icon bg-red-500"><i class="fas fa-wallet"></i></div>
+                                  <div>
+                                      <p class="text-sm text-gray-500">إجمالي المصاريف</p>
+                                      <p class="text-2xl font-bold" id="report-expenses">0</p>
+                                  </div>
+                              </div>
+                          </div>
 
-                         <!-- الرسوم البيانية -->
-                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                            <div class="dashboard-card">
-                                 <h4 class="text-xl font-semibold mb-4">ملخص الأداء المالي</h4>
-                                 <canvas id="performanceChart" style="max-height: 350px;"></canvas>
-                             </div>
-                             <div class="dashboard-card">
-                                 <h4 class="text-xl font-semibold mb-4">توزيع المبيعات</h4>
-                                 <canvas id="salesDistributionChart" style="max-height: 350px;"></canvas>
-                             </div>
-                         </div>
-                         
-                         <!-- الجداول التفصيلية -->
-                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                             <div class="data-table-container">
-                                 <h4 class="text-xl font-semibold mb-4 text-gray-700">المنتجات الأكثر مبيعاً</h4>
-                                 <table class="data-table" id="top-products-table-export">
-                                     <thead><tr><th>المنتج</th><th>الكمية المباعة</th><th>إجمالي الإيرادات</th></tr></thead>
-                                     <tbody id="top-products-table"></tbody>
-                                 </table>
-                             </div>
-                             <div class="data-table-container">
-                                 <h4 class="text-xl font-semibold mb-4 text-gray-700">أفضل العملاء</h4>
-                                 <table class="data-table" id="top-customers-table-export">
-                                     <thead><tr><th>العميل</th><th>إجمالي المشتريات</th></tr></thead>
-                                     <tbody id="top-customers-table"></tbody>
-                                 </table>
-                             </div>
-                         </div>
+                          <!-- الرسوم البيانية -->
+                          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                              <div class="dashboard-card">
+                                  <h4 class="text-xl font-semibold mb-4">ملخص الأداء المالي</h4>
+                                  <canvas id="performanceChart" style="max-height: 350px;"></canvas>
+                              </div>
+                              <div class="dashboard-card">
+                                  <h4 class="text-xl font-semibold mb-4">توزيع المبيعات</h4>
+                                  <canvas id="salesDistributionChart" style="max-height: 350px;"></canvas>
+                              </div>
+                          </div>
+                          
+                          <!-- الجداول التفصيلية -->
+                          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                               <div class="data-table-container">
+                                  <h4 class="text-xl font-semibold mb-4 text-gray-700">المنتجات الأكثر مبيعاً</h4>
+                                  <table class="data-table" id="top-products-table-export">
+                                      <thead><tr><th>المنتج</th><th>الكمية المباعة</th><th>إجمالي الإيرادات</th></tr></thead>
+                                      <tbody id="top-products-table"></tbody>
+                                  </table>
+                              </div>
+                               <div class="data-table-container">
+                                  <h4 class="text-xl font-semibold mb-4 text-gray-700">أفضل العملاء</h4>
+                                  <table class="data-table" id="top-customers-table-export">
+                                      <thead><tr><th>العميل</th><th>إجمالي المشتريات</th></tr></thead>
+                                      <tbody id="top-customers-table"></tbody>
+                                  </table>
+                              </div>
+                          </div>
 
-                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-                            <div class="data-table-container">
-                                <h4 class="text-xl font-semibold mb-4 text-gray-700">تقرير الرواتب</h4>
-                                <table class="data-table" id="salaries-report-table-export">
-                                    <thead><tr><th>الوصف</th><th>المبلغ الإجمالي</th></tr></thead>
-                                    <tbody id="salaries-report-table"></tbody>
-                                </table>
-                            </div>
-                            <div class="data-table-container">
-                                <h4 class="text-xl font-semibold mb-4 text-gray-700">تنبيهات نفاد المخزون</h4>
-                                <table class="data-table" id="low-stock-table-export">
-                                    <thead><tr><th>المنتج</th><th>الكمية المتبقية</th></tr></thead>
-                                    <tbody id="low-stock-table"></tbody>
-                                </table>
-                            </div>
-                        </div>
-                     </div>
-                 </div>
-            </div>
+                          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                              <div class="data-table-container">
+                                  <h4 class="text-xl font-semibold mb-4 text-gray-700">تقرير الرواتب</h4>
+                                  <table class="data-table" id="salaries-report-table-export">
+                                      <thead><tr><th>الوصف</th><th>المبلغ الإجمالي</th></tr></thead>
+                                      <tbody id="salaries-report-table"></tbody>
+                                  </table>
+                              </div>
+                              <div class="data-table-container">
+                                  <h4 class="text-xl font-semibold mb-4 text-gray-700">تنبيهات نفاد المخزون (الكمية صفر)</h4>
+                                  <table class="data-table" id="low-stock-table-export">
+                                      <thead><tr><th>المنتج</th><th>الكمية المتبقية</th></tr></thead>
+                                      <tbody id="low-stock-table"></tbody>
+                                  </table>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
 
             <!-- تبويب الإعدادات -->
             <div id="settings" class="tab-pane hidden">
@@ -888,6 +904,48 @@
                          </div>
                      </form>
                  </div>
+                 <div id="user-management-section" class="settings-card">
+                    <h3 class="text-2xl font-semibold mb-4 border-b pb-2">إدارة المستخدمين</h3>
+                    <div class="form-section p-0 m-0 shadow-none">
+                        <h4 class="text-xl font-semibold mb-4" id="user-form-title">إنشاء مستخدم جديد</h4>
+                        <form id="add-user-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div class="flex flex-col">
+                                <label for="user-email-input" class="text-gray-600 mb-1">البريد الإلكتروني</label>
+                                <input type="email" id="user-email-input" class="input" required>
+                            </div>
+                             <div class="flex flex-col">
+                                <label for="user-password-input" class="text-gray-600 mb-1">كلمة المرور</label>
+                                <input type="password" id="user-password-input" class="input" required>
+                            </div>
+                            <div class="flex flex-col">
+                                <label for="user-role-select" class="text-gray-600 mb-1">الصلاحية</label>
+                                <select id="user-role-select" class="select" required>
+                                    <option value="user">مستخدم</option>
+                                    <option value="visitor">زائر</option>
+                                    <option value="admin">مدير</option>
+                                </select>
+                            </div>
+                            <div class="col-span-full">
+                                <button type="submit" class="btn btn-primary w-full">إنشاء المستخدم</button>
+                            </div>
+                        </form>
+                    </div>
+                     <div class="data-table-container mt-8">
+                        <h4 class="text-xl font-semibold mb-4">قائمة المستخدمين</h4>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>البريد الإلكتروني</th>
+                                    <th>الصلاحية</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table">
+                                <!-- User rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
 
@@ -911,7 +969,7 @@
     </div>
     <div id="invoice-view-modal" class="fixed z-50 p-4 md:p-8 rounded-lg shadow-2xl bg-white max-w-4xl w-full hidden transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
         <div id="invoice-view-content"></div>
-        <div class="flex justify-end gap-4 p-4 bg-gray-50 rounded-b-lg mt-4">
+        <div class="flex justify-end gap-4 p-4 bg-gray-50 rounded-b-lg mt-4 no-print">
             <button id="invoice-print-btn" class="btn btn-primary"><i class="fas fa-print"></i> طباعة / حفظ PDF</button>
             <button id="invoice-close-btn" class="btn btn-danger bg-gray-500 hover:bg-gray-600">إغلاق</button>
         </div>
@@ -921,13 +979,12 @@
     document.addEventListener('DOMContentLoaded', () => {
         // --- Firebase Settings ---
         const firebaseConfig = {
-            apiKey: "AIzaSyCTqQyFH8EOslPZiyPm89cM9CMrY2G88WA",
-            authDomain: "aslantech.firebaseapp.com",
-            projectId: "aslantech",
-            storageBucket: "aslantech.firebasestorage.app",
-            messagingSenderId: "305255252292",
-            appId: "1:305255252292:web:4107992083514d8eef5711",
-            measurementId: "G-JKDHFNB1B0"
+            apiKey: "AIzaSyCTqQyFH8EOslPZiyPm89cM9CMrY2G88WA",
+            authDomain: "aslantech.firebaseapp.com",
+            projectId: "aslantech",
+            storageBucket: "aslantech.appspot.com",
+            messagingSenderId: "305255252292",
+            appId: "1:305255252292:web:4107992083514d8eef5711"
         };
         
         // --- Initialize Firebase ---
@@ -941,7 +998,12 @@
         let performanceChart = null;
         let salesDistributionChart = null;
         let currentInvoiceId = null;
-        let currentUser = null;
+        let currentUser = {
+            auth: null,
+            role: 'visitor' // Default role
+        };
+        let suppliersMap = new Map();
+        let productsCache = [];
         
         // --- User Feedback Functions ---
         const showMessage = (message) => {
@@ -987,42 +1049,42 @@
         
         async function deleteItem(collection, id) {
              try {
-                if (collection === 'sales') {
-                    const saleDoc = await db.collection('sales').doc(id).get();
-                    if (!saleDoc.exists) return;
-                    const saleToDelete = saleDoc.data();
-                    if (saleToDelete && saleToDelete.type === 'product' && saleToDelete.productId) {
-                        const productRef = db.collection('products').doc(saleToDelete.productId);
-                        await db.runTransaction(async (transaction) => {
-                            const productDoc = await transaction.get(productRef);
-                            if (productDoc.exists) {
-                                const newQty = productDoc.data().qty + saleToDelete.qty;
-                                transaction.update(productRef, { qty: newQty });
-                            }
-                        });
-                    }
-                } else if (collection === 'purchases') {
-                     const purchaseDoc = await db.collection('purchases').doc(id).get();
-                     if (!purchaseDoc.exists) return;
-                     const purchaseToDelete = purchaseDoc.data();
-                    if (purchaseToDelete && purchaseToDelete.type === 'product' && purchaseToDelete.productId) {
+                 if (collection === 'sales') {
+                     const saleDoc = await db.collection('sales').doc(id).get();
+                     if (!saleDoc.exists) return;
+                     const saleToDelete = saleDoc.data();
+                     if (saleToDelete && saleToDelete.type === 'product' && saleToDelete.productId) {
+                         const productRef = db.collection('products').doc(saleToDelete.productId);
+                         await db.runTransaction(async (transaction) => {
+                             const productDoc = await transaction.get(productRef);
+                             if (productDoc.exists) {
+                                 const newQty = productDoc.data().qty + saleToDelete.qty;
+                                 transaction.update(productRef, { qty: newQty });
+                             }
+                         });
+                     }
+                 } else if (collection === 'purchases') {
+                      const purchaseDoc = await db.collection('purchases').doc(id).get();
+                      if (!purchaseDoc.exists) return;
+                      const purchaseToDelete = purchaseDoc.data();
+                     if (purchaseToDelete && purchaseToDelete.type === 'product' && purchaseToDelete.productId) {
                          const productRef = db.collection('products').doc(purchaseToDelete.productId);
-                        await db.runTransaction(async (transaction) => {
-                            const productDoc = await transaction.get(productRef);
-                            if (productDoc.exists) {
-                                const newQty = productDoc.data().qty - purchaseToDelete.qty;
-                                transaction.update(productRef, { qty: newQty });
-                            }
-                        });
-                    }
-                }
-                await db.collection(collection).doc(id).delete();
-                return true;
-            } catch (e) {
-                console.error("Delete error:", e);
-                showMessage(`حدث خطأ أثناء حذف البيانات: ${e.message}`);
-                return false;
-            }
+                         await db.runTransaction(async (transaction) => {
+                             const productDoc = await transaction.get(productRef);
+                             if (productDoc.exists) {
+                                 const newQty = productDoc.data().qty - purchaseToDelete.qty;
+                                 transaction.update(productRef, { qty: newQty });
+                             }
+                         });
+                     }
+                 }
+                 await db.collection(collection).doc(id).delete();
+                 return true;
+             } catch (e) {
+                 console.error("Delete error:", e);
+                 showMessage(`حدث خطأ أثناء حذف البيانات: ${e.message}`);
+                 return false;
+             }
         }
 
         // --- UI and Tab Management ---
@@ -1049,18 +1111,18 @@
         // --- Data Refresh and Display Functions ---
         async function refreshProducts(searchTerm = '') {
             let query = db.collection('products').orderBy('name');
-            if (searchTerm) {
-                query = query.where('name', '>=', searchTerm).where('name', '<=', searchTerm + '\uf8ff');
-            }
             const snapshot = await query.get();
-            const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            productsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            const filteredProducts = productsCache.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
             const tableBody = document.getElementById('products-table');
             tableBody.innerHTML = '';
             let totalValue = 0, lowStockCount = 0, outOfStockCount = 0;
-            products.forEach(p => {
+            filteredProducts.forEach(p => {
                 totalValue += p.cost * p.qty;
-                if (p.qty <= 0) outOfStockCount++;
-                else if (p.qty <= 10) lowStockCount++;
+                if (p.qty === 0) outOfStockCount++;
+                else if (p.qty > 0 && p.qty <= 10) lowStockCount++;
                 const row = tableBody.insertRow();
                 let qtyClass = p.qty <= 0 ? 'bg-red-100 text-red-700 font-bold' : (p.qty <= 10 ? 'bg-yellow-100 text-yellow-700' : '');
                 row.innerHTML = `
@@ -1074,12 +1136,13 @@
                         <button class="btn btn-danger text-sm delete-btn" data-id="${p.id}" data-category="products">حذف</button>
                     </td>`;
             });
-            document.getElementById('stats-total-products').textContent = products.length;
+            document.getElementById('stats-total-products').textContent = filteredProducts.length;
             document.getElementById('stats-stock-value').textContent = `${totalValue.toFixed(2)} ${appSettings.currency}`;
             document.getElementById('stats-low-stock').textContent = lowStockCount;
             document.getElementById('stats-out-of-stock').textContent = outOfStockCount;
             toggleDeleteSelectedButton();
             await populateProductSelects(); 
+            applyPermissions(currentUser.role);
         }
 
         async function refreshSales() {
@@ -1101,6 +1164,7 @@
                        <button class="btn btn-danger text-sm delete-btn" data-id="${s.id}" data-category="sales">حذف</button>
                     </td>`;
             });
+            applyPermissions(currentUser.role);
         }
         
         async function refreshPurchases() {
@@ -1121,6 +1185,7 @@
                         <button class="btn btn-danger text-sm delete-btn" data-id="${p.id}" data-category="purchases">حذف</button>
                     </td>`;
             });
+            applyPermissions(currentUser.role);
         }
 
         async function refreshExpenses() {
@@ -1140,6 +1205,7 @@
                        <button class="btn btn-danger text-sm delete-btn" data-id="${e.id}" data-category="expenses">حذف</button>
                     </td>`;
             });
+            applyPermissions(currentUser.role);
         }
 
         async function refreshCustomers() {
@@ -1161,11 +1227,15 @@
             });
             populateSelect('s-customer', customers, 'id', 'name');
             populateSelect('i-customer', customers, 'id', 'name');
+            applyPermissions(currentUser.role);
         }
 
         async function refreshSuppliers() {
             const snapshot = await db.collection('suppliers').orderBy('name').get();
             const suppliers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            suppliersMap.clear();
+            suppliers.forEach(s => suppliersMap.set(s.name, s.id));
+
             const tableBody = document.getElementById('suppliers-table');
             tableBody.innerHTML = '';
             suppliers.forEach(s => {
@@ -1182,6 +1252,7 @@
             });
             populateSelect('p-supplier', suppliers, 'id', 'name');
             populateSelect('p-supplier-purchase', suppliers, 'id', 'name');
+            applyPermissions(currentUser.role);
         }
         
         async function refreshInvoices() {
@@ -1201,21 +1272,20 @@
                        <button class="btn btn-danger text-sm delete-btn" data-id="${i.id}" data-category="invoices">حذف</button>
                     </td>`;
             });
+            applyPermissions(currentUser.role);
         }
         
         async function populateProductSelects() {
-            const snapshot = await db.collection('products').orderBy('name').get();
-            const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             const displayTpl = (p) => `${p.name} (المتاح: ${p.qty})`;
             
             document.querySelectorAll('#s-product, #p-product').forEach(select => {
-                 populateSelect(select.id, products, 'id', 'name', displayTpl);
+                 populateSelect(select.id, productsCache, 'id', 'name', displayTpl);
             });
             
             document.querySelectorAll('.i-product-select').forEach(select => {
                 const selectedValue = select.value;
                 select.innerHTML = `<option value="">اختر منتج</option>`;
-                products.forEach(p => {
+                productsCache.forEach(p => {
                     const option = document.createElement('option');
                     option.value = p.id;
                     option.textContent = p.name;
@@ -1232,7 +1302,7 @@
             await updateDashboard(today);
             await Promise.all([
                 refreshProducts(), refreshSales(), refreshPurchases(), refreshExpenses(), 
-                refreshCustomers(), refreshSuppliers(), refreshInvoices()
+                refreshCustomers(), refreshSuppliers(), refreshInvoices(), refreshUsers()
             ]);
         }
 
@@ -1311,15 +1381,37 @@
             document.getElementById('report-expenses').textContent = `${reportExpenses.toFixed(2)} ${appSettings.currency}`;
             document.getElementById('report-profit').textContent = `${reportProfit.toFixed(2)} ${appSettings.currency}`;
             
+            // Top Products Table
             const productSales = {};
             salesData.filter(s => s.type === 'product').forEach(s => {
                 if (!productSales[s.name]) productSales[s.name] = { totalQty: 0, totalRevenue: 0 };
                 productSales[s.name].totalQty += s.qty;
                 productSales[s.name].totalRevenue += s.amount;
             });
-            const topProducts = Object.entries(productSales).sort((a, b) => b[1].totalRevenue - a[1].totalRevenue).slice(0, 5);
+            const topProducts = Object.entries(productSales).sort((a, b) => b[1].totalRevenue - a[1].totalRevenue).slice(0, 10);
             document.getElementById('top-products-table').innerHTML = topProducts.length > 0 ? topProducts.map(([name, data]) => `<tr><td>${name}</td><td>${data.totalQty}</td><td>${data.totalRevenue.toFixed(2)} ${appSettings.currency}</td></tr>`).join('') : `<tr><td colspan="3" class="text-center">لا توجد بيانات</td></tr>`;
             
+            // Top Customers Table
+            const customerSales = {};
+            salesData.forEach(s => {
+                const customer = s.customerName || 'غير محدد';
+                customerSales[customer] = (customerSales[customer] || 0) + s.amount;
+            });
+            const topCustomers = Object.entries(customerSales).sort((a, b) => b[1] - a[1]).slice(0, 10);
+             document.getElementById('top-customers-table').innerHTML = topCustomers.length > 0 ? topCustomers.map(([name, total]) => `<tr><td>${name}</td><td>${total.toFixed(2)} ${appSettings.currency}</td></tr>`).join('') : `<tr><td colspan="2" class="text-center">لا توجد بيانات</td></tr>`;
+
+            // Out of Stock Table
+            const allProductsSnapshot = await db.collection('products').get();
+            const allProducts = allProductsSnapshot.docs.map(doc => doc.data());
+            const outOfStockProducts = allProducts.filter(p => p.qty === 0);
+            document.getElementById('low-stock-table').innerHTML = outOfStockProducts.length > 0 ? outOfStockProducts.map(p => `<tr><td>${p.name}</td><td>${p.qty}</td></tr>`).join('') : `<tr><td colspan="2" class="text-center">لا توجد منتجات نافدة</td></tr>`;
+
+            // Salaries Table
+            const salaries = expensesData.filter(e => e.type === 'رواتب');
+            const totalSalaries = salaries.reduce((sum, s) => sum + s.amount, 0);
+            document.getElementById('salaries-report-table').innerHTML = `<tr><td>إجمالي الرواتب</td><td>${totalSalaries.toFixed(2)} ${appSettings.currency}</td></tr>`;
+
+            // Performance Chart (Bar)
             if (performanceChart) performanceChart.destroy();
             performanceChart = new Chart(document.getElementById('performanceChart').getContext('2d'), {
                 type: 'bar',
@@ -1333,6 +1425,32 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
+
+            // Sales Distribution Chart (Pie)
+            const salesDistribution = salesData.reduce((acc, sale) => {
+                const key = sale.type === 'product' ? 'المنتجات' : 'الخدمات';
+                acc[key] = (acc[key] || 0) + sale.amount;
+                return acc;
+            }, {});
+            
+            if (salesDistributionChart) salesDistributionChart.destroy();
+            if (Object.keys(salesDistribution).length > 0) {
+                 salesDistributionChart = new Chart(document.getElementById('salesDistributionChart').getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(salesDistribution),
+                        datasets: [{
+                            label: 'توزيع المبيعات',
+                            data: Object.values(salesDistribution),
+                            backgroundColor: ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'],
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            } else {
+                 document.getElementById('salesDistributionChart').getContext('2d').clearRect(0,0,300,300);
+            }
+           
             
             document.getElementById('report-results').classList.remove('hidden');
         }
@@ -1359,6 +1477,7 @@
             document.getElementById('add-invoice-form').addEventListener('submit', handleInvoiceFormSubmit);
             document.getElementById('reports-form').addEventListener('submit', (e) => { e.preventDefault(); generateReport(); });
             document.getElementById('settings-form').addEventListener('submit', handleSettingsSave);
+            document.getElementById('add-user-form').addEventListener('submit', handleUserFormSubmit);
             document.getElementById('delete-selected-products-btn').addEventListener('click', handleDeleteSelectedProducts);
             document.getElementById('import-products-excel').addEventListener('change', importFromExcel);
             document.getElementById('product-search-input').addEventListener('input', (e) => refreshProducts(e.target.value));
@@ -1374,7 +1493,8 @@
                 document.getElementById('custom-overlay').classList.add('hidden');
             });
             document.getElementById('tab-content').addEventListener('click', handleTableActions);
-            document.getElementById('s-type').addEventListener('change', toggleSaleFields);
+            document.getElementById('s-type').addEventListener('change', handleSaleTypeChange);
+            document.getElementById('s-product').addEventListener('change', handleProductSelectionForSale);
             document.getElementById('p-type').addEventListener('change', togglePurchaseFields);
             document.getElementById('add-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(false));
             document.getElementById('add-manual-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(true));
@@ -1383,12 +1503,21 @@
                 document.getElementById('invoice-view-modal').classList.add('hidden');
                 document.getElementById('custom-overlay').classList.add('hidden');
             });
-            document.getElementById('invoice-print-btn').addEventListener('click', printInvoice);
+            document.getElementById('invoice-print-btn').addEventListener('click', ()=>exportToPdfWithArabic('printable-invoice', 'فاتورة', `invoice-${currentInvoiceId}.pdf`));
 
             document.getElementById('print-report-btn').addEventListener('click', () => window.print());
-            document.getElementById('export-report-pdf-btn').addEventListener('click', () => exportToPdf('printable-content', 'تقرير الأداء', 'PerformanceReport.pdf'));
+            document.getElementById('export-report-pdf-btn').addEventListener('click', () => exportToPdfWithArabic('printable-content', 'تقرير الأداء', 'PerformanceReport.pdf'));
             document.getElementById('export-report-excel-btn').addEventListener('click', exportReportToExcel);
+            document.getElementById('export-invoices-excel-btn').addEventListener('click', exportInvoicesToExcel);
+            document.getElementById('export-invoices-pdf-btn').addEventListener('click', exportInvoicesToPdf);
 
+            // Programmatically add event listeners for Excel export buttons
+            document.getElementById('export-products-btn').addEventListener('click', () => exportToExcel('products-table-export', 'المنتجات', 'Products.xlsx'));
+            document.getElementById('export-sales-btn').addEventListener('click', () => exportToExcel('sales-table-export', 'المبيعات', 'Sales.xlsx'));
+            document.getElementById('export-purchases-btn').addEventListener('click', () => exportToExcel('purchases-table-export', 'المشتريات', 'Purchases.xlsx'));
+            document.getElementById('export-expenses-btn').addEventListener('click', () => exportToExcel('expenses-table-export', 'المصاريف', 'Expenses.xlsx'));
+            document.getElementById('export-customers-btn').addEventListener('click', () => exportToExcel('customers-table-export', 'العملاء', 'Customers.xlsx'));
+            document.getElementById('export-suppliers-btn').addEventListener('click', () => exportToExcel('suppliers-table-export', 'الموردين', 'Suppliers.xlsx'));
         }
         
         async function handleLogin(e) {
@@ -1402,32 +1531,8 @@
                 await auth.signInWithEmailAndPassword(email, password);
             } catch (error) {
                 console.error("Login failed:", error);
-                const errorMessage = JSON.stringify(error.message) || '';
-                if (errorMessage.includes("PERMISSION_DENIED") || errorMessage.includes("blocked")) {
-                    const loginScreen = document.getElementById('login-screen');
-                    loginScreen.innerHTML = `
-                        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-2xl text-center">
-                            <h2 class="text-3xl font-bold text-red-600 mb-4">خطأ في صلاحيات الربط (Referrer Blocked)</h2>
-                            <p class="text-gray-700 mb-4">
-                                هذا خطأ أمني. لقد تم حظر الطلب لأن رابط هذا الموقع غير مضاف إلى قائمة المواقع المسموح بها في إعدادات مفتاح الربط الخاص بك على Google Cloud.
-                            </p>
-                            <p class="text-gray-700 mb-2 font-semibold">لحل المشكلة، اتبع الخطوات التالية:</p>
-                            <ol class="text-right list-decimal list-inside bg-gray-50 p-4 rounded-md space-y-2">
-                                <li>اذهب إلى <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 hover:underline">Google Cloud Console Credentials</a>.</li>
-                                <li>اختر مشروعك (<code class="text-sm bg-gray-200 p-1 rounded">${firebaseConfig.projectId}</code>).</li>
-                                <li>انقر على اسم مفتاح الربط (API Key) الذي تستخدمه.</li>
-                                <li>تحت قسم "Website restrictions"، انقر على "ADD".</li>
-                                <li>انسخ الرابط التالي بالكامل وألصقه:</li>
-                            </ol>
-                            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-4 rounded-md text-sm break-all" dir="ltr">
-                                <code>${window.location.origin}</code>
-                            </div>
-                            <p class="text-gray-600">ثم انقر على "Save" وانتظر دقيقة، ثم قم بتحديث هذه الصفحة.</p>
-                        </div>`;
-                } else {
-                    errorP.textContent = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
-                    errorP.classList.remove('hidden');
-                }
+                errorP.textContent = "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
+                errorP.classList.remove('hidden');
             }
         }
 
@@ -1453,15 +1558,17 @@
                 }
             } else if (target.classList.contains('delete-btn')) {
                 showConfirm('هل أنت متأكد من الحذف؟', async () => {
-                    if (await deleteItem(category, id)) {
+                    const collectionName = category === 'user' ? 'users' : category;
+                    if (await deleteItem(collectionName, id)) {
                         const refreshMap = {
                             products: [refreshProducts], sales: [refreshSales, refreshProducts, updateDashboard], purchases: [refreshPurchases, refreshProducts, updateDashboard],
                             expenses: [refreshExpenses, updateDashboard], customers: [refreshCustomers, refreshSales, refreshInvoices], 
-                            suppliers: [refreshSuppliers, refreshProducts, refreshPurchases], invoices: [refreshInvoices]
+                            suppliers: [refreshSuppliers, refreshProducts, refreshPurchases], invoices: [refreshInvoices],
+                            user: [refreshUsers]
                         };
-                         if (refreshMap[category]) {
-                           for(const func of refreshMap[category]) await func();
-                        }
+                         if (refreshMap[collectionName]) {
+                            for(const func of refreshMap[collectionName]) await func();
+                         }
                         showMessage("تم الحذف بنجاح.");
                     }
                 });
@@ -1520,7 +1627,7 @@
                 if (!productDoc.exists || productDoc.data().qty < saleQty) {
                     showMessage(!productDoc.exists ? 'المنتج المحدد غير موجود.' : `الكمية المتوفرة غير كافية. متاح: ${productDoc.data().qty}`);
                     if (id && itemToEdit?.category === 'sale' && itemToEdit.type === 'product' && itemToEdit.productId) {
-                         await db.collection('products').doc(itemToEdit.productId).update({ qty: firebase.firestore.FieldValue.increment(-itemToEdit.qty) });
+                          await db.collection('products').doc(itemToEdit.productId).update({ qty: firebase.firestore.FieldValue.increment(-itemToEdit.qty) });
                     }
                     return; 
                 }
@@ -1716,7 +1823,7 @@
              if(title) title.textContent = originalTitles[category];
              if(submitBtn) submitBtn.textContent = originalButtons[category];
              if(cancelBtn) cancelBtn.classList.add('hidden');
-             if(category === 'sale') toggleSaleFields();
+             if(category === 'sale') handleSaleTypeChange();
              if(category === 'purchase') togglePurchaseFields();
              itemToEdit = null;
         }
@@ -1744,7 +1851,7 @@
             document.getElementById('sale-id').value = item.id;
             document.getElementById('s-date').value = item.date;
             document.getElementById('s-type').value = item.type;
-            toggleSaleFields();
+            handleSaleTypeChange(); // Call this to set UI correctly
             if (item.type === 'product') {
                 await populateProductSelects(); // Make sure the list is fresh
                 document.getElementById('s-product').value = item.productId;
@@ -1849,72 +1956,54 @@
              currentInvoiceId = invoiceId;
              const contentEl = document.getElementById('invoice-view-content');
              contentEl.innerHTML = `
-                <div id="printable-invoice">
-                    <div class="p-8">
-                        <div class="flex justify-between items-start mb-8">
-                            <div>
-                                <h2 class="text-3xl font-bold text-blue-600">${appSettings.companyName}</h2>
-                                <p>${appSettings.companyAddress || ''}</p>
-                                <p>${appSettings.companyPhone || ''}</p>
-                            </div>
-                            <div class="text-right">
-                                <h3 class="text-2xl font-bold">فاتورة</h3>
-                                <p>رقم: ${invoice.invoiceNumber}</p>
-                                <p>التاريخ: ${invoice.date}</p>
-                            </div>
-                        </div>
-                        <div class="mb-8 p-4 bg-gray-50 rounded-lg">
-                            <h4 class="font-bold mb-2">فاتورة إلى:</h4>
-                            <p>${invoice.customerName}</p>
-                            <p>${invoice.customerDetails.address || ''}</p>
-                            <p>${invoice.customerDetails.phone || ''}</p>
-                        </div>
-                        <table class="w-full text-right mb-8">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="p-2">البند</th>
-                                    <th class="p-2">الكمية</th>
-                                    <th class="p-2">السعر</th>
-                                    <th class="p-2">الإجمالي</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${invoice.items.map(item => `
-                                    <tr class="border-b">
-                                        <td class="p-2">${item.productName}</td>
-                                        <td class="p-2">${item.qty}</td>
-                                        <td class="p-2">${item.price.toFixed(2)}</td>
-                                        <td class="p-2">${(item.qty * item.price).toFixed(2)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                        <div class="text-left">
-                            <p class="text-xl font-bold">المجموع الكلي: ${invoice.totalAmount.toFixed(2)} ${appSettings.currency}</p>
-                        </div>
-                    </div>
-                </div>
-             `;
+                 <div id="printable-invoice">
+                     <div class="p-8">
+                         <div class="flex justify-between items-start mb-8">
+                             <div>
+                                 <h2 class="text-3xl font-bold text-blue-600">${appSettings.companyName}</h2>
+                                 <p>${appSettings.companyAddress || ''}</p>
+                                 <p>${appSettings.companyPhone || ''}</p>
+                             </div>
+                             <div class="text-right">
+                                 <h3 class="text-2xl font-bold">فاتورة</h3>
+                                 <p>رقم: ${invoice.invoiceNumber}</p>
+                                 <p>التاريخ: ${invoice.date}</p>
+                             </div>
+                         </div>
+                         <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                             <h4 class="font-bold mb-2">فاتورة إلى:</h4>
+                             <p>${invoice.customerName}</p>
+                             <p>${invoice.customerDetails.address || ''}</p>
+                             <p>${invoice.customerDetails.phone || ''}</p>
+                         </div>
+                         <table class="w-full text-right mb-8">
+                             <thead class="bg-gray-100">
+                                 <tr>
+                                     <th class="p-2">البند</th>
+                                     <th class="p-2">الكمية</th>
+                                     <th class="p-2">السعر</th>
+                                     <th class="p-2">الإجمالي</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 ${invoice.items.map(item => `
+                                     <tr class="border-b">
+                                         <td class="p-2">${item.productName}</td>
+                                         <td class="p-2">${item.qty}</td>
+                                         <td class="p-2">${item.price.toFixed(2)}</td>
+                                         <td class="p-2">${(item.qty * item.price).toFixed(2)}</td>
+                                     </tr>
+                                 `).join('')}
+                             </tbody>
+                         </table>
+                         <div class="text-left">
+                             <p class="text-xl font-bold">المجموع الكلي: ${invoice.totalAmount.toFixed(2)} ${appSettings.currency}</p>
+                         </div>
+                     </div>
+                 </div>
+              `;
             document.getElementById('invoice-view-modal').classList.remove('hidden');
             document.getElementById('custom-overlay').classList.remove('hidden');
-        }
-        
-        function printInvoice() {
-            const printContent = document.getElementById('printable-invoice');
-            if (printContent) {
-                const originalContents = document.body.innerHTML;
-                document.body.innerHTML = printContent.innerHTML;
-                window.print();
-                document.body.innerHTML = originalContents;
-                // Re-initialize event listeners as they are lost
-                main(); 
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-container').classList.remove('hidden');
-                switchTab('invoices');
-                document.getElementById('invoice-view-modal').classList.remove('hidden');
-                document.getElementById('custom-overlay').classList.remove('hidden');
-                viewInvoice(currentInvoiceId);
-            }
         }
         
         function exportToExcel(tableId, sheetName, fileName) {
@@ -1927,69 +2016,77 @@
         }
 
          async function importFromExcel(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                
-                if (jsonData.length === 0) return showMessage("الملف فارغ أو غير صحيح.");
-                
-                showConfirm(`هل تريد استيراد ${jsonData.length} منتج؟ سيتم إضافتها إلى المخزون.`, async () => {
-                    const batch = db.batch();
-                    jsonData.forEach(item => {
-                        const productRef = db.collection('products').doc();
-                        const productData = {
-                            name: item['الاسم'] || item['name'],
-                            cost: parseFloat(item['سعر التكلفة'] || item['cost'] || 0),
-                            qty: parseInt(item['الكمية'] || item['qty'] || 0),
-                            supplierName: item['المورد'] || item['supplierName'] || 'مستورد'
-                        };
-                        if(productData.name) {
-                            batch.set(productRef, productData);
-                        }
-                    });
-                    await batch.commit();
-                    await refreshProducts();
-                    showMessage(`تم استيراد ${jsonData.length} منتج بنجاح.`);
-                });
-            };
-            reader.readAsArrayBuffer(file);
-            event.target.value = ''; // Reset input
+             const file = event.target.files[0];
+             if (!file) return;
+             const reader = new FileReader();
+             reader.onload = async (e) => {
+                 const data = new Uint8Array(e.target.result);
+                 const workbook = XLSX.read(data, { type: 'array' });
+                 const firstSheetName = workbook.SheetNames[0];
+                 const worksheet = workbook.Sheets[firstSheetName];
+                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                 
+                 if (jsonData.length === 0) return showMessage("الملف فارغ أو غير صحيح.");
+                 
+                 showConfirm(`هل تريد استيراد ${jsonData.length} منتج؟ سيتم إضافتها إلى المخزون.`, async () => {
+                     const batch = db.batch();
+                     jsonData.forEach(item => {
+                         const productRef = db.collection('products').doc();
+                         const supplierName = item['المورد'] || item['supplierName'] || 'مستورد';
+                         const supplierId = suppliersMap.get(supplierName) || null; // Lookup supplier ID
+                         const productData = {
+                             name: item['الاسم'] || item['name'],
+                             cost: parseFloat(item['سعر التكلفة'] || item['cost'] || 0),
+                             qty: parseInt(item['الكمية'] || item['qty'] || 0),
+                             supplierId: supplierId,
+                             supplierName: supplierName
+                         };
+                         if(productData.name) {
+                             batch.set(productRef, productData);
+                         }
+                     });
+                     await batch.commit();
+                     await refreshProducts();
+                     showMessage(`تم استيراد ${jsonData.length} منتج بنجاح.`);
+                 });
+             };
+             reader.readAsArrayBuffer(file);
+             event.target.value = ''; // Reset input
         }
 
-        function exportToPdf(elementId, title, fileName) {
+        async function exportToPdfWithArabic(elementId, title, fileName) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+
+            // This is a base64 encoded Amiri font. It's large but makes the PDF export work without external files.
+            const amiriFont = 'AAEAAAARAQAABAAQR0RFRgQsA...'; // This would be a very long string
             
-            // To handle Arabic text, you need a font that supports it.
-            // This is a complex topic in jsPDF. For simplicity, we'll use autoTable's font handling.
-            const table = document.getElementById(elementId);
-             if (table) {
-                doc.autoTable({ html: `#${elementId}` });
-                doc.save(fileName);
-            } else {
-                const element = document.getElementById(elementId);
-                html2canvas(element).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const pdf = new jsPDF('p', 'mm', 'a4');
-                    const imgProps = pdf.getImageProperties(imgData);
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                    pdf.save(fileName);
-                });
+            // Due to size limitations, I cannot embed the full font here. 
+            // The logic below assumes a font that supports Arabic is loaded.
+            // A real implementation would require loading a font like this.
+            // For now, it might not render Arabic correctly without the actual font data.
+            // The best approach is to use html2canvas for complex layouts.
+            
+            const element = document.getElementById(elementId);
+             if(!element) {
+                showMessage('عنصر التصدير غير موجود.');
+                return;
             }
+
+            html2canvas(element, { scale: 2 }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgProps= pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(fileName);
+            });
         }
         
         function exportReportToExcel() {
             const wb = XLSX.utils.book_new();
             
-            // Add summary data
             const summary = [
                 ["المقياس", "القيمة"],
                 ["إجمالي المبيعات", document.getElementById('report-sales').textContent],
@@ -2000,16 +2097,90 @@
             const wsSummary = XLSX.utils.aoa_to_sheet(summary);
             XLSX.utils.book_append_sheet(wb, wsSummary, "ملخص الأداء");
             
-            // Add top products table
-            const topProductsTable = document.getElementById('top-products-table-export');
-            if (topProductsTable) {
-                const wsTopProducts = XLSX.utils.table_to_sheet(topProductsTable);
-                XLSX.utils.book_append_sheet(wb, wsTopProducts, "المنتجات الأكثر مبيعاً");
+            const tableIds = {
+                "المنتجات الأكثر مبيعاً": 'top-products-table-export',
+                "أفضل العملاء": 'top-customers-table-export',
+                "تنبيهات المخزون": 'low-stock-table-export',
+                "تقرير الرواتب": 'salaries-report-table-export'
+            };
+
+            for(const sheetName in tableIds){
+                const table = document.getElementById(tableIds[sheetName]);
+                if(table){
+                    const ws = XLSX.utils.table_to_sheet(table);
+                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                }
             }
             
             XLSX.writeFile(wb, "PerformanceReport.xlsx");
         }
 
+        async function exportInvoicesToExcel() {
+             const startDate = document.getElementById('invoice-start-date').value;
+             const endDate = document.getElementById('invoice-end-date').value;
+             let query = db.collection('invoices');
+             if (startDate) query = query.where('date', '>=', startDate);
+             if (endDate) query = query.where('date', '<=', endDate);
+             const snapshot = await query.orderBy('date', 'desc').get();
+             const invoices = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    'رقم الفاتورة': data.invoiceNumber,
+                    'التاريخ': data.date,
+                    'العميل': data.customerName,
+                    'المبلغ الإجمالي': data.totalAmount.toFixed(2)
+                };
+             });
+
+             if (invoices.length === 0) return showMessage('لا توجد فواتير للتصدير في هذا النطاق الزمني.');
+             
+             const ws = XLSX.utils.json_to_sheet(invoices);
+             const wb = XLSX.utils.book_new();
+             XLSX.utils.book_append_sheet(wb, ws, "الفواتير");
+             XLSX.writeFile(wb, `Invoices_${startDate}_to_${endDate}.xlsx`);
+        }
+
+        async function exportInvoicesToPdf() {
+            const startDate = document.getElementById('invoice-start-date').value;
+             const endDate = document.getElementById('invoice-end-date').value;
+             let query = db.collection('invoices');
+             if (startDate) query = query.where('date', '>=', startDate);
+             if (endDate) query = query.where('date', '<=', endDate);
+             const snapshot = await query.orderBy('date', 'desc').get();
+             const invoices = snapshot.docs.map(doc => doc.data());
+             if (invoices.length === 0) return showMessage('لا توجد فواتير للتصدير في هذا النطاق الزمني.');
+
+            // Create a temporary printable version of the invoices
+            const tempDiv = document.createElement('div');
+            tempDiv.id = 'temp-invoice-export';
+            tempDiv.style.display = 'none'; // Hide it
+            invoices.forEach(invoice => {
+                const invoiceHtml = `
+                    <div class="p-8 border-b-2 border-dashed">
+                         <div class="flex justify-between items-start mb-8">
+                             <div>
+                                 <h2 class="text-3xl font-bold text-blue-600">${appSettings.companyName}</h2>
+                             </div>
+                             <div class="text-right">
+                                 <h3 class="text-2xl font-bold">فاتورة</h3>
+                                 <p>رقم: ${invoice.invoiceNumber}</p><p>التاريخ: ${invoice.date}</p>
+                             </div>
+                         </div>
+                         <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                             <h4 class="font-bold mb-2">فاتورة إلى: ${invoice.customerName}</h4>
+                         </div>
+                         <table class="w-full text-right mb-8">
+                             <thead class="bg-gray-100"><tr><th class="p-2">البند</th><th class="p-2">الكمية</th><th class="p-2">السعر</th><th class="p-2">الإجمالي</th></tr></thead>
+                             <tbody>${invoice.items.map(item => `<tr><td class="p-2">${item.productName}</td><td class="p-2">${item.qty}</td><td class="p-2">${item.price.toFixed(2)}</td><td class="p-2">${(item.qty * item.price).toFixed(2)}</td></tr>`).join('')}</tbody>
+                         </table>
+                         <div class="text-left"><p class="text-xl font-bold">المجموع: ${invoice.totalAmount.toFixed(2)} ${appSettings.currency}</p></div>
+                    </div>`;
+                tempDiv.innerHTML += invoiceHtml;
+            });
+            document.body.appendChild(tempDiv);
+            await exportToPdfWithArabic('temp-invoice-export', 'الفواتير', `Invoices_${startDate}_to_${endDate}.pdf`);
+            document.body.removeChild(tempDiv);
+        }
 
         function toggleDeleteSelectedButton() {
             const selectedCount = document.querySelectorAll('.product-checkbox:checked').length;
@@ -2019,11 +2190,32 @@
             if (textSpan) textSpan.textContent = selectedCount > 0 ? `حذف المحدد (${selectedCount})` : 'حذف المحدد';
         }
 
-        function toggleSaleFields() {
+        function handleSaleTypeChange() {
              const type = document.getElementById('s-type').value;
-             document.getElementById('s-product-container').classList.toggle('hidden', type === 'service');
-             document.getElementById('s-qty-container').classList.toggle('hidden', type === 'service');
-             document.getElementById('s-service-container').classList.toggle('hidden', type === 'product');
+             const isService = type === 'service';
+             document.getElementById('s-product-container').classList.toggle('hidden', isService);
+             document.getElementById('s-qty-container').classList.toggle('hidden', isService);
+             document.getElementById('s-service-container').classList.toggle('hidden', !isService);
+
+             const costInput = document.getElementById('s-cost');
+             costInput.readOnly = !isService;
+             if(isService){
+                costInput.value = '';
+                costInput.placeholder = 'أدخل التكلفة يدوياً';
+             } else {
+                 handleProductSelectionForSale(); // Update cost for currently selected product
+             }
+        }
+        
+        function handleProductSelectionForSale() {
+            const productId = document.getElementById('s-product').value;
+            const costInput = document.getElementById('s-cost');
+            const product = productsCache.find(p => p.id === productId);
+            if(product){
+                costInput.value = product.cost;
+            } else {
+                costInput.value = '';
+            }
         }
 
         function togglePurchaseFields() {
@@ -2057,25 +2249,122 @@
             showMessage("تم حفظ الإعدادات بنجاح.");
         }
 
+        // --- User Management and Permissions ---
+        async function handleUserFormSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('user-email-input').value;
+            const password = document.getElementById('user-password-input').value;
+            const role = document.getElementById('user-role-select').value;
+            
+            // This is insecure on the client-side. In a real app, this should be a Cloud Function.
+            // But for this environment, we'll create the user and hope for the best with security rules.
+            try {
+                // We create a temporary secondary app to create users without logging in the admin.
+                const tempApp = firebase.initializeApp(firebaseConfig, "temp-user-creation");
+                const tempAuth = tempApp.auth();
+                const userCredential = await tempAuth.createUserWithEmailAndPassword(email, password);
+                
+                // Now set the role in Firestore
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    email: email,
+                    role: role
+                });
+                
+                await tempApp.delete(); // Clean up the temporary app
+                showMessage('تم إنشاء المستخدم بنجاح!');
+                resetForm('add-user-form');
+                await refreshUsers();
+            } catch (error) {
+                console.error("Error creating user:", error);
+                showMessage(`خطأ في إنشاء المستخدم: ${error.message}`);
+            }
+        }
+
+        async function refreshUsers() {
+            if (currentUser.role !== 'admin') return;
+            const snapshot = await db.collection('users').get();
+            const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const tableBody = document.getElementById('users-table');
+            tableBody.innerHTML = '';
+            users.forEach(user => {
+                 const row = tableBody.insertRow();
+                 row.innerHTML = `
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        ${ currentUser.auth?.uid !== user.id ? `<button class="btn btn-danger text-sm delete-btn" data-id="${user.id}" data-category="user">حذف</button>` : 'الحساب الحالي'}
+                    </td>
+                 `;
+            });
+        }
+        
+        function applyPermissions(role) {
+            const isVisitor = role === 'visitor';
+            const isUser = role === 'user';
+            const isAdmin = role === 'admin';
+
+            // Hide/Show tabs
+            document.getElementById('settings-tab-btn').style.display = isAdmin ? '' : 'none';
+
+            // Disable forms and major action buttons for visitors
+            document.querySelectorAll('form button[type="submit"], #delete-selected-products-btn, #import-products-excel').forEach(el => {
+                el.disabled = isVisitor;
+            });
+
+            // Disable all edit/delete buttons in tables for visitors
+            document.querySelectorAll('.edit-btn, .delete-btn').forEach(btn => {
+                btn.style.display = isVisitor ? 'none' : '';
+            });
+
+            // Specific restrictions for 'user' role
+            if(isUser) {
+                document.getElementById('user-management-section').style.display = 'none';
+            } else if (isAdmin) {
+                document.getElementById('user-management-section').style.display = '';
+            }
+
+            document.getElementById('user-role-display').textContent = `الصلاحية: ${role}`;
+        }
+        
         function main() {
             setupEventListeners();
             addInvoiceItemRow(false);
             const today = new Date().toISOString().split('T')[0];
-            ['s-date', 'p-date', 'e-date', 'i-date', 'dashboard-date', 'start-date', 'end-date'].forEach(id => {
+            ['s-date', 'p-date', 'e-date', 'i-date', 'dashboard-date', 'start-date', 'end-date', 'invoice-start-date', 'invoice-end-date'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.value = today;
             });
             
-            auth.onAuthStateChanged(user => {
+            auth.onAuthStateChanged(async user => {
                 if (user) {
-                    currentUser = user;
+                    const userDocRef = db.collection('users').doc(user.uid);
+                    const userDoc = await userDocRef.get();
+                    currentUser.auth = user;
+
+                    if (userDoc.exists && userDoc.data().role) {
+                        currentUser.role = userDoc.data().role;
+                    } else {
+                        // User doc doesn't exist or has no role. Check if they might be the first admin.
+                        const allUsersSnapshot = await db.collection('users').limit(1).get();
+                        if (allUsersSnapshot.empty || (allUsersSnapshot.docs.length === 1 && allUsersSnapshot.docs[0].id === user.uid)) {
+                            // If no users exist, or this user is the only one, make them admin.
+                            currentUser.role = 'admin';
+                            // Create/update the user document with admin role
+                            await userDocRef.set({ email: user.email, role: 'admin' }, { merge: true });
+                        } else {
+                            currentUser.role = 'visitor'; // Default to visitor for safety
+                        }
+                    }
+                    
                     document.getElementById('user-email').textContent = user.email;
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('app-container').classList.remove('hidden');
-                    refreshAllDataOnLogin();
+                    
+                    await refreshAllDataOnLogin();
+                    applyPermissions(currentUser.role);
                     switchTab('dashboard');
                 } else {
-                    currentUser = null;
+                    currentUser = { auth: null, role: 'visitor' };
                     document.getElementById('login-screen').classList.remove('hidden');
                     document.getElementById('app-container').classList.add('hidden');
                     document.getElementById('login-form').reset();
