@@ -1245,7 +1245,7 @@
             salesSnapshot.forEach(doc => {
                 const sale = doc.data();
                 totalSales += sale.amount;
-                profitFromSales += (sale.amount - (sale.cost * sale.qty));
+                profitFromSales += (sale.amount - (sale.cost * (sale.qty || 1) ));
             });
 
             const purchasesSnapshot = await db.collection('purchases').where('date', '==', targetDate).get();
@@ -1301,7 +1301,7 @@
             const expensesData = expensesSnapshot.docs.map(doc => doc.data());
 
             const reportSales = salesData.reduce((sum, s) => sum + s.amount, 0);
-            const reportProfitFromSales = salesData.reduce((sum, s) => sum + (s.amount - (s.cost * s.qty)), 0);
+            const reportProfitFromSales = salesData.reduce((sum, s) => sum + (s.amount - (s.cost * (s.qty || 1))), 0);
             const reportPurchases = purchasesData.reduce((sum, p) => sum + p.amount, 0);
             const reportExpenses = expensesData.reduce((sum, e) => sum + e.amount, 0);
             const reportProfit = reportProfitFromSales - reportExpenses;
@@ -1320,7 +1320,6 @@
             const topProducts = Object.entries(productSales).sort((a, b) => b[1].totalRevenue - a[1].totalRevenue).slice(0, 5);
             document.getElementById('top-products-table').innerHTML = topProducts.length > 0 ? topProducts.map(([name, data]) => `<tr><td>${name}</td><td>${data.totalQty}</td><td>${data.totalRevenue.toFixed(2)} ${appSettings.currency}</td></tr>`).join('') : `<tr><td colspan="3" class="text-center">لا توجد بيانات</td></tr>`;
             
-            // Charts, Top Customers, etc.
             if (performanceChart) performanceChart.destroy();
             performanceChart = new Chart(document.getElementById('performanceChart').getContext('2d'), {
                 type: 'bar',
@@ -1340,21 +1339,29 @@
 
 
         // --- Event Listeners and Form Handlers ---
-        async function setupEventListeners() {
+        function setupEventListeners() {
             document.getElementById('nav-tabs').addEventListener('click', (e) => e.target.tagName === 'BUTTON' && switchTab(e.target.dataset.tab));
             document.getElementById('dashboard-date-form').addEventListener('submit', (e) => { e.preventDefault(); updateDashboard(document.getElementById('dashboard-date').value); });
             document.getElementById('login-form').addEventListener('submit', handleLogin);
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
             document.getElementById('add-product-form').addEventListener('submit', handleProductFormSubmit);
+            document.getElementById('product-form-cancel-btn').addEventListener('click', () => resetForm('add-product-form'));
             document.getElementById('add-sale-form').addEventListener('submit', handleSaleFormSubmit);
+            document.getElementById('sale-form-cancel-btn').addEventListener('click', () => resetForm('add-sale-form'));
             document.getElementById('add-purchase-form').addEventListener('submit', handlePurchaseFormSubmit);
+            document.getElementById('purchase-form-cancel-btn').addEventListener('click', () => resetForm('add-purchase-form'));
             document.getElementById('add-expense-form').addEventListener('submit', handleExpenseFormSubmit);
+            document.getElementById('expense-form-cancel-btn').addEventListener('click', () => resetForm('add-expense-form'));
             document.getElementById('add-customer-form').addEventListener('submit', handleCustomerFormSubmit);
+            document.getElementById('customer-form-cancel-btn').addEventListener('click', () => resetForm('add-customer-form'));
             document.getElementById('add-supplier-form').addEventListener('submit', handleSupplierFormSubmit);
+            document.getElementById('supplier-form-cancel-btn').addEventListener('click', () => resetForm('add-supplier-form'));
             document.getElementById('add-invoice-form').addEventListener('submit', handleInvoiceFormSubmit);
             document.getElementById('reports-form').addEventListener('submit', (e) => { e.preventDefault(); generateReport(); });
             document.getElementById('settings-form').addEventListener('submit', handleSettingsSave);
             document.getElementById('delete-selected-products-btn').addEventListener('click', handleDeleteSelectedProducts);
+            document.getElementById('import-products-excel').addEventListener('change', importFromExcel);
+            document.getElementById('product-search-input').addEventListener('input', (e) => refreshProducts(e.target.value));
             document.getElementById('select-all-products').addEventListener('change', (e) => {
                 document.querySelectorAll('.product-checkbox').forEach(checkbox => checkbox.checked = e.target.checked);
                 toggleDeleteSelectedButton();
@@ -1367,6 +1374,21 @@
                 document.getElementById('custom-overlay').classList.add('hidden');
             });
             document.getElementById('tab-content').addEventListener('click', handleTableActions);
+            document.getElementById('s-type').addEventListener('change', toggleSaleFields);
+            document.getElementById('p-type').addEventListener('change', togglePurchaseFields);
+            document.getElementById('add-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(false));
+            document.getElementById('add-manual-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(true));
+            document.getElementById('invoice-items-container').addEventListener('change', updateInvoiceTotal);
+            document.getElementById('invoice-close-btn').addEventListener('click', () => {
+                document.getElementById('invoice-view-modal').classList.add('hidden');
+                document.getElementById('custom-overlay').classList.add('hidden');
+            });
+            document.getElementById('invoice-print-btn').addEventListener('click', printInvoice);
+
+            document.getElementById('print-report-btn').addEventListener('click', () => window.print());
+            document.getElementById('export-report-pdf-btn').addEventListener('click', () => exportToPdf('printable-content', 'تقرير الأداء', 'PerformanceReport.pdf'));
+            document.getElementById('export-report-excel-btn').addEventListener('click', exportReportToExcel);
+
         }
         
         async function handleLogin(e) {
@@ -1518,12 +1540,154 @@
                 showMessage('تم تسجيل عملية البيع بنجاح!');
             }
         }
+        
+        async function handlePurchaseFormSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('purchase-id').value;
+            const type = document.getElementById('p-type').value;
 
-        async function handlePurchaseFormSubmit(e) { e.preventDefault(); /* Similar logic as above */ }
-        async function handleExpenseFormSubmit(e) { e.preventDefault(); /* Similar logic as above */ }
-        async function handleCustomerFormSubmit(e) { e.preventDefault(); /* Similar logic as above */ }
-        async function handleSupplierFormSubmit(e) { e.preventDefault(); /* Similar logic as above */ }
-        async function handleInvoiceFormSubmit(e) { e.preventDefault(); /* Similar logic as above */ }
+            if (id && itemToEdit?.category === 'purchase' && itemToEdit.type === 'product' && itemToEdit.productId) {
+                await db.collection('products').doc(itemToEdit.productId).update({ qty: firebase.firestore.FieldValue.increment(-itemToEdit.qty) });
+            }
+
+            const supplierId = document.getElementById('p-supplier-purchase').value;
+            let supplierName = 'غير محدد';
+            if (supplierId) {
+                const supplierDoc = await db.collection('suppliers').doc(supplierId).get();
+                if (supplierDoc.exists) supplierName = supplierDoc.data().name;
+            }
+
+            const purchaseCost = parseFloat(document.getElementById('p-cost-input').value);
+            const purchaseQty = parseInt(document.getElementById('p-qty-input').value);
+            let productName, productId = null;
+            
+            if (type === 'product') {
+                productId = document.getElementById('p-product').value;
+                const productRef = db.collection('products').doc(productId);
+                const productDoc = await productRef.get();
+                if (!productDoc.exists) {
+                    showMessage('المنتج المحدد غير موجود.');
+                    if (id && itemToEdit?.category === 'purchase' && itemToEdit.type === 'product' && itemToEdit.productId) {
+                       await db.collection('products').doc(itemToEdit.productId).update({ qty: firebase.firestore.FieldValue.increment(itemToEdit.qty) });
+                    }
+                    return;
+                }
+                productName = productDoc.data().name;
+                await productRef.update({ qty: firebase.firestore.FieldValue.increment(purchaseQty) });
+            } else {
+                productName = document.getElementById('p-other-product-name').value;
+            }
+
+            const data = { date: document.getElementById('p-date').value, type, productName, qty: purchaseQty, cost: purchaseCost, supplierId: supplierId || null, supplierName, amount: purchaseCost * purchaseQty, productId };
+            if (await addOrUpdateItem('purchases', data, id || null)) {
+                resetForm('add-purchase-form');
+                await refreshPurchases();
+                await refreshProducts();
+                await updateDashboard();
+                showMessage('تم تسجيل عملية الشراء بنجاح!');
+            }
+        }
+
+        async function handleExpenseFormSubmit(e) {
+            e.preventDefault();
+            const data = {
+                date: document.getElementById('e-date').value,
+                type: document.getElementById('e-type').value,
+                amount: parseFloat(document.getElementById('e-amount').value),
+                description: document.getElementById('e-desc').value
+            };
+            const id = document.getElementById('expense-id').value;
+            if (await addOrUpdateItem('expenses', data, id || null)) {
+                resetForm('add-expense-form');
+                await refreshExpenses();
+                await updateDashboard();
+                showMessage('تم تسجيل المصروف بنجاح!');
+            }
+        }
+
+        async function handleCustomerFormSubmit(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('c-name').value,
+                phone: document.getElementById('c-phone').value,
+                email: document.getElementById('c-email').value,
+                address: document.getElementById('c-address').value
+            };
+            const id = document.getElementById('customer-id').value;
+            if (await addOrUpdateItem('customers', data, id || null)) {
+                resetForm('add-customer-form');
+                await refreshCustomers();
+                showMessage('تم حفظ العميل بنجاح!');
+            }
+        }
+        
+        async function handleSupplierFormSubmit(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('sup-name').value,
+                phone: document.getElementById('sup-phone').value,
+                email: document.getElementById('sup-email').value,
+                address: document.getElementById('sup-address').value
+            };
+            const id = document.getElementById('supplier-id').value;
+            if (await addOrUpdateItem('suppliers', data, id || null)) {
+                resetForm('add-supplier-form');
+                await refreshSuppliers();
+                showMessage('تم حفظ المورد بنجاح!');
+            }
+        }
+        
+        async function handleInvoiceFormSubmit(e) {
+            e.preventDefault();
+            const customerId = document.getElementById('i-customer').value;
+            const customerDoc = await db.collection('customers').doc(customerId).get();
+            if (!customerDoc.exists) return showMessage('العميل المحدد غير موجود');
+            
+            const invoiceItems = [];
+            document.querySelectorAll('.invoice-item-row').forEach(row => {
+                const type = row.dataset.type;
+                let item = { type };
+                if (type === 'product') {
+                    item.productId = row.querySelector('.i-product-select').value;
+                    item.productName = row.querySelector('.i-product-select').options[row.querySelector('.i-product-select').selectedIndex].text;
+                    item.qty = parseInt(row.querySelector('.i-qty').value);
+                    item.price = parseFloat(row.querySelector('.i-price').value);
+                } else {
+                    item.productName = row.querySelector('.i-manual-name').value;
+                    item.qty = 1;
+                    item.price = parseFloat(row.querySelector('.i-manual-price').value);
+                }
+                item.total = item.qty * item.price;
+                invoiceItems.push(item);
+            });
+
+            if (invoiceItems.some(item => !item.productName || !item.price || (item.type === 'product' && !item.qty) )) {
+                 return showMessage('الرجاء تعبئة جميع الحقول في بنود الفاتورة.');
+            }
+
+            const totalAmount = invoiceItems.reduce((sum, item) => sum + item.total, 0);
+            const settingsDoc = await db.collection('settings').doc('appConfig').get();
+            const currentInvoiceNumber = (settingsDoc.data()?.lastInvoiceNumber || 0) + 1;
+
+            const data = {
+                invoiceNumber: currentInvoiceNumber,
+                date: document.getElementById('i-date').value,
+                customerId,
+                customerName: customerDoc.data().name,
+                customerDetails: customerDoc.data(),
+                items: invoiceItems,
+                totalAmount
+            };
+
+            if(await addOrUpdateItem('invoices', data)) {
+                await db.collection('settings').doc('appConfig').set({ lastInvoiceNumber: currentInvoiceNumber }, { merge: true });
+                resetForm('add-invoice-form');
+                document.getElementById('invoice-items-container').innerHTML = '';
+                addInvoiceItemRow(false);
+                await refreshInvoices();
+                showMessage(`تم إنشاء الفاتورة بنجاح برقم ${currentInvoiceNumber}.`);
+            }
+        }
 
         async function handleDeleteSelectedProducts() {
             const selectedIds = Array.from(document.querySelectorAll('.product-checkbox:checked')).map(cb => cb.dataset.id);
@@ -1549,25 +1713,210 @@
              const cancelBtn = document.getElementById(`${category}-form-cancel-btn`);
              const originalTitles = { 'product': 'إضافة منتج جديد', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل شراء جديد', 'expense': 'تسجيل مصروف جديد', 'customer': 'إضافة عميل جديد', 'supplier': 'إضافة مورد جديد' };
              const originalButtons = { 'product': 'إضافة المنتج', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل الشراء', 'expense': 'تسجيل المصروف', 'customer': 'إضافة العميل', 'supplier': 'إضافة المورد' };
-             if(title) title.textContent = originalTitles[category] || '';
-             if(submitBtn) submitBtn.textContent = originalButtons[category] || '';
+             if(title) title.textContent = originalTitles[category];
+             if(submitBtn) submitBtn.textContent = originalButtons[category];
              if(cancelBtn) cancelBtn.classList.add('hidden');
              if(category === 'sale') toggleSaleFields();
              if(category === 'purchase') togglePurchaseFields();
              itemToEdit = null;
         }
         
-        function prepareFormForEdit(category, item) { /* ... */ }
-        function prepareProductEdit(item) { /* ... */ }
-        function prepareSaleEdit(item) { /* ... */ }
-        function preparePurchaseEdit(item) { /* ... */ }
-        function prepareExpenseEdit(item) { /* ... */ }
-        function prepareCustomerEdit(item) { /* ... */ }
-        function prepareSupplierEdit(item) { /* ... */ }
-        async function addInvoiceItemRow(isManual = false) { /* ... */ }
-        function updateInvoiceTotal() { /* ... */ }
-        async function viewInvoice(invoiceId) { /* ... */ }
-        function printInvoice() { /* ... */ }
+        function prepareFormForEdit(category, item) {
+             const title = document.getElementById(`${category}-form-title`);
+             const submitBtn = document.getElementById(`${category}-form-submit-btn`);
+             const cancelBtn = document.getElementById(`${category}-form-cancel-btn`);
+             if(title) title.textContent = `تعديل ${title.textContent.replace('إضافة', '').replace('جديد', '')}`;
+             if(submitBtn) submitBtn.textContent = 'حفظ التعديلات';
+             if(cancelBtn) cancelBtn.classList.remove('hidden');
+        }
+
+        function prepareProductEdit(item) {
+            prepareFormForEdit('product', item);
+            document.getElementById('product-id').value = item.id;
+            document.getElementById('p-name').value = item.name;
+            document.getElementById('p-cost').value = item.cost;
+            document.getElementById('p-qty').value = item.qty;
+            document.getElementById('p-supplier').value = item.supplierId;
+        }
+
+        async function prepareSaleEdit(item) {
+            prepareFormForEdit('sale', item);
+            document.getElementById('sale-id').value = item.id;
+            document.getElementById('s-date').value = item.date;
+            document.getElementById('s-type').value = item.type;
+            toggleSaleFields();
+            if (item.type === 'product') {
+                await populateProductSelects(); // Make sure the list is fresh
+                document.getElementById('s-product').value = item.productId;
+                document.getElementById('s-qty').value = item.qty;
+            } else {
+                document.getElementById('s-service-name').value = item.name;
+            }
+            document.getElementById('s-price').value = item.price;
+            document.getElementById('s-cost').value = item.cost;
+            document.getElementById('s-customer').value = item.customerId;
+        }
+
+        async function preparePurchaseEdit(item) {
+            prepareFormForEdit('purchase', item);
+            document.getElementById('purchase-id').value = item.id;
+            document.getElementById('p-date').value = item.date;
+            document.getElementById('p-type').value = item.type;
+            togglePurchaseFields();
+            if (item.type === 'product') {
+                await populateProductSelects(); // Make sure the list is fresh
+                document.getElementById('p-product').value = item.productId;
+            } else {
+                document.getElementById('p-other-product-name').value = item.productName;
+            }
+            document.getElementById('p-cost-input').value = item.cost;
+            document.getElementById('p-qty-input').value = item.qty;
+            document.getElementById('p-supplier-purchase').value = item.supplierId;
+        }
+        
+        function prepareExpenseEdit(item) {
+            prepareFormForEdit('expense', item);
+            document.getElementById('expense-id').value = item.id;
+            document.getElementById('e-date').value = item.date;
+            document.getElementById('e-type').value = item.type;
+            document.getElementById('e-amount').value = item.amount;
+            document.getElementById('e-desc').value = item.description;
+        }
+        
+        function prepareCustomerEdit(item) {
+            prepareFormForEdit('customer', item);
+            document.getElementById('customer-id').value = item.id;
+            document.getElementById('c-name').value = item.name;
+            document.getElementById('c-phone').value = item.phone;
+            document.getElementById('c-email').value = item.email;
+            document.getElementById('c-address').value = item.address;
+        }
+
+        function prepareSupplierEdit(item) {
+            prepareFormForEdit('supplier', item);
+            document.getElementById('supplier-id').value = item.id;
+            document.getElementById('sup-name').value = item.name;
+            document.getElementById('sup-phone').value = item.phone;
+            document.getElementById('sup-email').value = item.email;
+            document.getElementById('sup-address').value = item.address;
+        }
+
+        async function addInvoiceItemRow(isManual = false) {
+             const container = document.getElementById('invoice-items-container');
+             const row = document.createElement('div');
+             row.className = 'grid grid-cols-12 gap-2 items-center invoice-item-row';
+             row.dataset.type = isManual ? 'manual' : 'product';
+
+            if (isManual) {
+                row.innerHTML = `
+                    <div class="col-span-6"><input type="text" class="input i-manual-name" placeholder="اسم البند اليدوي"></div>
+                    <div class="col-span-4"><input type="number" step="0.01" class="input i-manual-price" placeholder="السعر"></div>
+                    <div class="col-span-2"><button type="button" class="btn btn-danger w-full remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
+                `;
+            } else {
+                 row.innerHTML = `
+                    <div class="col-span-5"><select class="select i-product-select"></select></div>
+                    <div class="col-span-3"><input type="number" class="input i-qty" placeholder="الكمية" value="1"></div>
+                    <div class="col-span-3"><input type="number" step="0.01" class="input i-price" placeholder="سعر البيع"></div>
+                    <div class="col-span-1"><button type="button" class="btn btn-danger w-full remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
+                `;
+            }
+            container.appendChild(row);
+            if (!isManual) await populateProductSelects();
+            row.querySelector('.remove-invoice-item-btn').addEventListener('click', () => { row.remove(); updateInvoiceTotal(); });
+        }
+        
+        function updateInvoiceTotal() {
+            let total = 0;
+            document.querySelectorAll('.invoice-item-row').forEach(row => {
+                const type = row.dataset.type;
+                if (type === 'product') {
+                    const qty = parseInt(row.querySelector('.i-qty').value) || 0;
+                    const price = parseFloat(row.querySelector('.i-price').value) || 0;
+                    total += qty * price;
+                } else {
+                    const price = parseFloat(row.querySelector('.i-manual-price').value) || 0;
+                    total += price;
+                }
+            });
+            document.getElementById('invoice-total').textContent = `${total.toFixed(2)} ${appSettings.currency}`;
+        }
+        
+        async function viewInvoice(invoiceId) {
+             const doc = await db.collection('invoices').doc(invoiceId).get();
+             if (!doc.exists) return showMessage('الفاتورة غير موجودة');
+             const invoice = doc.data();
+             currentInvoiceId = invoiceId;
+             const contentEl = document.getElementById('invoice-view-content');
+             contentEl.innerHTML = `
+                <div id="printable-invoice">
+                    <div class="p-8">
+                        <div class="flex justify-between items-start mb-8">
+                            <div>
+                                <h2 class="text-3xl font-bold text-blue-600">${appSettings.companyName}</h2>
+                                <p>${appSettings.companyAddress || ''}</p>
+                                <p>${appSettings.companyPhone || ''}</p>
+                            </div>
+                            <div class="text-right">
+                                <h3 class="text-2xl font-bold">فاتورة</h3>
+                                <p>رقم: ${invoice.invoiceNumber}</p>
+                                <p>التاريخ: ${invoice.date}</p>
+                            </div>
+                        </div>
+                        <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-bold mb-2">فاتورة إلى:</h4>
+                            <p>${invoice.customerName}</p>
+                            <p>${invoice.customerDetails.address || ''}</p>
+                            <p>${invoice.customerDetails.phone || ''}</p>
+                        </div>
+                        <table class="w-full text-right mb-8">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="p-2">البند</th>
+                                    <th class="p-2">الكمية</th>
+                                    <th class="p-2">السعر</th>
+                                    <th class="p-2">الإجمالي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${invoice.items.map(item => `
+                                    <tr class="border-b">
+                                        <td class="p-2">${item.productName}</td>
+                                        <td class="p-2">${item.qty}</td>
+                                        <td class="p-2">${item.price.toFixed(2)}</td>
+                                        <td class="p-2">${(item.qty * item.price).toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <div class="text-left">
+                            <p class="text-xl font-bold">المجموع الكلي: ${invoice.totalAmount.toFixed(2)} ${appSettings.currency}</p>
+                        </div>
+                    </div>
+                </div>
+             `;
+            document.getElementById('invoice-view-modal').classList.remove('hidden');
+            document.getElementById('custom-overlay').classList.remove('hidden');
+        }
+        
+        function printInvoice() {
+            const printContent = document.getElementById('printable-invoice');
+            if (printContent) {
+                const originalContents = document.body.innerHTML;
+                document.body.innerHTML = printContent.innerHTML;
+                window.print();
+                document.body.innerHTML = originalContents;
+                // Re-initialize event listeners as they are lost
+                main(); 
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                switchTab('invoices');
+                document.getElementById('invoice-view-modal').classList.remove('hidden');
+                document.getElementById('custom-overlay').classList.remove('hidden');
+                viewInvoice(currentInvoiceId);
+            }
+        }
+        
         function exportToExcel(tableId, sheetName, fileName) {
             const table = document.getElementById(tableId);
             if (!table) return showMessage('لم يتم العثور على جدول للتصدير.');
@@ -1576,7 +1925,92 @@
             const wb = XLSX.utils.table_to_book(tableClone, { Sheet: sheetName });
             XLSX.writeFile(wb, fileName);
         }
-        async function importFromExcel(event) { /* ... */ }
+
+         async function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                if (jsonData.length === 0) return showMessage("الملف فارغ أو غير صحيح.");
+                
+                showConfirm(`هل تريد استيراد ${jsonData.length} منتج؟ سيتم إضافتها إلى المخزون.`, async () => {
+                    const batch = db.batch();
+                    jsonData.forEach(item => {
+                        const productRef = db.collection('products').doc();
+                        const productData = {
+                            name: item['الاسم'] || item['name'],
+                            cost: parseFloat(item['سعر التكلفة'] || item['cost'] || 0),
+                            qty: parseInt(item['الكمية'] || item['qty'] || 0),
+                            supplierName: item['المورد'] || item['supplierName'] || 'مستورد'
+                        };
+                        if(productData.name) {
+                            batch.set(productRef, productData);
+                        }
+                    });
+                    await batch.commit();
+                    await refreshProducts();
+                    showMessage(`تم استيراد ${jsonData.length} منتج بنجاح.`);
+                });
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = ''; // Reset input
+        }
+
+        function exportToPdf(elementId, title, fileName) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // To handle Arabic text, you need a font that supports it.
+            // This is a complex topic in jsPDF. For simplicity, we'll use autoTable's font handling.
+            const table = document.getElementById(elementId);
+             if (table) {
+                doc.autoTable({ html: `#${elementId}` });
+                doc.save(fileName);
+            } else {
+                const element = document.getElementById(elementId);
+                html2canvas(element).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgProps = pdf.getImageProperties(imgData);
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                    pdf.save(fileName);
+                });
+            }
+        }
+        
+        function exportReportToExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            // Add summary data
+            const summary = [
+                ["المقياس", "القيمة"],
+                ["إجمالي المبيعات", document.getElementById('report-sales').textContent],
+                ["إجمالي المشتريات", document.getElementById('report-purchases').textContent],
+                ["إجمالي المصاريف", document.getElementById('report-expenses').textContent],
+                ["الربح الصافي", document.getElementById('report-profit').textContent],
+            ];
+            const wsSummary = XLSX.utils.aoa_to_sheet(summary);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "ملخص الأداء");
+            
+            // Add top products table
+            const topProductsTable = document.getElementById('top-products-table-export');
+            if (topProductsTable) {
+                const wsTopProducts = XLSX.utils.table_to_sheet(topProductsTable);
+                XLSX.utils.book_append_sheet(wb, wsTopProducts, "المنتجات الأكثر مبيعاً");
+            }
+            
+            XLSX.writeFile(wb, "PerformanceReport.xlsx");
+        }
+
+
         function toggleDeleteSelectedButton() {
             const selectedCount = document.querySelectorAll('.product-checkbox:checked').length;
             const btn = document.getElementById('delete-selected-products-btn');
@@ -1584,8 +2018,19 @@
             const textSpan = btn.querySelector('span');
             if (textSpan) textSpan.textContent = selectedCount > 0 ? `حذف المحدد (${selectedCount})` : 'حذف المحدد';
         }
-        function toggleSaleFields() { /* ... */ }
-        function togglePurchaseFields() { /* ... */ }
+
+        function toggleSaleFields() {
+             const type = document.getElementById('s-type').value;
+             document.getElementById('s-product-container').classList.toggle('hidden', type === 'service');
+             document.getElementById('s-qty-container').classList.toggle('hidden', type === 'service');
+             document.getElementById('s-service-container').classList.toggle('hidden', type === 'product');
+        }
+
+        function togglePurchaseFields() {
+            const type = document.getElementById('p-type').value;
+            document.getElementById('p-product-container').classList.toggle('hidden', type === 'other');
+            document.getElementById('p-other-product-container').classList.toggle('hidden', type === 'product');
+        }
         
         async function loadSettings() {
             const settingsDoc = await db.collection('settings').doc('appConfig').get();
