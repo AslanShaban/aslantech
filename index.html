@@ -2571,8 +2571,10 @@
  			const password = document.getElementById('user-password-input').value;
  			const role = document.getElementById('user-role-select').value;
  			
+            let tempApp;
  			try {
- 				const tempApp = firebase.initializeApp(firebaseConfig, "temp-user-creation");
+                // Get the existing app instance or initialize it if it doesn't exist.
+ 				tempApp = firebase.apps.find(app => app.name === 'temp-user-creation') || firebase.initializeApp(firebaseConfig, "temp-user-creation");
  				const tempAuth = tempApp.auth();
  				const userCredential = await tempAuth.createUserWithEmailAndPassword(email, password);
  				
@@ -2581,14 +2583,18 @@
  					role: role
  				});
  				
- 				await tempApp.delete();
  				showMessage('تم إنشاء المستخدم بنجاح!');
  				resetForm('add-user-form');
  				await refreshUsers();
  			} catch (error) {
  				console.error("Error creating user:", error);
  				showMessage(`خطأ في إنشاء المستخدم: ${error.message}`);
- 			}
+ 			} finally {
+                // Ensure the temporary app is always deleted.
+                if (tempApp) {
+                    await tempApp.delete();
+                }
+            }
  		}
 
  		async function refreshUsers() {
@@ -2680,3 +2686,4 @@
  	</script>
  </body>
  </html>
+
