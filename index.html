@@ -213,6 +213,9 @@
  				</div>
  				 <p id="login-error" class="text-red-500 mb-4 hidden">البريد الإلكتروني أو كلمة المرور غير صحيحة.</p>
  				<button type="submit" class="btn btn-primary w-full text-lg">دخول</button>
+                 <div class="mt-4">
+                    <a href="#" id="forgot-password-link" class="text-sm text-sky-600 hover:underline">هل نسيت كلمة المرور؟</a>
+                </div>
  			</form>
  		</div>
  	</div>
@@ -990,6 +993,19 @@
  						  </table>
  					  </div>
  				 </div>
+                 <div id="backup-management-section" class="settings-card" style="display: none;">
+                    <h3 class="text-2xl font-semibold mb-4 border-b pb-2">النسخ الاحتياطي والاستعادة</h3>
+                    <div class="flex flex-wrap gap-4 items-center">
+                        <button id="export-backup-btn" class="btn btn-primary bg-sky-600 hover:bg-sky-700">
+                            <i class="fas fa-file-export"></i> تصدير نسخة احتياطية
+                        </button>
+                        <label class="btn bg-green-600 hover:bg-green-700 text-white cursor-pointer">
+                            <i class="fas fa-file-import"></i> استيراد نسخة احتياطية
+                            <input type="file" id="import-backup-input" class="hidden" accept=".json">
+                        </label>
+                    </div>
+                    <p class="mt-4 text-sm text-red-600 bg-red-50 p-3 rounded-lg"><i class="fas fa-exclamation-triangle mr-2"></i><strong>تحذير:</strong> استيراد نسخة احتياطية سيقوم بحذف جميع البيانات الحالية بشكل نهائي واستبدالها ببيانات الملف الذي تم رفعه. يرجى توخي الحذر الشديد.</p>
+                </div>
  			</div>
 
 
@@ -1017,6 +1033,20 @@
  			<button id="invoice-print-btn" class="btn btn-primary"><i class="fas fa-print"></i> طباعة / حفظ PDF</button>
  			<button id="invoice-close-btn" class="btn btn-danger bg-gray-500 hover:bg-gray-600">إغلاق</button>
  		</div>
+ 	</div>
+    <div id="forgot-password-modal" class="fixed z-50 p-6 rounded-lg shadow-lg bg-white max-w-sm w-full hidden transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+ 		<h3 class="text-xl font-bold text-center mb-4">إعادة تعيين كلمة المرور</h3>
+        <p class="text-center text-gray-600 mb-6">أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة مرورك.</p>
+ 		<form id="forgot-password-form">
+            <div class="mb-4">
+                <label for="reset-email" class="block text-gray-700 font-semibold mb-2 text-right">البريد الإلكتروني</label>
+                <input type="email" id="reset-email" class="input" required>
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button type="submit" class="btn btn-primary w-1/2">إرسال الرابط</button>
+                <button type="button" id="forgot-password-cancel-btn" class="btn bg-gray-200 hover:bg-gray-300 w-1/2">إلغاء</button>
+            </div>
+        </form>
  	</div>
  	
  	<script>
@@ -1637,6 +1667,23 @@
  			document.getElementById('export-expenses-btn').addEventListener('click', () => exportToExcel('expenses-table-export', 'المصاريف', 'Expenses.xlsx'));
  			document.getElementById('export-customers-btn').addEventListener('click', () => exportToExcel('customers-table-export', 'العملاء', 'Customers.xlsx'));
  			document.getElementById('export-suppliers-btn').addEventListener('click', () => exportToExcel('suppliers-table-export', 'الموردين', 'Suppliers.xlsx'));
+            
+            // Forgot Password Listener
+            document.getElementById('forgot-password-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('forgot-password-modal').classList.remove('hidden');
+                document.getElementById('custom-overlay').classList.remove('hidden');
+            });
+            document.getElementById('forgot-password-form').addEventListener('submit', handlePasswordReset);
+            document.getElementById('forgot-password-cancel-btn').addEventListener('click', () => {
+                document.getElementById('forgot-password-modal').classList.add('hidden');
+                document.getElementById('custom-overlay').classList.add('hidden');
+            });
+
+            // Backup & Restore Listeners
+            document.getElementById('export-backup-btn').addEventListener('click', exportBackup);
+            document.getElementById('import-backup-input').addEventListener('change', handleImportBackup);
+
  		}
  		
  		async function handleLogin(e) {
@@ -1656,6 +1703,28 @@
  		}
 
  		function handleLogout() { auth.signOut(); }
+
+        async function handlePasswordReset(e) {
+            e.preventDefault();
+            const email = document.getElementById('reset-email').value;
+            if (!email) {
+                showMessage('الرجاء إدخال البريد الإلكتروني.');
+                return;
+            }
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showMessage('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.');
+                document.getElementById('forgot-password-modal').classList.add('hidden');
+                document.getElementById('custom-overlay').classList.add('hidden');
+            } catch (error) {
+                console.error("Password reset error:", error);
+                if (error.code === 'auth/user-not-found') {
+                    showMessage('هذا البريد الإلكتروني غير مسجل.');
+                } else {
+                    showMessage('حدث خطأ أثناء إرسال البريد الإلكتروني.');
+                }
+            }
+        }
 
  		async function handleTableActions(e) {
  			const target = e.target.closest('button'); if (!target) return;
@@ -2460,9 +2529,7 @@
  			  // تبديل خاصية "required" لمنع مشاكل التحقق من صحة النموذج في المتصفح
  			  document.getElementById('s-product').required = !isService;
  			  document.getElementById('s-service-name').required = isService;
-              // --- FIX START ---
               document.getElementById('s-qty').required = !isService;
-              // --- FIX END ---
 
  			  const costInput = document.getElementById('s-cost');
  			  costInput.readOnly = !isService;
@@ -2588,7 +2655,15 @@
  				await refreshUsers();
  			} catch (error) {
  				console.error("Error creating user:", error);
- 				showMessage(`خطأ في إنشاء المستخدم: ${error.message}`);
+                let errorMessage = 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'هذا البريد الإلكتروني مستخدم بالفعل. الرجاء إدخال بريد إلكتروني آخر.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'كلمة المرور ضعيفة جداً. يجب أن تتكون من 6 أحرف على الأقل.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'صيغة البريد الإلكتروني غير صحيحة.';
+                }
+ 				showMessage(`خطأ في إنشاء المستخدم: ${errorMessage}`);
  			} finally {
                 // Ensure the temporary app is always deleted.
                 if (tempApp) {
@@ -2616,28 +2691,150 @@
  		}
  		
  		function applyPermissions(role) {
- 			const isVisitor = role === 'visitor';
- 			const isAdmin = role === 'admin';
+            const isVisitor = role === 'visitor';
+            const isAdmin = role === 'admin';
 
- 			document.getElementById('settings-tab-btn').style.display = isAdmin ? '' : 'none';
- 			if (!isAdmin && document.querySelector('.tab-btn.active[data-tab="settings"]')) {
- 				switchTab('dashboard'); // Kick non-admins out of settings page if they land on it
- 			}
+            // Settings Tab and Backup Section visibility
+            document.getElementById('settings-tab-btn').style.display = isAdmin ? '' : 'none';
+            document.getElementById('backup-management-section').style.display = isAdmin ? '' : 'none';
+            if (!isAdmin && document.querySelector('.tab-btn.active[data-tab="settings"]')) {
+                switchTab('dashboard');
+            }
+            
+            // User Management section within settings
+            document.getElementById('user-management-section').style.display = isAdmin ? '' : 'none';
+            document.getElementById('user-role-display').textContent = `الصلاحية: ${ROLES_PERMISSIONS[role]?.name || role}`;
 
- 			document.querySelectorAll('form button[type="submit"], #delete-selected-products-btn, #import-products-excel, #add-invoice-item-btn, #add-manual-invoice-item-btn').forEach(el => {
- 				el.disabled = isVisitor;
- 				if(isVisitor) el.classList.add('opacity-50', 'cursor-not-allowed');
- 				else el.classList.remove('opacity-50', 'cursor-not-allowed');
- 			});
+            // Hide all action and export elements for visitors
+            const restrictedElements = document.querySelectorAll(`
+                form button[type="submit"], 
+                .edit-btn, 
+                .delete-btn, 
+                .create-invoice-from-sale-btn,
+                #delete-selected-products-btn, 
+                #import-products-excel, 
+                #add-invoice-item-btn, 
+                #add-manual-invoice-item-btn,
+                #export-products-btn,
+                #export-sales-btn,
+                #export-purchases-btn,
+                #export-expenses-btn,
+                #export-customers-btn,
+                #export-suppliers-btn,
+                #export-invoices-excel-btn,
+                #export-invoices-pdf-btn,
+                #print-report-btn,
+                #export-report-pdf-btn,
+                #export-advanced-report-excel-btn
+            `);
 
- 			document.querySelectorAll('.edit-btn, .delete-btn, .create-invoice-from-sale-btn').forEach(btn => {
- 				btn.style.display = isVisitor ? 'none' : '';
- 			});
-
- 			document.getElementById('user-management-section').style.display = isAdmin ? '' : 'none';
- 			document.getElementById('user-role-display').textContent = `الصلاحية: ${ROLES_PERMISSIONS[role]?.name || role}`;
- 		}
+            restrictedElements.forEach(el => {
+                // For file input, we hide the parent label, not the hidden input itself
+                const targetEl = el.id === 'import-products-excel' ? el.parentElement : el;
+                if (isVisitor) {
+                    targetEl.style.display = 'none';
+                } else {
+                    // Restore original display style if not a visitor (important for elements that might be inline-flex etc.)
+                    targetEl.style.display = ''; 
+                }
+            });
+        }
  		
+        async function exportBackup() {
+            showMessage('جاري تحضير النسخة الاحتياطية... قد يستغرق هذا بعض الوقت.');
+            const backupData = {};
+            const collectionsToBackup = ['products', 'sales', 'purchases', 'expenses', 'customers', 'suppliers', 'invoices', 'users'];
+
+            try {
+                for (const collectionName of collectionsToBackup) {
+                    const snapshot = await db.collection(collectionName).get();
+                    backupData[collectionName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                }
+                
+                // Backup settings separately
+                const settingsDoc = await db.collection('settings').doc('appConfig').get();
+                if (settingsDoc.exists) {
+                    backupData['settings'] = [{ id: 'appConfig', ...settingsDoc.data() }];
+                }
+
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                const today = new Date().toISOString().slice(0, 10);
+                a.href = url;
+                a.download = `backup-${today}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                document.getElementById('custom-alert').classList.add('hidden');
+                document.getElementById('custom-overlay').classList.add('hidden');
+            } catch (error) {
+                console.error("Backup failed:", error);
+                showMessage(`فشل تصدير النسخة الاحتياطية: ${error.message}`);
+            }
+        }
+
+        function handleImportBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const backupData = JSON.parse(e.target.result);
+                    
+                    showConfirm(`هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟ سيتم حذف جميع البيانات الحالية بشكل نهائي واستبدالها ببيانات الملف. هذه العملية لا يمكن التراجع عنها.`, async () => {
+                        showMessage('جاري استعادة النسخة الاحتياطية... الرجاء عدم إغلاق الصفحة.');
+                        
+                        try {
+                            const allCollections = ['products', 'sales', 'purchases', 'expenses', 'customers', 'suppliers', 'invoices', 'users', 'settings'];
+                            
+                            // Delete all documents in all collections
+                            for (const collectionName of allCollections) {
+                                const snapshot = await db.collection(collectionName).get();
+                                if (snapshot.size > 0) {
+                                    const batch = db.batch();
+                                    snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                                    await batch.commit();
+                                }
+                            }
+
+                            // Import new data
+                            for (const collectionName in backupData) {
+                                const items = backupData[collectionName];
+                                if (items && items.length > 0) {
+                                    const batch = db.batch();
+                                    items.forEach(item => {
+                                        const { id, ...data } = item;
+                                        // For settings, the doc has a specific ID
+                                        const docRef = id ? db.collection(collectionName).doc(id) : db.collection(collectionName).doc();
+                                        batch.set(docRef, data);
+                                    });
+                                    await batch.commit();
+                                }
+                            }
+
+                            await refreshAllDataOnLogin();
+                            showMessage('تم استعادة النسخة الاحتياطية بنجاح!');
+
+                        } catch (importError) {
+                            console.error("Import failed:", importError);
+                            showMessage(`فشل استيراد النسخة الاحتياطية: ${importError.message}`);
+                        }
+                    });
+
+                } catch (parseError) {
+                    console.error("File parse error:", parseError);
+                    showMessage('ملف النسخة الاحتياطية غير صالح أو تالف.');
+                } finally {
+                    event.target.value = ''; // Reset file input
+                }
+            };
+            reader.readAsText(file);
+        }
+
  		function main() {
  			setupEventListeners();
  			addInvoiceItemRow(false);
