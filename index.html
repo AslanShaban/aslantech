@@ -2262,12 +2262,21 @@
             const id = document.getElementById('purchase-id').value;
             const type = document.getElementById('p-type').value;
 
+            // Revert stock change if editing an existing inventory-linked purchase
             if (id && itemToEdit?.category === 'purchase' && itemToEdit.type === 'product' && itemToEdit.productId) {
                 await updateDoc(doc(db, 'products', itemToEdit.productId), { qty: increment(-itemToEdit.qty) });
             }
 
             const supplierDocId = document.getElementById('p-supplier-purchase').value;
             let supplierName = supplierIdToNameMap.get(supplierDocId) || 'غير محدد';
+            let supplierNumericId = null;
+             if(supplierDocId) {
+                const supDoc = await getDoc(doc(db, 'suppliers', supplierDocId));
+                if(supDoc.exists()) {
+                    supplierNumericId = supDoc.data().supplierNumericId || null;
+                }
+            }
+
 
             const purchaseCost = Math.abs(parseFloat(document.getElementById('p-cost-input').value));
             const purchaseQty = Math.abs(parseInt(document.getElementById('p-qty-input').value));
@@ -2283,6 +2292,7 @@
                 const productDoc = await getDoc(productRef);
                 if (!productDoc.exists()) {
                     showMessage('المنتج المحدد غير موجود.');
+                    // Re-apply original increment if edit fails due to deleted product
                     if (id && itemToEdit?.category === 'purchase' && itemToEdit.type === 'product' && itemToEdit.productId) {
                          await updateDoc(doc(db, 'products', itemToEdit.productId), { qty: increment(itemToEdit.qty) });
                     }
@@ -2290,22 +2300,48 @@
                 }
                 productName = productDoc.data().name;
                 await updateDoc(productRef, { qty: increment(purchaseQty) });
-            } else {
-                productName = document.getElementById('p-other-product-name').value;
-                if (!productName.trim()) {
-                    // This check is redundant if .required is set, but good for safety
+
+            } else { // type === 'other'
+                productName = document.getElementById('p-other-product-name').value.trim();
+                if (!productName) {
                     showMessage('الرجاء إدخال اسم المنتج.');
                     return;
                 }
+
+                // Create the new product in the inventory
+                const newProductData = {
+                    name: productName,
+                    cost: purchaseCost,
+                    qty: purchaseQty,
+                    supplierId: supplierDocId || null,
+                    supplierNumericId: supplierNumericId,
+                    supplierName: supplierName
+                };
+                const newProductRef = await addDoc(collection(db, 'products'), newProductData);
+                await logActivity('إضافة منتج عبر المشتريات', `الاسم: ${newProductData.name}`);
+                
+                // Use the new product's ID for the purchase record
+                productId = newProductRef.id;
             }
 
-            const data = { date: document.getElementById('p-date').value, type, productName, qty: purchaseQty, cost: purchaseCost, supplierId: supplierDocId || null, supplierName, amount: purchaseCost * purchaseQty, productId };
+            const data = { 
+                date: document.getElementById('p-date').value, 
+                type, 
+                productName, 
+                qty: purchaseQty, 
+                cost: purchaseCost, 
+                supplierId: supplierDocId || null, 
+                supplierName, 
+                amount: purchaseCost * purchaseQty, 
+                productId: productId // Ensure this is saved
+            };
+
             if (await addOrUpdateItem('purchases', data, id || null, { add: `إضافة مشتريات: ${data.productName}`, update: `تعديل مشتريات: ${data.productName}` })) {
                 resetForm('add-purchase-form');
                 await refreshPurchases(getLocalDate());
-                await refreshProducts();
+                await refreshProducts(); // Crucial to show the new product
                 await updateDashboard();
-                showMessage('تم تسجيل عملية الشراء بنجاح!');
+                showMessage('تم تسجيل عملية الشراء وإضافة المنتج للمستودع بنجاح!');
             }
         }
 
