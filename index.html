@@ -821,7 +821,7 @@
 					 <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
 						  <h3 class="text-2xl font-semibold">قائمة الفواتير</h3>
 						  <div class="flex-grow">
-							  <form id="invoice-export-form" class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+							  <form id="invoice-export-form" class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
 								  <div>
 									  <label for="invoice-start-date" class="text-xs">من تاريخ</label>
 									  <input type="date" id="invoice-start-date" class="input p-2 text-sm">
@@ -832,7 +832,6 @@
 								  </div>
 								  <div class="flex gap-2">
 									  <button type="button" id="export-invoices-excel-btn" class="btn btn-primary bg-green-600 hover:bg-green-700 w-full text-sm"><i class="fas fa-file-excel"></i> تصدير Excel</button>
-									  <button type="button" id="export-invoices-pdf-btn" class="btn btn-primary bg-red-600 hover:bg-red-700 w-full text-sm"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
 								  </div>
 							  </form>
 						  </div>
@@ -956,7 +955,7 @@
 								  <div class="dashboard-card">
 									  <h4 class="text-lg font-semibold mb-4">المنتجات الأكثر مبيعاً</h4>
 									  <table class="report-table" id="top-products-table-export">
-										  <thead><tr><th>المنتج</th><th>الكمية المباعة</th><th>إجمالي الإيرادات</th></tr></thead>
+										  <thead><tr><th>المنتج</th><th>الكمية المباعة</th><th>إجمالي الأرباح</th></tr></thead>
 										  <tbody id="top-products-table"></tbody>
 									  </table>
 								  </div>
@@ -1840,12 +1839,13 @@
             // Top Products Table
             const productSales = {};
             salesData.filter(s => s.type === 'product').forEach(s => {
-                if (!productSales[s.name]) productSales[s.name] = { totalQty: 0, totalRevenue: 0 };
+                if (!productSales[s.name]) productSales[s.name] = { totalQty: 0, totalProfit: 0 };
                 productSales[s.name].totalQty += s.qty;
-                productSales[s.name].totalRevenue += s.amount;
+                const profit = (s.price - s.cost) * (s.qty || 1);
+                productSales[s.name].totalProfit += profit;
             });
-            const topProducts = Object.entries(productSales).sort((a, b) => b[1].totalRevenue - a[1].totalRevenue).slice(0, 10);
-            document.getElementById('top-products-table').innerHTML = topProducts.length > 0 ? topProducts.map(([name, data]) => `<tr><td>${name}</td><td>${data.totalQty}</td><td>${data.totalRevenue.toFixed(2)} ${appSettings.currency}</td></tr>`).join('') : `<tr><td colspan="3" class="text-center">لا توجد بيانات</td></tr>`;
+            const topProducts = Object.entries(productSales).sort((a, b) => b[1].totalProfit - a[1].totalProfit).slice(0, 10);
+            document.getElementById('top-products-table').innerHTML = topProducts.length > 0 ? topProducts.map(([name, data]) => `<tr><td>${name}</td><td>${data.totalQty}</td><td>${data.totalProfit.toFixed(2)} ${appSettings.currency}</td></tr>`).join('') : `<tr><td colspan="3" class="text-center">لا توجد بيانات</td></tr>`;
             
             // Top Customers Table
             const customerSales = {};
@@ -1983,7 +1983,6 @@
 
             // Invoices export listeners
             document.getElementById('export-invoices-excel-btn').addEventListener('click', exportInvoicesToExcel);
-            document.getElementById('export-invoices-pdf-btn').addEventListener('click', exportInvoicesToPdf);
 
             // Export buttons that were using onclick
             document.getElementById('export-products-btn').addEventListener('click', () => exportToExcel('products-table-export', 'المنتجات', 'Products.xlsx'));
@@ -2107,9 +2106,13 @@
             const saleDoc = await getDoc(doc(db, 'sales', saleId));
             if(!saleDoc.exists()) return showMessage('لم يتم العثور على عملية البيع');
             const sale = saleDoc.data();
+
+            if (!sale.customerId) {
+                return showMessage('لا يمكن إنشاء فاتورة لعملية بيع بدون عميل محدد. يرجى تعديل عملية البيع وإضافة عميل.');
+            }
             
             const customerDoc = await getDoc(doc(db, 'customers', sale.customerId));
-            if (!customerDoc.exists) return showMessage('العميل المرتبط بعملية البيع هذه غير موجود');
+            if (!customerDoc.exists()) return showMessage('العميل المرتبط بعملية البيع هذه غير موجود');
             
             const settingsDocRef = doc(db, 'settings', 'appConfig');
             
@@ -3385,4 +3388,7 @@
     </script>
 </body>
 </html>
+"
+, but I am asking you to do something to it.
+My query is: اعد اصلاح الكود و ارسله كامل بدون اخطاء
 
