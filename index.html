@@ -566,7 +566,7 @@
 						 </div>
 						 <div class="flex flex-col" id="p-product-container">
 							 <label for="p-product" class="text-gray-600 mb-1">المنتج</label>
-                             <select id="p-product" class="select" required></select>
+                             <select id="p-product" class="select"></select>
 						 </div>
 						 <div class="flex flex-col hidden" id="p-other-product-container">
 							 <label for="p-other-product-name" class="text-gray-600 mb-1">اسم المنتج</label>
@@ -1193,6 +1193,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        // A secondary app instance for creating users without signing out the admin
+        const secondaryApp = initializeApp(firebaseConfig, "secondary");
+        const secondaryAuth = getAuth(secondaryApp);
 
         // --- Global Variables ---
         let appSettings = { currency: 'د.أ', initialFund: 0, companyName: 'شركتك', companyAddress: '', companyPhone: '', loyaltyPointsRate: 0 };
@@ -1243,11 +1246,9 @@
             return localDate.toISOString().split('T')[0];
         }
 
-		// FIX: Replaced navigator.clipboard with a more robust method for iframe compatibility
         function copyToClipboard(text) {
             const textArea = document.createElement('textarea');
             textArea.value = text;
-            // Avoid scrolling to bottom
             textArea.style.top = "0";
             textArea.style.left = "0";
             textArea.style.position = "fixed";
@@ -1411,10 +1412,10 @@
                          const productRef = doc(db, 'products', purchaseToDelete.productId);
                          await updateDoc(productRef, { qty: increment(-purchaseToDelete.qty) });
                      }
-                 } else if (['products', 'customers', 'suppliers', 'expenses', 'invoices'].includes(collectionName)) {
+                 } else if (['products', 'customers', 'suppliers', 'expenses', 'invoices', 'users'].includes(collectionName)) {
                      const itemDoc = await getDoc(doc(db, collectionName, id));
                      if(itemDoc.exists()) {
-                         itemName = itemDoc.data().name || itemDoc.data().productName || itemDoc.data().type || `فاتورة رقم ${itemDoc.data().invoiceNumber}`;
+                         itemName = itemDoc.data().name || itemDoc.data().productName || itemDoc.data().type || itemDoc.data().email || `فاتورة رقم ${itemDoc.data().invoiceNumber}`;
                      }
                  }
                  await deleteDoc(doc(db, collectionName, id));
@@ -1426,6 +1427,60 @@
                  return false;
              }
         }
+
+        // --- Authentication ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        currentUser.role = userDoc.data().role;
+                    } else {
+                        console.warn(`User ${user.uid} exists in Auth but not in Firestore 'users' collection.`);
+                        currentUser.role = 'visitor'; 
+                    }
+                    currentUser.auth = user;
+
+                    document.getElementById('user-email').textContent = user.email;
+                    document.getElementById('user-role-display').textContent = translateRole(currentUser.role);
+                    
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('app-container').classList.remove('hidden');
+
+                    await refreshAllDataOnLogin();
+                    
+                    applyPermissions(currentUser.role);
+                } catch (error) {
+                    console.error("Error during post-login data refresh:", error);
+                    showMessage("حدث خطأ أثناء تحميل بيانات التطبيق. يرجى محاولة تسجيل الخروج والدخول مرة أخرى.");
+                    await signOut(auth);
+                }
+            } else {
+                currentUser = { auth: null, role: 'visitor' };
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app-container').classList.add('hidden');
+                document.getElementById('user-email').textContent = '';
+                document.getElementById('user-role-display').textContent = '';
+                clearAllTables();
+            }
+        });
+
+        function translateRole(role) {
+            const roles = { admin: 'مدير', user: 'مستخدم', visitor: 'زائر' };
+            return roles[role] || role;
+        }
+
+        function clearAllTables() {
+            const tableIds = ['products-table', 'sales-table', 'purchases-table', 'expenses-table', 'customers-table', 'suppliers-table', 'invoices-table', 'activity-log-table', 'users-table'];
+            tableIds.forEach(id => {
+                const table = document.getElementById(id);
+                if(table) table.innerHTML = '';
+            });
+            if (monthlySalesChart) monthlySalesChart.destroy();
+            if (performanceChart) performanceChart.destroy();
+            if (salesDistributionChart) salesDistributionChart.destroy();
+        }
+
 
         // --- UI and Tab Management ---
         function switchTab(tabId) {
@@ -2220,6 +2275,10 @@
             
             if (type === 'product') {
                 productId = document.getElementById('p-product').value;
+                if (!productId) {
+                    showMessage('الرجاء اختيار منتج.');
+                    return;
+                }
                 const productRef = doc(db, 'products', productId);
                 const productDoc = await getDoc(productRef);
                 if (!productDoc.exists()) {
@@ -2233,6 +2292,11 @@
                 await updateDoc(productRef, { qty: increment(purchaseQty) });
             } else {
                 productName = document.getElementById('p-other-product-name').value;
+                if (!productName.trim()) {
+                    // This check is redundant if .required is set, but good for safety
+                    showMessage('الرجاء إدخال اسم المنتج.');
+                    return;
+                }
             }
 
             const data = { date: document.getElementById('p-date').value, type, productName, qty: purchaseQty, cost: purchaseCost, supplierId: supplierDocId || null, supplierName, amount: purchaseCost * purchaseQty, productId };
@@ -2926,8 +2990,13 @@
 
         function togglePurchaseFields() {
             const type = document.getElementById('p-type').value;
-            document.getElementById('p-product-container').classList.toggle('hidden', type === 'other');
-            document.getElementById('p-other-product-container').classList.toggle('hidden', type === 'product');
+            const isOther = type === 'other';
+
+            document.getElementById('p-product-container').classList.toggle('hidden', isOther);
+            document.getElementById('p-other-product-container').classList.toggle('hidden', !isOther);
+            
+            document.getElementById('p-product').required = !isOther;
+            document.getElementById('p-other-product-name').required = isOther;
         }
         
         async function loadSettings() {
@@ -3012,42 +3081,7 @@
             const password = document.getElementById('user-password-input').value;
             const role = document.getElementById('user-role-select').value;
             
-            // This approach of creating a temporary app is complex and not standard.
-            // The Admin SDK is the correct way, but for a client-side app, we call a cloud function.
-            // As a simplified but insecure alternative for this environment, we just show a message.
-            // In a real app, this MUST be a Cloud Function.
             showMessage('ميزة إنشاء المستخدمين تتطلب إعدادات من جانب الخادم (Cloud Function) وهي معطلة في هذه النسخة التجريبية.');
-            
-            // The original logic is commented out below. It's clever but requires re-authentication of the admin.
-            /*
-            let tempApp;
-            try {
-                tempApp = initializeApp(firebaseConfig, "temp-user-creation");
-                const tempAuth = getAuth(tempApp);
-                const userCredential = await createUserWithEmailAndPassword(tempAuth, email, password);
-                
-                await setDoc(doc(db, 'users', userCredential.user.uid), {
-                    email: email,
-                    role: role
-                });
-                
-                await logActivity('إنشاء مستخدم جديد', `البريد الإلكتروني: ${email}, الصلاحية: ${role}`);
-                showMessage('تم إنشاء المستخدم بنجاح!');
-                resetForm('add-user-form');
-                await refreshUsers();
-            } catch (error) {
-                console.error("Error creating user:", error);
-                let errorMessage = 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
-                if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = 'هذا البريد الإلكتروني مستخدم بالفعل.';
-                } else if (error.code === 'auth/weak-password') {
-                    errorMessage = 'كلمة المرور ضعيفة جداً. يجب أن تتكون من 6 أحرف على الأقل.';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'صيغة البريد الإلكتروني غير صحيحة.';
-                }
-                showMessage(`خطأ في إنشاء المستخدم: ${errorMessage}`);
-            }
-            */
         }
 
         async function refreshUsers() {
@@ -3072,7 +3106,7 @@
             const isVisitor = role === 'visitor';
             const isAdmin = role === 'admin';
 
-            document.getElementById('settings-tab-btn').style.display = isAdmin ? '' : 'flex';
+            document.getElementById('settings-tab-btn').style.display = isAdmin ? 'flex' : 'none';
             document.getElementById('activity-log-tab-btn').style.display = isAdmin ? '' : 'none';
 
             document.getElementById('backup-management-section').style.display = isAdmin ? '' : 'none';
