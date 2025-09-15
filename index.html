@@ -270,7 +270,7 @@
 		<!-- أزرار التنقل -->
 		<div class="flex flex-wrap justify-center gap-2 mb-8" id="nav-tabs">
 			<button class="tab-btn active" data-tab="dashboard">الرئيسية</button>
-			<button class="tab-btn" data-tab="products">المستودع</button>
+			<button class="tab-btn" data-tab="products">المستودعات</button>
 			<button class="tab-btn" data-tab="sales">المبيعات</button>
 			<button class="tab-btn" data-tab="purchases">المشتريات</button>
 			<button class="tab-btn" data-tab="expenses">المصاريف</button>
@@ -383,10 +383,10 @@
 
 			<!-- تبويب المستودع (المنتجات) -->
 			<div id="products" class="tab-pane hidden">
-				<h2 class="text-3xl font-bold mb-6 text-center text-slate-800 dark:text-slate-100">إدارة المستودع</h2>
+				<h2 class="text-3xl font-bold mb-6 text-center text-slate-800 dark:text-slate-100">إدارة المنتجات</h2>
 				<div class="form-section">
 					<h3 class="text-2xl font-semibold mb-4" id="product-form-title">إضافة منتج جديد</h3>
-					<form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+					<form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
 						<input type="hidden" id="product-id">
 						<div class="flex flex-col">
 							<label for="p-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم المنتج</label>
@@ -408,6 +408,12 @@
 							<label for="p-supplier" class="text-slate-600 dark:text-slate-300 mb-1">المورد</label>
 							<select id="p-supplier" class="select">
 								<option value="">اختر مورد</option>
+							</select>
+						</div>
+						<div class="flex flex-col">
+							<label for="p-warehouse" class="text-slate-600 dark:text-slate-300 mb-1">المستودع</label>
+							<select id="p-warehouse" class="select" required>
+								<option value="">اختر مستودع</option>
 							</select>
 						</div>
 						<div class="flex items-end col-span-full gap-2">
@@ -443,6 +449,12 @@
 								<input type="text" id="product-search-input" class="w-full pl-10 input" placeholder="ابحث بالاسم...">
 							</div>
 							<div class="relative w-full sm:w-64">
+								<span class="absolute inset-y-0 left-0 flex items-center pl-3"><i class="fas fa-warehouse text-slate-400"></i></span>
+							   <select id="warehouse-filter" class="w-full pl-10 select">
+								   <option value="">كل المستودعات</option>
+							   </select>
+						   </div>
+							<div class="relative w-full sm:w-64">
 								 <span class="absolute inset-y-0 left-0 flex items-center pl-3"><i class="fas fa-filter text-slate-400"></i></span>
 								<select id="product-supplier-filter" class="w-full pl-10 select">
 									<option value="">فلترة حسب المورد</option>
@@ -462,6 +474,7 @@
 									<th class="no-export"><input type="checkbox" id="select-all-products"></th>
 									<th>الاسم</th>
 									<th>نوع المنتج</th>
+									<th>المستودع</th>
 									<th>سعر التكلفة</th>
 									<th>الكمية</th>
 									<th>المورد</th>
@@ -485,6 +498,12 @@
 							 <label for="s-date" class="text-slate-600 dark:text-slate-300 mb-1">التاريخ</label>
 							 <input type="date" id="s-date" class="input" required>
 						 </div>
+						 <div class="flex flex-col">
+							<label for="s-warehouse" class="text-slate-600 dark:text-slate-300 mb-1">المستودع</label>
+							<select id="s-warehouse" class="select" required>
+								<option value="">اختر مستودع</option>
+							</select>
+						</div>
 						 <div class="flex flex-col">
 							 <label for="s-type" class="text-slate-600 dark:text-slate-300 mb-1">نوع البيع</label>
 							 <select id="s-type" class="select">
@@ -543,6 +562,7 @@
 									<th>التاريخ</th>
 									<th>النوع</th>
 									<th>الاسم/المنتج</th>
+									<th>المستودع</th>
 									<th>الكمية</th>
 									<th>العميل</th>
 									<th>المبلغ</th>
@@ -566,6 +586,12 @@
 							 <label for="p-date" class="text-slate-600 dark:text-slate-300 mb-1">التاريخ</label>
 							 <input type="date" id="p-date" class="input" required>
 						 </div>
+						 <div class="flex flex-col">
+							<label for="purchase-warehouse" class="text-slate-600 dark:text-slate-300 mb-1">المستودع</label>
+							<select id="purchase-warehouse" class="select" required>
+								<option value="">اختر مستودع</option>
+							</select>
+						</div>
 						 <div class="flex flex-col">
 							 <label for="p-type" class="text-slate-600 dark:text-slate-300 mb-1">نوع الشراء</label>
 							 <select id="p-type" class="select">
@@ -619,6 +645,7 @@
 								<tr>
 									<th>التاريخ</th>
 									<th>المنتج</th>
+									<th>المستودع</th>
 									<th>الكمية</th>
 									<th>المورد</th>
 									<th>المبلغ</th>
@@ -999,7 +1026,7 @@
 								  <div class="dashboard-card">
 									  <h4 class="text-lg font-semibold mb-4">تنبيهات نفاد المخزون (الكمية صفر)</h4>
 									  <table class="report-table" id="low-stock-table-export">
-										  <thead><tr><th>المنتج</th><th>الكمية المتبقية</th></tr></thead>
+										  <thead><tr><th>المنتج</th><th>المستودع</th><th>الكمية المتبقية</th></tr></thead>
 										  <tbody id="low-stock-table"></tbody>
 									  </table>
 								  </div>
@@ -1070,6 +1097,39 @@
 						 </div>
 					 </form>
 				 </div>
+
+				 <!-- قسم إدارة المستودعات -->
+				 <div id="warehouse-management-section" class="settings-card">
+					<h3 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-slate-600">إدارة المستودعات</h3>
+					<div class="form-section p-0 m-0 shadow-none">
+						<h4 class="text-xl font-semibold mb-4" id="warehouse-form-title">إضافة مستودع جديد</h4>
+						<form id="add-warehouse-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+							<input type="hidden" id="warehouse-id">
+							<div class="flex flex-col md:col-span-2">
+								<label for="w-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم المستودع</label>
+								<input type="text" id="w-name" class="input" required>
+							</div>
+							<div class="flex items-end col-span-full md:col-span-1 gap-2">
+								<button type="submit" class="btn btn-primary w-full" id="warehouse-form-submit-btn">إضافة مستودع</button>
+								<button type="button" class="btn bg-slate-500 text-white w-full hidden" id="warehouse-form-cancel-btn">إلغاء</button>
+							</div>
+						</form>
+					</div>
+					<div class="mt-8 data-table-wrapper">
+						<h4 class="text-xl font-semibold mb-4">قائمة المستودعات</h4>
+						<div class="data-table-container">
+							<table class="data-table">
+								<thead>
+									<tr>
+										<th>الاسم</th>
+										<th class="no-export">الإجراءات</th>
+									</tr>
+								</thead>
+								<tbody id="warehouses-table"></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
 
                  <!-- قسم إدارة الموظفين - جديد -->
                  <div id="employee-management-section" class="settings-card" style="display: none;">
@@ -1275,6 +1335,7 @@
 		let supplierNumericIdToDocIdMap = new Map();
         let productsCache = [];
         let employeesCache = [];
+        let warehousesCache = [];
         
         // --- User Feedback Functions ---
         const showMessage = (message) => {
@@ -1476,7 +1537,7 @@
                          const productRef = doc(db, 'products', purchaseToDelete.productId);
                          await updateDoc(productRef, { qty: increment(-purchaseToDelete.qty) });
                      }
-                 } else if (['products', 'customers', 'suppliers', 'expenses', 'invoices', 'users', 'employees'].includes(collectionName)) {
+                 } else if (['products', 'customers', 'suppliers', 'expenses', 'invoices', 'users', 'employees', 'warehouses'].includes(collectionName)) {
                      const itemDoc = await getDoc(doc(db, collectionName, id));
                      if(itemDoc.exists()) {
                          itemName = itemDoc.data().name || itemDoc.data().productName || itemDoc.data().type || itemDoc.data().email || `فاتورة رقم ${itemDoc.data().invoiceNumber}`;
@@ -1540,7 +1601,7 @@
         }
 
         function clearAllTables() {
-            const tableIds = ['products-table', 'sales-table', 'purchases-table', 'expenses-table', 'customers-table', 'suppliers-table', 'invoices-table', 'activity-log-table', 'users-table', 'employees-table'];
+            const tableIds = ['products-table', 'sales-table', 'purchases-table', 'expenses-table', 'customers-table', 'suppliers-table', 'invoices-table', 'activity-log-table', 'users-table', 'employees-table', 'warehouses-table'];
             tableIds.forEach(id => {
                 const table = document.getElementById(id);
                 if(table) table.innerHTML = '';
@@ -1564,10 +1625,11 @@
             else if (tabId === 'activity_log') { refreshActivityLog(); }
         }
 
-        function populateSelect(selectId, data, valueField, textField, displayTpl = null) {
+        function populateSelect(selectId, data, valueField, textField, displayTpl = null, addEmptyOption = true) {
             const select = document.getElementById(selectId);
+            if (!select) return;
             const currentValue = select.value;
-            select.innerHTML = `<option value="">اختر</option>`;
+            select.innerHTML = addEmptyOption ? `<option value="">اختر</option>` : '';
             data.forEach(item => {
                 const option = document.createElement('option');
                 option.value = item[valueField];
@@ -1581,6 +1643,7 @@
 		async function refreshProducts() {
 			const searchTerm = document.getElementById('product-search-input').value.toLowerCase();
 			const supplierIdFilter = document.getElementById('product-supplier-filter').value;
+			const warehouseIdFilter = document.getElementById('warehouse-filter').value;
 
 			const q = query(collection(db, 'products'), orderBy('name'));
 			const snapshot = await getDocs(q);
@@ -1590,6 +1653,10 @@
 			productsCache = allProducts; 
 
 			let filteredProducts = productsCache;
+
+			if (warehouseIdFilter) {
+				filteredProducts = filteredProducts.filter(p => p.warehouseId === warehouseIdFilter);
+			}
 
 			if (supplierIdFilter) {
 				filteredProducts = filteredProducts.filter(p => p.supplierId === supplierIdFilter);
@@ -1614,6 +1681,7 @@
 					<td class="no-export"><input type="checkbox" class="product-checkbox" data-id="${p.id}"></td>
 					<td class="whitespace-nowrap">${p.name}</td>
 					<td>${p.category || 'N/A'}</td>
+					<td>${p.warehouseName || 'غير محدد'}</td>
 					<td>${(p.cost || 0).toFixed(2)} ${appSettings.currency}</td>
 					<td class="${qtyClass} text-center">${p.qty}</td>
 					<td>${p.supplierName || 'غير محدد'}</td>
@@ -1649,6 +1717,7 @@
                     <td class="whitespace-nowrap">${s.date}</td>
                     <td>${s.type === 'product' ? 'منتج' : 'خدمة'}</td>
                     <td class="whitespace-nowrap">${s.name}</td>
+                    <td>${s.warehouseName || '-'}</td>
                     <td>${s.qty || 1}</td>
                     <td class="whitespace-nowrap">${s.customerName || 'غير محدد'}</td>
                     <td>${(s.amount || 0).toFixed(2)} ${appSettings.currency}</td>
@@ -1677,6 +1746,7 @@
                 row.innerHTML = `
                     <td class="whitespace-nowrap">${p.date}</td>
                     <td class="whitespace-nowrap">${p.productName}</td>
+                    <td>${p.warehouseName || '-'}</td>
                     <td>${p.qty}</td>
                     <td class="whitespace-nowrap">${p.supplierName || 'غير محدد'}</td>
                     <td>${(p.amount || 0).toFixed(2)} ${appSettings.currency}</td>
@@ -1825,25 +1895,32 @@
             applyPermissions(currentUser.role);
         }
         
-        async function populateProductSelects() {
-            const displayTpl = (p) => `${p.name} (المتاح: ${p.qty})`;
-            
-            document.querySelectorAll('#s-product, #p-product').forEach(select => {
-                populateSelect(select.id, productsCache, 'id', 'name', displayTpl);
-            });
-            
-            document.querySelectorAll('.i-product-select').forEach(select => {
-                const selectedValue = select.value;
-                select.innerHTML = `<option value="">اختر منتج</option>`;
-                productsCache.forEach(p => {
-                    const option = document.createElement('option');
-                    option.value = p.id;
-                    option.textContent = p.name;
-                    select.appendChild(option);
-                });
-                select.value = selectedValue;
-            });
-        }
+		async function populateProductSelects(warehouseId = null) {
+			const productsToDisplay = warehouseId ? productsCache.filter(p => p.warehouseId === warehouseId) : productsCache;
+			const displayTpl = (p) => `${p.name} (المتاح: ${p.qty})`;
+
+			// For sales form
+			populateSelect('s-product', productsToDisplay, 'id', 'name', displayTpl, productsToDisplay.length > 0);
+
+			// For purchase form (existing products)
+			populateSelect('p-product', productsToDisplay, 'id', 'name', displayTpl, productsToDisplay.length > 0);
+
+			// For invoice items
+			document.querySelectorAll('.i-product-select').forEach(select => {
+				const selectedValue = select.value;
+				const currentWarehouseId = select.closest('.invoice-item-row')?.dataset.warehouseId;
+				const productsForInvoiceItem = currentWarehouseId ? productsCache.filter(p => p.warehouseId === currentWarehouseId) : productsCache;
+				
+				select.innerHTML = `<option value="">اختر منتج</option>`;
+				productsForInvoiceItem.forEach(p => {
+					const option = document.createElement('option');
+					option.value = p.id;
+					option.textContent = p.name;
+					select.appendChild(option);
+				});
+				select.value = selectedValue;
+			});
+		}
         
         async function refreshEmployees() {
             if (currentUser.role !== 'admin') {
@@ -1873,12 +1950,66 @@
             applyPermissions(currentUser.role);
         }
 
+		async function refreshWarehouses() {
+			const q = query(collection(db, 'warehouses'), orderBy('name'));
+			const snapshot = await getDocs(q);
+			
+			if (snapshot.empty) {
+				// If no warehouses exist, create a default one
+				await addDoc(collection(db, 'warehouses'), { name: "المستودع الرئيسي" });
+				await refreshWarehouses(); // Re-run to fetch the newly created one
+				return;
+			}
+
+			warehousesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+			// Populate management table
+			const tableBody = document.getElementById('warehouses-table');
+			tableBody.innerHTML = '';
+			warehousesCache.forEach(w => {
+				const row = tableBody.insertRow();
+				row.innerHTML = `
+					<td class="whitespace-nowrap">${w.name}</td>
+					<td class="whitespace-nowrap no-export">
+						<button class="btn btn-edit text-sm edit-btn" data-id="${w.id}" data-category="warehouse">تعديل</button>
+						<button class="btn btn-danger text-sm delete-btn" data-id="${w.id}" data-category="warehouses">حذف</button>
+					</td>`;
+			});
+
+			// Populate select dropdowns
+			const warehouseFilterSelect = document.getElementById('warehouse-filter');
+			const oldFilterValue = warehouseFilterSelect.value;
+			warehouseFilterSelect.innerHTML = '<option value="">كل المستودعات</option>';
+			warehousesCache.forEach(w => {
+				const option = document.createElement('option');
+				option.value = w.id;
+				option.textContent = w.name;
+				warehouseFilterSelect.appendChild(option);
+			});
+			warehouseFilterSelect.value = oldFilterValue;
+			
+			populateSelect('p-warehouse', warehousesCache, 'id', 'name', null, true);
+			populateSelect('s-warehouse', warehousesCache, 'id', 'name', null, warehousesCache.length > 1);
+			populateSelect('purchase-warehouse', warehousesCache, 'id', 'name', null, warehousesCache.length > 1);
+			
+			// If there's only one warehouse, auto-select it in forms
+			if (warehousesCache.length === 1) {
+				const singleWarehouseId = warehousesCache[0].id;
+				document.getElementById('s-warehouse').value = singleWarehouseId;
+				document.getElementById('purchase-warehouse').value = singleWarehouseId;
+				populateProductSelects(singleWarehouseId);
+			}
+
+			applyPermissions(currentUser.role);
+		}
+
         async function refreshAllDataOnLogin() {
             await loadSettings();
             const today = getLocalDate();
             document.getElementById('dashboard-date').value = today;
             await updateDashboard(today);
             await Promise.all([
+				refreshWarehouses(),
                 refreshSuppliers(),
                 refreshProducts(), 
                 refreshSales(), 
@@ -1887,7 +2018,7 @@
                 refreshCustomers(), 
                 refreshInvoices(), 
                 refreshUsers(),
-                refreshEmployees(), // New
+                refreshEmployees(),
                 refreshActivityLog()
             ]);
             updateAdvancedDashboardMetrics();
@@ -1984,7 +2115,7 @@
 
             // Out of Stock Table
             const outOfStockProducts = productsCache.filter(p => p.qty === 0);
-            document.getElementById('low-stock-table').innerHTML = outOfStockProducts.length > 0 ? outOfStockProducts.map(p => `<tr><td>${p.name}</td><td>${p.qty}</td></tr>`).join('') : `<tr><td colspan="2" class="text-center">لا توجد منتجات نافدة</td></tr>`;
+            document.getElementById('low-stock-table').innerHTML = outOfStockProducts.length > 0 ? outOfStockProducts.map(p => `<tr><td>${p.name}</td><td>${p.warehouseName}</td><td>${p.qty}</td></tr>`).join('') : `<tr><td colspan="3" class="text-center">لا توجد منتجات نافدة</td></tr>`;
 
             // Expenses report
 			const expensesReportTableBody = document.getElementById('salaries-report-table');
@@ -2067,8 +2198,10 @@
             document.getElementById('customer-form-cancel-btn').addEventListener('click', () => resetForm('add-customer-form'));
             document.getElementById('add-supplier-form').addEventListener('submit', handleSupplierFormSubmit);
             document.getElementById('supplier-form-cancel-btn').addEventListener('click', () => resetForm('add-supplier-form'));
-            document.getElementById('add-employee-form').addEventListener('submit', handleEmployeeFormSubmit); // New
-            document.getElementById('employee-form-cancel-btn').addEventListener('click', () => resetForm('add-employee-form')); // New
+            document.getElementById('add-employee-form').addEventListener('submit', handleEmployeeFormSubmit);
+            document.getElementById('employee-form-cancel-btn').addEventListener('click', () => resetForm('add-employee-form'));
+			document.getElementById('add-warehouse-form').addEventListener('submit', handleWarehouseFormSubmit);
+            document.getElementById('warehouse-form-cancel-btn').addEventListener('click', () => resetForm('add-warehouse-form'));
             document.getElementById('add-invoice-form').addEventListener('submit', handleInvoiceFormSubmit);
             document.getElementById('reports-form').addEventListener('submit', (e) => { e.preventDefault(); generateReport(); });
             document.getElementById('settings-form').addEventListener('submit', handleSettingsSave);
@@ -2078,6 +2211,8 @@
             
 			document.getElementById('product-search-input').addEventListener('input', () => refreshProducts());
 			document.getElementById('product-supplier-filter').addEventListener('change', () => refreshProducts());
+			document.getElementById('warehouse-filter').addEventListener('change', () => refreshProducts());
+			document.getElementById('s-warehouse').addEventListener('change', (e) => populateProductSelects(e.target.value));
 
             document.getElementById('select-all-products').addEventListener('change', (e) => {
                 document.querySelectorAll('.product-checkbox').forEach(checkbox => checkbox.checked = e.target.checked);
@@ -2093,7 +2228,7 @@
             document.getElementById('tab-content').addEventListener('click', handleTableActions);
             document.getElementById('s-type').addEventListener('change', handleSaleTypeChange);
             document.getElementById('s-product').addEventListener('change', handleProductSelectionForSale);
-            document.getElementById('e-type').addEventListener('change', handleExpenseTypeChange); // New
+            document.getElementById('e-type').addEventListener('change', handleExpenseTypeChange);
             document.getElementById('p-type').addEventListener('change', togglePurchaseFields);
             document.getElementById('add-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(false));
             document.getElementById('add-manual-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(true));
@@ -2209,10 +2344,10 @@
                 if (itemDoc.exists()) {
                     const item = { id: itemDoc.id, ...itemDoc.data()};
                     itemToEdit = { ...item, category };
-                    const editFunctions = { product: prepareProductEdit, sale: prepareSaleEdit, purchase: preparePurchaseEdit, expense: prepareExpenseEdit, customer: prepareCustomerEdit, supplier: prepareSupplierEdit, employee: prepareEmployeeEdit };
+                    const editFunctions = { product: prepareProductEdit, sale: prepareSaleEdit, purchase: preparePurchaseEdit, expense: prepareExpenseEdit, customer: prepareCustomerEdit, supplier: prepareSupplierEdit, employee: prepareEmployeeEdit, warehouse: prepareWarehouseEdit };
                     if (editFunctions[category]) {
                         editFunctions[category](item);
-                        switchTab(collectionName === 'employees' ? 'settings' : collectionName);
+                        switchTab(collectionName === 'employees' || collectionName === 'warehouses' ? 'settings' : collectionName);
                     }
                 }
             } else if (target.classList.contains('delete-btn')) {
@@ -2222,7 +2357,7 @@
                             products: [refreshProducts], sales: [refreshSales, refreshProducts, updateDashboard], purchases: [refreshPurchases, refreshProducts, updateDashboard],
                             expenses: [refreshExpenses, updateDashboard], customers: [refreshCustomers, refreshSales, refreshInvoices], 
                             suppliers: [refreshSuppliers, refreshProducts, refreshPurchases], invoices: [refreshInvoices],
-                            users: [refreshUsers], employees: [refreshEmployees]
+                            users: [refreshUsers], employees: [refreshEmployees], warehouses: [refreshWarehouses, refreshProducts]
                         };
                         if (refreshMap[collectionName]) {
                             for(const func of refreshMap[collectionName]) await func();
@@ -2259,6 +2394,8 @@
                              type: 'product',
                              productId: sale.productId,
                              productName: sale.name,
+							 warehouseId: sale.warehouseId,
+							 warehouseName: sale.warehouseName,
                              qty: sale.qty,
                              price: sale.price,
                              total: sale.amount
@@ -2311,6 +2448,9 @@
                 }
             }
 
+			const warehouseId = document.getElementById('p-warehouse').value;
+			const warehouse = warehousesCache.find(w => w.id === warehouseId);
+
             const data = { 
                 name: document.getElementById('p-name').value, 
 				category: document.getElementById('p-category').value,
@@ -2318,7 +2458,9 @@
                 qty: Math.abs(parseInt(document.getElementById('p-qty').value)), 
                 supplierId: supplierDocId || null,
                 supplierNumericId: supplierNumericId,
-                supplierName: supplierName
+                supplierName: supplierName,
+				warehouseId: warehouseId,
+				warehouseName: warehouse ? warehouse.name : 'غير محدد'
             };
             const id = document.getElementById('product-id').value;
             if (await addOrUpdateItem('products', data, id || null, { add: `إضافة منتج: ${data.name}`, update: `تعديل منتج: ${data.name}` })) {
@@ -2344,6 +2486,10 @@
                 if(customerDoc.exists()) customerName = customerDoc.data().name;
             }
 
+			const warehouseId = document.getElementById('s-warehouse').value;
+			const warehouse = warehousesCache.find(w => w.id === warehouseId);
+			if (type === 'product' && !warehouse) return showMessage("الرجاء اختيار المستودع.");
+
             const salePrice = Math.abs(parseFloat(document.getElementById('s-price').value));
             const saleCost = Math.abs(parseFloat(document.getElementById('s-cost').value)) || 0;
             let saleName, saleQty, amount, productId = null;
@@ -2354,8 +2500,12 @@
                 const productRef = doc(db, 'products', productId);
                 const productDoc = await getDoc(productRef);
 
-                if (!productDoc.exists() || productDoc.data().qty < saleQty) {
-                    showMessage(!productDoc.exists() ? 'المنتج المحدد غير موجود.' : `الكمية المتوفرة غير كافية. متاح: ${productDoc.data().qty}`);
+                if (!productDoc.exists() || productDoc.data().warehouseId !== warehouseId) {
+                    showMessage('المنتج المحدد غير موجود في هذا المستودع.');
+                    return;
+                }
+                if (productDoc.data().qty < saleQty) {
+                    showMessage(`الكمية المتوفرة غير كافية. متاح: ${productDoc.data().qty}`);
                     if (id && itemToEdit?.category === 'sale' && itemToEdit.type === 'product' && itemToEdit.productId) {
                           await updateDoc(doc(db, 'products', itemToEdit.productId), { qty: increment(-itemToEdit.qty) });
                     }
@@ -2368,7 +2518,7 @@
                 saleName = document.getElementById('s-service-name').value; saleQty = 1; amount = salePrice;
             }
 
-            const data = { date: document.getElementById('s-date').value, type, name: saleName, qty: saleQty, price: salePrice, cost: saleCost, customerId: customerId || null, customerName, amount, productId };
+            const data = { date: document.getElementById('s-date').value, type, name: saleName, qty: saleQty, price: salePrice, cost: saleCost, customerId: customerId || null, customerName, amount, productId, warehouseId: warehouseId, warehouseName: warehouse ? warehouse.name : '' };
             if (await addOrUpdateItem('sales', data, id || null, { add: `إضافة مبيعات: ${data.name}`, update: `تعديل مبيعات: ${data.name}` })) {
                 
                 if (customerId && appSettings.loyaltyPointsRate > 0) {
@@ -2407,6 +2557,10 @@
                      supplierNumericId = supDoc.data().supplierNumericId || null;
                  }
              }
+			
+			const warehouseId = document.getElementById('purchase-warehouse').value;
+			const warehouse = warehousesCache.find(w => w.id === warehouseId);
+			if (!warehouse) return showMessage("الرجاء اختيار المستودع.");
 
 
             const purchaseCost = Math.abs(parseFloat(document.getElementById('p-cost-input').value));
@@ -2421,11 +2575,8 @@
                 }
                 const productRef = doc(db, 'products', productId);
                 const productDoc = await getDoc(productRef);
-                if (!productDoc.exists()) {
-                    showMessage('المنتج المحدد غير موجود.');
-                    if (id && itemToEdit?.category === 'purchase' && itemToEdit.type === 'product' && itemToEdit.productId) {
-                         await updateDoc(doc(db, 'products', itemToEdit.productId), { qty: increment(itemToEdit.qty) });
-                    }
+                if (!productDoc.exists() || productDoc.data().warehouseId !== warehouseId) {
+                    showMessage('المنتج المحدد غير موجود في هذا المستودع.');
                     return;
                 }
                 productName = productDoc.data().name;
@@ -2445,7 +2596,9 @@
                     qty: purchaseQty,
                     supplierId: supplierDocId || null,
                     supplierNumericId: supplierNumericId,
-                    supplierName: supplierName
+                    supplierName: supplierName,
+					warehouseId: warehouseId,
+					warehouseName: warehouse.name
                 };
                 const newProductRef = await addDoc(collection(db, 'products'), newProductData);
                 await logActivity('إضافة منتج عبر المشتريات', `الاسم: ${newProductData.name}`);
@@ -2462,7 +2615,9 @@
                 supplierId: supplierDocId || null, 
                 supplierName, 
                 amount: purchaseCost * purchaseQty, 
-                productId: productId
+                productId: productId,
+				warehouseId: warehouseId,
+				warehouseName: warehouse.name
             };
 
             if (await addOrUpdateItem('purchases', data, id || null, { add: `إضافة مشتريات: ${data.productName}`, update: `تعديل مشتريات: ${data.productName}` })) {
@@ -2572,6 +2727,19 @@
             }
         }
 
+		async function handleWarehouseFormSubmit(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('w-name').value,
+            };
+            const id = document.getElementById('warehouse-id').value;
+            if (await addOrUpdateItem('warehouses', data, id || null, { add: `إضافة مستودع: ${data.name}`, update: `تعديل مستودع: ${data.name}` })) {
+                resetForm('add-warehouse-form');
+                await refreshWarehouses();
+                showMessage('تم حفظ المستودع بنجاح!');
+            }
+        }
+
         async function handleInvoiceFormSubmit(e) {
             e.preventDefault();
             const customerId = document.getElementById('i-customer').value;
@@ -2583,6 +2751,9 @@
                 const type = row.dataset.type;
                 let item = { type };
                 if (type === 'product') {
+					item.warehouseId = row.querySelector('.i-warehouse-select').value;
+					const warehouse = warehousesCache.find(w => w.id === item.warehouseId);
+					item.warehouseName = warehouse ? warehouse.name : '';
                     item.productId = row.querySelector('.i-product-select').value;
                     item.productName = row.querySelector('.i-product-select').options[row.querySelector('.i-product-select').selectedIndex].text;
                     item.qty = Math.abs(parseInt(row.querySelector('.i-qty').value));
@@ -2596,8 +2767,8 @@
                 invoiceItems.push(item);
             });
 
-            if (invoiceItems.some(item => !item.productName || !item.price || (item.type === 'product' && !item.qty) )) {
-                return showMessage('الرجاء تعبئة جميع الحقول في بنود الفاتورة.');
+            if (invoiceItems.some(item => !item.productName || !item.price || (item.type === 'product' && (!item.qty || !item.warehouseId)) )) {
+                return showMessage('الرجاء تعبئة جميع الحقول في بنود الفاتورة، بما في ذلك المستودع لكل منتج.');
             }
 
             for (const item of invoiceItems) {
@@ -2651,7 +2822,9 @@
                                 qty: item.qty,
                                 cost: product.cost || 0,
                                 amount: item.total,
-                                productId: item.productId
+                                productId: item.productId,
+								warehouseId: item.warehouseId,
+								warehouseName: item.warehouseName
                             });
 
                         } else {
@@ -2707,8 +2880,8 @@
              const title = document.getElementById(`${category}-form-title`);
              const submitBtn = document.getElementById(`${category}-form-submit-btn`);
              const cancelBtn = document.getElementById(`${category}-form-cancel-btn`);
-             const originalTitles = { 'product': 'إضافة منتج جديد', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل شراء جديد', 'expense': 'تسجيل مصروف جديد', 'customer': 'إضافة عميل جديد', 'supplier': 'إضافة مورد جديد', 'employee': 'إضافة موظف جديد' };
-             const originalButtons = { 'product': 'إضافة المنتج', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل الشراء', 'expense': 'تسجيل المصروف', 'customer': 'إضافة العميل', 'supplier': 'إضافة المورد', 'employee': 'إضافة موظف' };
+             const originalTitles = { 'product': 'إضافة منتج جديد', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل شراء جديد', 'expense': 'تسجيل مصروف جديد', 'customer': 'إضافة عميل جديد', 'supplier': 'إضافة مورد جديد', 'employee': 'إضافة موظف جديد', 'warehouse': 'إضافة مستودع جديد' };
+             const originalButtons = { 'product': 'إضافة المنتج', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل الشراء', 'expense': 'تسجيل المصروف', 'customer': 'إضافة العميل', 'supplier': 'إضافة المورد', 'employee': 'إضافة موظف', 'warehouse': 'إضافة مستودع' };
              if(title) title.textContent = originalTitles[category];
              if(submitBtn) submitBtn.textContent = originalButtons[category];
              if(cancelBtn) cancelBtn.classList.add('hidden');
@@ -2735,6 +2908,7 @@
             document.getElementById('p-cost').value = item.cost;
             document.getElementById('p-qty').value = item.qty;
             document.getElementById('p-supplier').value = item.supplierId;
+			document.getElementById('p-warehouse').value = item.warehouseId;
         }
 
         async function prepareSaleEdit(item) {
@@ -2742,9 +2916,10 @@
             document.getElementById('sale-id').value = item.id;
             document.getElementById('s-date').value = item.date;
             document.getElementById('s-type').value = item.type;
+			document.getElementById('s-warehouse').value = item.warehouseId;
             handleSaleTypeChange();
             if (item.type === 'product') {
-                await populateProductSelects();
+                await populateProductSelects(item.warehouseId);
                 document.getElementById('s-product').value = item.productId;
                 document.getElementById('s-qty').value = item.qty;
             } else {
@@ -2759,10 +2934,11 @@
             prepareFormForEdit('purchase', item);
             document.getElementById('purchase-id').value = item.id;
             document.getElementById('p-date').value = item.date;
+			document.getElementById('purchase-warehouse').value = item.warehouseId;
             document.getElementById('p-type').value = item.type;
             togglePurchaseFields();
             if (item.type === 'product') {
-                await populateProductSelects();
+                await populateProductSelects(item.warehouseId);
                 document.getElementById('p-product').value = item.productId;
             } else {
                 document.getElementById('p-other-product-name').value = item.productName;
@@ -2810,6 +2986,12 @@
             document.getElementById('emp-position').value = item.position;
         }
 
+		function prepareWarehouseEdit(item) {
+            prepareFormForEdit('warehouse', item);
+            document.getElementById('warehouse-id').value = item.id;
+            document.getElementById('w-name').value = item.name;
+        }
+
         async function addInvoiceItemRow(isManual = false) {
              const container = document.getElementById('invoice-items-container');
              const row = document.createElement('div');
@@ -2824,14 +3006,33 @@
                 `;
             } else {
                  row.innerHTML = `
-                    <div class="col-span-5"><select class="select i-product-select"></select></div>
-                    <div class="col-span-3"><input type="number" class="input i-qty" placeholder="الكمية" min="1" value="1"></div>
-                    <div class="col-span-3"><input type="number" step="0.01" min="0" class="input i-price" placeholder="سعر البيع"></div>
+					<div class="col-span-3"><select class="select i-warehouse-select"><option value="">اختر مستودع</option></select></div>
+                    <div class="col-span-4"><select class="select i-product-select"><option value="">اختر منتج</option></select></div>
+                    <div class="col-span-2"><input type="number" class="input i-qty" placeholder="الكمية" min="1" value="1"></div>
+                    <div class="col-span-2"><input type="number" step="0.01" min="0" class="input i-price" placeholder="سعر البيع"></div>
                     <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
                 `;
             }
             container.appendChild(row);
-            if (!isManual) await populateProductSelects();
+            if (!isManual) {
+				const warehouseSelect = row.querySelector('.i-warehouse-select');
+				populateSelect(warehouseSelect.id, warehousesCache, 'id', 'name', null, true);
+				
+				// Add a unique ID to be able to re-select it later
+				const uniqueId = `i-warehouse-select-${Date.now()}`;
+				warehouseSelect.id = uniqueId;
+
+				warehouseSelect.addEventListener('change', async (e) => {
+					const warehouseId = e.target.value;
+					const productSelect = row.querySelector('.i-product-select');
+					const productsInWarehouse = productsCache.filter(p => p.warehouseId === warehouseId);
+					populateSelect(productSelect.id, productsInWarehouse, 'id', 'name', null, true);
+					row.dataset.warehouseId = warehouseId;
+				});
+
+				// Also add unique ID to product select
+				row.querySelector('.i-product-select').id = `i-product-select-${Date.now()}`;
+			}
             row.querySelector('.remove-invoice-item-btn').addEventListener('click', () => { row.remove(); updateInvoiceTotal(); });
         }
         
@@ -2882,6 +3083,7 @@
                              <thead class="bg-slate-100 dark:bg-slate-600">
                                  <tr>
                                      <th class="p-2">البند</th>
+									 <th class="p-2">المستودع</th>
                                      <th class="p-2">الكمية</th>
                                      <th class="p-2">السعر</th>
                                      <th class="p-2">الإجمالي</th>
@@ -2891,6 +3093,7 @@
                                  ${invoice.items.map(item => `
                                      <tr class="border-b dark:border-slate-600">
                                          <td class="p-2">${item.productName}</td>
+										 <td class="p-2">${item.warehouseName || '-'}</td>
                                          <td class="p-2">${item.qty}</td>
                                          <td class="p-2">${item.price.toFixed(2)}</td>
                                          <td class="p-2">${(item.qty * item.price).toFixed(2)}</td>
@@ -3135,13 +3338,16 @@
         function handleSaleTypeChange() {
              const type = document.getElementById('s-type').value;
              const isService = type === 'service';
+			 const warehouseSelect = document.getElementById('s-warehouse');
              document.getElementById('s-product-container').classList.toggle('hidden', isService);
              document.getElementById('s-qty-container').classList.toggle('hidden', isService);
              document.getElementById('s-service-container').classList.toggle('hidden', !isService);
+			 warehouseSelect.parentElement.classList.toggle('hidden', isService);
              
              document.getElementById('s-product').required = !isService;
              document.getElementById('s-service-name').required = isService;
              document.getElementById('s-qty').required = !isService;
+			 warehouseSelect.required = !isService;
 
              const costInput = document.getElementById('s-cost');
              costInput.readOnly = !isService;
@@ -3186,7 +3392,7 @@
             if (settingsDoc.exists()) {
                  appSettings = { ...appSettings, ...settingsDoc.data() }
                  if(!settingsDoc.data().supplierCounter) {
-                     await setDoc(doc(db, 'settings', 'appConfig'), { supplierCounter: 0 }, { merge: true });
+                   await setDoc(doc(db, 'settings', 'appConfig'), { supplierCounter: 0 }, { merge: true });
                  }
             } else {
                  await setDoc(doc(db, 'settings', 'appConfig'), { supplierCounter: 0 });
