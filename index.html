@@ -347,10 +347,10 @@
  					</div>
  					<div class="dashboard-card bg-teal-500 text-white flex items-center justify-between">
  						<div>
- 							<p class="text-lg font-bold">صافي الصندوق</p>
- 							<p class="text-3xl font-extrabold" id="remaining-fund">0</p>
+ 							<p class="text-lg font-bold">الحركة اليومية للصندوق</p>
+ 							<p class="text-3xl font-extrabold" id="daily-fund-movement">0</p>
  						</div>
- 						<i class="fas fa-cash-register text-4xl opacity-50"></i>
+ 						<i class="fas fa-exchange-alt text-4xl opacity-50"></i>
  					</div>
  				</div>
  			</div>
@@ -1733,6 +1733,7 @@
  		async function updateDashboard(date = null) {
  			const targetDate = date || new Date().toISOString().split('T')[0];
  			
+ 			// Get daily sales
  			const salesSnapshot = await getDocs(query(collection(db, 'sales'), where('date', '==', targetDate)));
  			let totalSales = 0, totalCostOfGoods = 0;
  			salesSnapshot.forEach(doc => {
@@ -1741,45 +1742,33 @@
  				totalCostOfGoods += (sale.cost * (sale.qty || 1));
  			});
 
+            // Get daily returns
             const returnsSnapshot = await getDocs(query(collection(db, 'returns'), where('date', '==', targetDate)));
             let totalReturns = 0;
             returnsSnapshot.forEach(doc => totalReturns += doc.data().amount);
 
-            const netSales = totalSales - totalReturns;
-
+            // Get daily purchases
  			const purchasesSnapshot = await getDocs(query(collection(db, 'purchases'), where('date', '==', targetDate)));
  			let totalPurchases = 0;
  			purchasesSnapshot.forEach(doc => totalPurchases += doc.data().amount);
  			
+            // Get daily expenses
  			const expensesSnapshot = await getDocs(query(collection(db, 'expenses'), where('date', '==', targetDate)));
  			let totalExpenses = 0;
  			expensesSnapshot.forEach(doc => totalExpenses += doc.data().amount);
  			
+            // --- Calculate Metrics ---
+            const netSales = totalSales - totalReturns;
  			const netProfit = (netSales - totalCostOfGoods) - totalExpenses;
+            const dailyFundMovement = totalSales - totalReturns - totalPurchases - totalExpenses;
 
- 			const allSalesSnapshot = await getDocs(collection(db, 'sales'));
- 			let lifeSales = 0;
- 			allSalesSnapshot.forEach(doc => lifeSales += doc.data().amount);
 
-            const allReturnsSnapshot = await getDocs(collection(db, 'returns'));
-            let lifeReturns = 0;
-            allReturnsSnapshot.forEach(doc => lifeReturns += doc.data().amount);
-
- 			const allPurchasesSnapshot = await getDocs(collection(db, 'purchases'));
- 			let lifePurchases = 0;
- 			allPurchasesSnapshot.forEach(doc => lifePurchases += doc.data().amount);
-
- 			const allExpensesSnapshot = await getDocs(collection(db, 'expenses'));
- 			let lifeExpenses = 0;
- 			allExpensesSnapshot.forEach(doc => lifeExpenses += doc.data().amount);
-
- 			const remainingFund = (appSettings.initialFund || 0) + lifeSales - lifeReturns - lifePurchases - lifeExpenses;
-
+            // --- Update UI ---
  			document.getElementById('total-sales').textContent = `${netSales.toFixed(2)} ${appSettings.currency}`;
  			document.getElementById('total-purchases').textContent = `${totalPurchases.toFixed(2)} ${appSettings.currency}`;
  			document.getElementById('total-expenses').textContent = `${totalExpenses.toFixed(2)} ${appSettings.currency}`;
  			document.getElementById('net-profit').textContent = `${netProfit.toFixed(2)} ${appSettings.currency}`;
- 			document.getElementById('remaining-fund').textContent = `${remainingFund.toFixed(2)} ${appSettings.currency}`;
+ 			document.getElementById('daily-fund-movement').textContent = `${dailyFundMovement.toFixed(2)} ${appSettings.currency}`;
  		}
  		
  		async function generateReport() {
