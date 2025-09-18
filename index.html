@@ -272,10 +272,12 @@
 			<button class="tab-btn active" data-tab="dashboard">الرئيسية</button>
 			<button class="tab-btn" data-tab="products">المستودعات</button>
 			<button class="tab-btn" data-tab="sales">المبيعات</button>
+			<button class="tab-btn" data-tab="returns">المرتجعات</button>
 			<button class="tab-btn" data-tab="purchases">المشتريات</button>
 			<button class="tab-btn" data-tab="expenses">المصاريف</button>
 			<button class="tab-btn" data-tab="customers">العملاء</button>
 			<button class="tab-btn" data-tab="suppliers">الموردين</button>
+            <button class="tab-btn" data-tab="quotations">عروض الأسعار</button>
 			<button class="tab-btn" data-tab="invoices">الفواتير</button>
 			<button class="tab-btn" data-tab="reports">التقارير</button>
             <button class="tab-btn" data-tab="activity_log" id="activity-log-tab-btn" style="display: none;">سجل النشاط</button>
@@ -575,6 +577,66 @@
 				</div>
 			</div>
 
+			<!-- تبويب المرتجعات -->
+			<div id="returns" class="tab-pane hidden">
+				<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة المرتجعات</h2>
+				<div class="form-section">
+					<h3 class="text-2xl font-semibold mb-4" id="return-form-title">تسجيل عملية إرجاع</h3>
+					<form id="add-return-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+						<input type="hidden" id="return-id">
+						<div class="flex flex-col">
+							<label for="r-date" class="text-slate-600 dark:text-slate-300 mb-1">التاريخ</label>
+							<input type="date" id="r-date" class="input" required>
+						</div>
+						<div class="flex flex-col">
+							<label for="r-warehouse" class="text-slate-600 dark:text-slate-300 mb-1">المستودع</label>
+							<select id="r-warehouse" class="select" required>
+								<option value="">اختر مستودع</option>
+							</select>
+						</div>
+						<div class="flex flex-col">
+							<label for="r-product" class="text-slate-600 dark:text-slate-300 mb-1">المنتج المرتجع</label>
+							<select id="r-product" class="select" required></select>
+						</div>
+						<div class="flex flex-col">
+							<label for="r-qty" class="text-slate-600 dark:text-slate-300 mb-1">الكمية المرتجعة</label>
+							<input type="number" id="r-qty" class="input" min="1" required>
+						</div>
+						<div class="flex flex-col col-span-full">
+							<label for="r-reason" class="text-slate-600 dark:text-slate-300 mb-1">سبب الإرجاع (اختياري)</label>
+							<textarea id="r-reason" class="input" rows="2"></textarea>
+						</div>
+						<div class="flex items-end col-span-full gap-2">
+							<button type="submit" class="btn btn-primary w-full" id="return-form-submit-btn">تسجيل الإرجاع</button>
+							<button type="button" class="btn bg-slate-500 text-white w-full hidden" id="return-form-cancel-btn">إلغاء التعديل</button>
+						</div>
+					</form>
+				</div>
+				<div class="data-table-wrapper mt-8">
+					<div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 pb-4 table-header-bar">
+						<h3 class="text-2xl font-semibold">سجل المرتجعات</h3>
+						<div class="flex flex-wrap gap-2">
+							<button id="export-returns-btn" class="btn btn-primary bg-sky-500 hover:bg-sky-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+						</div>
+					</div>
+					<div class="data-table-container">
+						<table class="data-table" id="returns-table-export">
+							<thead>
+								<tr>
+									<th>التاريخ</th>
+									<th>المنتج</th>
+									<th>المستودع</th>
+									<th>الكمية</th>
+									<th>السبب</th>
+									<th class="no-export">الإجراءات</th>
+								</tr>
+							</thead>
+							<tbody id="returns-table"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
 			 <!-- تبويب المشتريات -->
 			<div id="purchases" class="tab-pane hidden">
 				 <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة المشتريات</h2>
@@ -833,12 +895,68 @@
 				</div>
 			</div>
 
+			<!-- تبويب عروض الأسعار -->
+			<div id="quotations" class="tab-pane hidden">
+				<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة عروض الأسعار</h2>
+				<div class="form-section">
+					<h3 class="text-2xl font-semibold mb-4" id="quotation-form-title">إنشاء عرض سعر جديد</h3>
+					<form id="add-quotation-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+						 <input type="hidden" id="quotation-id">
+						 <div class="flex flex-col">
+							 <label for="q-date" class="text-slate-600 dark:text-slate-300 mb-1">تاريخ عرض السعر</label>
+							 <input type="date" id="q-date" class="input" required>
+						 </div>
+						 <div class="flex flex-col">
+							 <label for="q-customer" class="text-slate-600 dark:text-slate-300 mb-1">العميل</label>
+							 <select id="q-customer" class="select" required>
+								 <option value="">اختر عميل</option>
+							 </select>
+						 </div>
+						 <div class="flex flex-col col-span-full">
+							 <label class="text-slate-600 dark:text-slate-300 mb-1">بنود عرض السعر</label>
+							 <div id="quotation-items-container" class="space-y-4">
+								 <!-- Quotation item rows will be added here -->
+							 </div>
+							 <div class="flex gap-2 mt-4">
+								 <button type="button" id="add-quotation-item-btn" class="btn btn-primary self-start">إضافة بند</button>
+							 </div>
+						 </div>
+						 <div class="flex flex-col col-span-full">
+							 <p class="text-lg font-bold">المجموع الكلي: <span id="quotation-total">0.00</span></p>
+						 </div>
+						 <div class="flex items-end col-span-full">
+							 <button type="submit" class="btn btn-primary w-full" id="quotation-form-submit-btn">إنشاء عرض السعر</button>
+							 <button type="button" class="btn bg-slate-500 text-white w-full hidden" id="quotation-form-cancel-btn">إلغاء التعديل</button>
+						 </div>
+					</form>
+				</div>
+				<div class="data-table-wrapper mt-8">
+					<h3 class="text-2xl font-semibold mb-4">قائمة عروض الأسعار</h3>
+					<div class="data-table-container">
+						<table class="data-table" id="quotations-table-export">
+							<thead>
+								<tr>
+									<th>رقم العرض</th>
+									<th>التاريخ</th>
+									<th>العميل</th>
+									<th>المبلغ الإجمالي</th>
+									<th>الحالة</th>
+									<th class="no-export">الإجراءات</th>
+								</tr>
+							</thead>
+							<tbody id="quotations-table"></tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
 			<!-- تبويب الفواتير -->
 			<div id="invoices" class="tab-pane hidden">
 				 <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة الفواتير</h2>
 				 <div class="form-section">
 					 <h3 class="text-2xl font-semibold mb-4">إنشاء فاتورة جديدة</h3>
 					 <form id="add-invoice-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                         <input type="hidden" id="invoice-source-quotation-id">
 						 <div class="flex flex-col">
 							 <label for="i-date" class="text-slate-600 dark:text-slate-300 mb-1">تاريخ الفاتورة</label>
 							 <input type="date" id="i-date" class="input" required>
@@ -1017,10 +1135,22 @@
 									  </table>
 								  </div>
 								   <div class="dashboard-card">
-									  <h4 class="text-lg font-semibold mb-4">تقرير المصاريف</h4>
-									  <table class="report-table" id="salaries-report-table-export">
+									  <h4 class="text-lg font-semibold mb-4">تقرير المصاريف التفصيلي</h4>
+									  <table class="report-table" id="detailed-expenses-report-table">
 										  <thead><tr><th>التاريخ</th><th>النوع</th><th>الوصف/البيان</th><th>المبلغ</th></tr></thead>
-										  <tbody id="salaries-report-table"></tbody>
+										  <tbody id="detailed-expenses-report-table-body"></tbody>
+									  </table>
+								  </div>
+								  <div class="dashboard-card">
+									  <h4 class="text-lg font-semibold mb-4">تقرير الرواتب للموظفين</h4>
+									  <table class="report-table" id="salaries-by-employee-report-table">
+										  <thead>
+											  <tr>
+												  <th>اسم الموظف</th>
+												  <th>إجمالي المبلغ المدفوع</th>
+											  </tr>
+										  </thead>
+										  <tbody id="salaries-by-employee-report-table-body"></tbody>
 									  </table>
 								  </div>
 								  <div class="dashboard-card">
@@ -1516,41 +1646,49 @@
         }
         
         async function deleteItem(collectionName, id, itemName = '') {
-             try {
-                 if (collectionName === 'sales') {
-                     const saleDocRef = doc(db, 'sales', id);
-                     const saleDoc = await getDoc(saleDocRef);
-                     if (!saleDoc.exists()) return;
-                     const saleToDelete = saleDoc.data();
-                     itemName = saleToDelete.name;
-                     if (saleToDelete && saleToDelete.type === 'product' && saleToDelete.productId) {
-                         const productRef = doc(db, 'products', saleToDelete.productId);
-                         await updateDoc(productRef, { qty: increment(saleToDelete.qty) });
-                     }
-                 } else if (collectionName === 'purchases') {
-                     const purchaseDocRef = doc(db, 'purchases', id);
-                     const purchaseDoc = await getDoc(purchaseDocRef);
-                     if (!purchaseDoc.exists()) return;
-                     const purchaseToDelete = purchaseDoc.data();
-                     itemName = purchaseToDelete.productName;
-                     if (purchaseToDelete && purchaseToDelete.type === 'product' && purchaseToDelete.productId) {
-                         const productRef = doc(db, 'products', purchaseToDelete.productId);
-                         await updateDoc(productRef, { qty: increment(-purchaseToDelete.qty) });
-                     }
-                 } else if (['products', 'customers', 'suppliers', 'expenses', 'invoices', 'users', 'employees', 'warehouses'].includes(collectionName)) {
-                     const itemDoc = await getDoc(doc(db, collectionName, id));
-                     if(itemDoc.exists()) {
-                         itemName = itemDoc.data().name || itemDoc.data().productName || itemDoc.data().type || itemDoc.data().email || `فاتورة رقم ${itemDoc.data().invoiceNumber}`;
-                     }
-                 }
-                 await deleteDoc(doc(db, collectionName, id));
-                 await logActivity(`حذف ${collectionName}`, `"${itemName}" (ID: ${id})`);
-                 return true;
-             } catch (e) {
-                 console.error("Delete error:", e);
-                 showMessage(`حدث خطأ أثناء حذف البيانات: ${e.message}`);
-                 return false;
-             }
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const itemRef = doc(db, collectionName, id);
+                    const itemDoc = await transaction.get(itemRef);
+                    if (!itemDoc.exists()) {
+                        console.log(`Item ${id} in ${collectionName} does not exist. Nothing to delete.`);
+                        return;
+                    };
+
+                    const itemData = itemDoc.data();
+                    itemName = itemData.name || itemData.productName || itemData.type || itemData.email || `ID: ${id}`;
+
+                    if (collectionName === 'sales' && itemData.type === 'product' && itemData.productId) {
+                        const productRef = doc(db, 'products', itemData.productId);
+                        transaction.update(productRef, { qty: increment(itemData.qty) });
+                    } else if (collectionName === 'purchases' && itemData.productId) {
+                        const productRef = doc(db, 'products', itemData.productId);
+                        const productDoc = await transaction.get(productRef);
+                        if (productDoc.exists() && productDoc.data().qty >= itemData.qty) {
+                            transaction.update(productRef, { qty: increment(-itemData.qty) });
+                        } else {
+                            console.warn(`Could not decrement stock for deleted purchase ${id}, product ${itemData.productId} not found or insufficient stock.`);
+                        }
+                    } else if (collectionName === 'returns' && itemData.productId) {
+                        const productRef = doc(db, 'products', itemData.productId);
+                        const productDoc = await transaction.get(productRef);
+                        if (productDoc.exists() && productDoc.data().qty >= itemData.qty) {
+                            transaction.update(productRef, { qty: increment(-itemData.qty) });
+                        } else {
+                            console.warn(`Could not decrement stock for deleted return ${id}, product ${itemData.productId} not found or insufficient stock.`);
+                        }
+                    }
+                    
+                    transaction.delete(itemRef);
+                });
+                
+                await logActivity(`حذف ${collectionName}`, `"${itemName}" (ID: ${id})`);
+                return true;
+            } catch (e) {
+                console.error("Delete error:", e);
+                showMessage(`حدث خطأ أثناء حذف البيانات: ${e.message}`);
+                return false;
+            }
         }
 
         // --- Authentication ---
@@ -1601,7 +1739,7 @@
         }
 
         function clearAllTables() {
-            const tableIds = ['products-table', 'sales-table', 'purchases-table', 'expenses-table', 'customers-table', 'suppliers-table', 'invoices-table', 'activity-log-table', 'users-table', 'employees-table', 'warehouses-table'];
+            const tableIds = ['products-table', 'sales-table', 'returns-table', 'purchases-table', 'expenses-table', 'customers-table', 'suppliers-table', 'quotations-table', 'invoices-table', 'activity-log-table', 'users-table', 'employees-table', 'warehouses-table'];
             tableIds.forEach(id => {
                 const table = document.getElementById(id);
                 if(table) table.innerHTML = '';
@@ -1620,8 +1758,10 @@
             document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
             
             if (tabId === 'sales') { refreshSales(); } 
+            else if (tabId === 'returns') { refreshReturns(); } 
             else if (tabId === 'purchases') { refreshPurchases(); } 
             else if (tabId === 'expenses') { refreshExpenses(); } 
+            else if (tabId === 'quotations') { refreshQuotations(); } 
             else if (tabId === 'activity_log') { refreshActivityLog(); }
         }
 
@@ -1729,6 +1869,27 @@
             });
             applyPermissions(currentUser.role);
         }
+
+        async function refreshReturns() {
+            const q = query(collection(db, 'returns'), orderBy('date', 'desc'), limit(200));
+            const snapshot = await getDocs(q);
+            const returns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const tableBody = document.getElementById('returns-table');
+            tableBody.innerHTML = '';
+            returns.forEach(r => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td class="whitespace-nowrap">${r.date}</td>
+                    <td class="whitespace-nowrap">${r.productName}</td>
+                    <td>${r.warehouseName || '-'}</td>
+                    <td>${r.qty}</td>
+                    <td>${r.reason || ''}</td>
+                    <td class="whitespace-nowrap no-export">
+                        <button class="btn btn-danger text-sm delete-btn" data-id="${r.id}" data-category="returns">حذف</button>
+                    </td>`;
+            });
+            applyPermissions(currentUser.role);
+        }
         
         async function refreshPurchases(date) {
             let q;
@@ -1809,6 +1970,7 @@
                     </td>`;
             });
             populateSelect('s-customer', customers, 'id', 'name');
+            populateSelect('q-customer', customers, 'id', 'name');
             populateSelect('i-customer', customers, 'id', 'name');
             applyPermissions(currentUser.role);
         }
@@ -1873,6 +2035,30 @@
 
 			applyPermissions(currentUser.role);
 		}
+
+        async function refreshQuotations() {
+            const q = query(collection(db, 'quotations'), orderBy('quotationNumber', 'desc'));
+            const snapshot = await getDocs(q);
+            const quotations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const tableBody = document.getElementById('quotations-table');
+            tableBody.innerHTML = '';
+            quotations.forEach(q => {
+                const row = tableBody.insertRow();
+                const statusClasses = q.status === 'converted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                const statusText = q.status === 'converted' ? 'تم تحويلها' : 'جديد';
+                row.innerHTML = `
+                    <td>${q.quotationNumber}</td>
+                    <td class="whitespace-nowrap">${q.date}</td>
+                    <td class="whitespace-nowrap">${q.customerName}</td>
+                    <td>${(q.totalAmount || 0).toFixed(2)} ${appSettings.currency}</td>
+                    <td><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClasses}">${statusText}</span></td>
+                    <td class="whitespace-nowrap no-export">
+                        ${q.status !== 'converted' ? `<button class="btn bg-green-500 text-white text-sm convert-quotation-btn" data-id="${q.id}">تحويل إلى فاتورة</button>` : ''}
+                        <button class="btn btn-danger text-sm delete-btn" data-id="${q.id}" data-category="quotations">حذف</button>
+                    </td>`;
+            });
+            applyPermissions(currentUser.role);
+        }
         
         async function refreshInvoices() {
             const q = query(collection(db, 'invoices'), orderBy('invoiceNumber', 'desc'));
@@ -1901,6 +2087,9 @@
 
 			// For sales form
 			populateSelect('s-product', productsToDisplay, 'id', 'name', displayTpl, productsToDisplay.length > 0);
+
+			// For returns form
+			populateSelect('r-product', productsToDisplay, 'id', 'name', null, productsToDisplay.length > 0);
 
 			// For purchase form (existing products)
 			populateSelect('p-product', productsToDisplay, 'id', 'name', displayTpl, productsToDisplay.length > 0);
@@ -1990,12 +2179,14 @@
 			
 			populateSelect('p-warehouse', warehousesCache, 'id', 'name', null, true);
 			populateSelect('s-warehouse', warehousesCache, 'id', 'name', null, warehousesCache.length > 1);
+			populateSelect('r-warehouse', warehousesCache, 'id', 'name', null, warehousesCache.length > 1);
 			populateSelect('purchase-warehouse', warehousesCache, 'id', 'name', null, warehousesCache.length > 1);
 			
 			// If there's only one warehouse, auto-select it in forms
 			if (warehousesCache.length === 1) {
 				const singleWarehouseId = warehousesCache[0].id;
 				document.getElementById('s-warehouse').value = singleWarehouseId;
+				document.getElementById('r-warehouse').value = singleWarehouseId;
 				document.getElementById('purchase-warehouse').value = singleWarehouseId;
 				populateProductSelects(singleWarehouseId);
 			}
@@ -2012,10 +2203,12 @@
 				refreshWarehouses(),
                 refreshSuppliers(),
                 refreshProducts(), 
-                refreshSales(), 
+                refreshSales(),
+                refreshReturns(),
                 refreshPurchases(), 
                 refreshExpenses(), 
-                refreshCustomers(), 
+                refreshCustomers(),
+                refreshQuotations(),
                 refreshInvoices(), 
                 refreshUsers(),
                 refreshEmployees(),
@@ -2117,9 +2310,15 @@
             const outOfStockProducts = productsCache.filter(p => p.qty === 0);
             document.getElementById('low-stock-table').innerHTML = outOfStockProducts.length > 0 ? outOfStockProducts.map(p => `<tr><td>${p.name}</td><td>${p.warehouseName}</td><td>${p.qty}</td></tr>`).join('') : `<tr><td colspan="3" class="text-center">لا توجد منتجات نافدة</td></tr>`;
 
-            // Expenses report
-			const expensesReportTableBody = document.getElementById('salaries-report-table');
-			const sortedExpensesData = expensesData.sort((a, b) => a.date.localeCompare(b.date)); // Sort by date
+            // Detailed Expenses Report
+			const expensesReportTable = document.getElementById('detailed-expenses-report-table');
+			const expensesReportTableBody = document.getElementById('detailed-expenses-report-table-body');
+			const sortedExpensesData = expensesData.sort((a, b) => a.date.localeCompare(b.date));
+
+            // Clear previous tfoot if exists
+            const existingTfoot = expensesReportTable.querySelector('tfoot');
+            if (existingTfoot) existingTfoot.remove();
+
 			expensesReportTableBody.innerHTML = sortedExpensesData.length > 0
 				? sortedExpensesData.map(e => {
                     let description = e.description || '-';
@@ -2135,6 +2334,62 @@
 					</tr>
 				`}).join('')
 				: `<tr><td colspan="4" class="text-center">لا توجد مصاريف في هذه الفترة</td></tr>`;
+
+            // Add total row
+            if (sortedExpensesData.length > 0) {
+                const totalExpenses = expensesData.reduce((sum, e) => sum + e.amount, 0);
+                const tfoot = document.createElement('tfoot');
+                tfoot.innerHTML = `
+                    <tr class="font-bold bg-slate-100 dark:bg-slate-700">
+                        <td colspan="3" class="p-2 text-left font-bold">المجموع الكلي</td>
+                        <td class="p-2 font-bold">${totalExpenses.toFixed(2)} ${appSettings.currency}</td>
+                    </tr>
+                `;
+                expensesReportTable.appendChild(tfoot);
+            }
+
+            // New Salaries Report by Employee
+            const salariesData = expensesData.filter(e => e.type === 'رواتب' && e.employeeName);
+            const salariesByEmployee = salariesData.reduce((acc, salary) => {
+                const name = salary.employeeName;
+                if (!acc[name]) {
+                    acc[name] = 0;
+                }
+                acc[name] += salary.amount;
+                return acc;
+            }, {});
+
+            const salariesReportTableBody = document.getElementById('salaries-by-employee-report-table-body');
+            const salariesReportTable = document.getElementById('salaries-by-employee-report-table');
+            salariesReportTableBody.innerHTML = ''; // Clear previous data
+
+            const existingSalariesTfoot = salariesReportTable.querySelector('tfoot');
+            if(existingSalariesTfoot) existingSalariesTfoot.remove();
+
+            const sortedSalaries = Object.entries(salariesByEmployee).sort(([,a],[,b]) => b-a);
+
+            if (sortedSalaries.length > 0) {
+                sortedSalaries.forEach(([name, totalAmount]) => {
+                    const row = salariesReportTableBody.insertRow();
+                    row.innerHTML = `
+                        <td>${name}</td>
+                        <td>${totalAmount.toFixed(2)} ${appSettings.currency}</td>
+                    `;
+                });
+                
+                const totalSalaries = salariesData.reduce((sum, s) => sum + s.amount, 0);
+                const tfoot = document.createElement('tfoot');
+                tfoot.innerHTML = `
+                    <tr class="font-bold bg-slate-100 dark:bg-slate-700">
+                        <td class="p-2 text-left font-bold">المجموع الكلي للرواتب</td>
+                        <td class="p-2 font-bold">${totalSalaries.toFixed(2)} ${appSettings.currency}</td>
+                    </tr>
+                `;
+                salariesReportTable.appendChild(tfoot);
+
+            } else {
+                salariesReportTableBody.innerHTML = `<tr><td colspan="2" class="text-center">لا توجد بيانات رواتب في هذه الفترة</td></tr>`;
+            }
 
             // Performance Chart (Bar)
             if (performanceChart) performanceChart.destroy();
@@ -2190,6 +2445,7 @@
             document.getElementById('product-form-cancel-btn').addEventListener('click', () => resetForm('add-product-form'));
             document.getElementById('add-sale-form').addEventListener('submit', handleSaleFormSubmit);
             document.getElementById('sale-form-cancel-btn').addEventListener('click', () => resetForm('add-sale-form'));
+            document.getElementById('add-return-form').addEventListener('submit', handleReturnFormSubmit);
             document.getElementById('add-purchase-form').addEventListener('submit', handlePurchaseFormSubmit);
             document.getElementById('purchase-form-cancel-btn').addEventListener('click', () => resetForm('add-purchase-form'));
             document.getElementById('add-expense-form').addEventListener('submit', handleExpenseFormSubmit);
@@ -2202,6 +2458,7 @@
             document.getElementById('employee-form-cancel-btn').addEventListener('click', () => resetForm('add-employee-form'));
 			document.getElementById('add-warehouse-form').addEventListener('submit', handleWarehouseFormSubmit);
             document.getElementById('warehouse-form-cancel-btn').addEventListener('click', () => resetForm('add-warehouse-form'));
+            document.getElementById('add-quotation-form').addEventListener('submit', handleQuotationFormSubmit);
             document.getElementById('add-invoice-form').addEventListener('submit', handleInvoiceFormSubmit);
             document.getElementById('reports-form').addEventListener('submit', (e) => { e.preventDefault(); generateReport(); });
             document.getElementById('settings-form').addEventListener('submit', handleSettingsSave);
@@ -2213,6 +2470,7 @@
 			document.getElementById('product-supplier-filter').addEventListener('change', () => refreshProducts());
 			document.getElementById('warehouse-filter').addEventListener('change', () => refreshProducts());
 			document.getElementById('s-warehouse').addEventListener('change', (e) => populateProductSelects(e.target.value));
+			document.getElementById('r-warehouse').addEventListener('change', (e) => populateProductSelects(e.target.value));
 
             document.getElementById('select-all-products').addEventListener('change', (e) => {
                 document.querySelectorAll('.product-checkbox').forEach(checkbox => checkbox.checked = e.target.checked);
@@ -2233,6 +2491,8 @@
             document.getElementById('add-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(false));
             document.getElementById('add-manual-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(true));
             document.getElementById('invoice-items-container').addEventListener('change', updateInvoiceTotal);
+            document.getElementById('add-quotation-item-btn').addEventListener('click', () => addQuotationItemRow());
+            document.getElementById('quotation-items-container').addEventListener('change', updateQuotationTotal);
             document.getElementById('invoice-close-btn').addEventListener('click', () => {
                 document.getElementById('invoice-view-modal').classList.add('hidden');
                 document.getElementById('custom-overlay').classList.add('hidden');
@@ -2260,6 +2520,7 @@
             document.getElementById('export-expenses-btn').addEventListener('click', () => exportToExcel('expenses-table-export', 'المصاريف', 'Expenses.xlsx'));
             document.getElementById('export-customers-btn').addEventListener('click', () => exportToExcel('customers-table-export', 'العملاء', 'Customers.xlsx'));
             document.getElementById('export-suppliers-btn').addEventListener('click', () => exportToExcel('suppliers-table-export', 'الموردين', 'Suppliers.xlsx'));
+            document.getElementById('export-returns-btn').addEventListener('click', () => exportToExcel('returns-table-export', 'المرتجعات', 'Returns.xlsx'));
             
             document.getElementById('forgot-password-link').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -2333,6 +2594,7 @@
             const category = target.dataset.category;
             if (target.classList.contains('view-invoice-btn')) { if (id) await viewInvoice(id); return; }
             if (target.classList.contains('create-invoice-from-sale-btn')) { if (id) await createInvoiceFromSale(id); return; }
+            if (target.classList.contains('convert-quotation-btn')) { if (id) await convertQuotationToInvoice(id); return; }
             if (!category) return;
 
             let collectionName = category.endsWith('s') ? category : category + 's';
@@ -2357,7 +2619,8 @@
                             products: [refreshProducts], sales: [refreshSales, refreshProducts, updateDashboard], purchases: [refreshPurchases, refreshProducts, updateDashboard],
                             expenses: [refreshExpenses, updateDashboard], customers: [refreshCustomers, refreshSales, refreshInvoices], 
                             suppliers: [refreshSuppliers, refreshProducts, refreshPurchases], invoices: [refreshInvoices],
-                            users: [refreshUsers], employees: [refreshEmployees], warehouses: [refreshWarehouses, refreshProducts]
+                            users: [refreshUsers], employees: [refreshEmployees], warehouses: [refreshWarehouses, refreshProducts],
+                            returns: [refreshReturns, refreshProducts], quotations: [refreshQuotations]
                         };
                         if (refreshMap[collectionName]) {
                             for(const func of refreshMap[collectionName]) await func();
@@ -2536,6 +2799,56 @@
                 await updateDashboard();
                 await refreshCustomers();
                 showMessage('تم تسجيل عملية البيع بنجاح!');
+            }
+        }
+
+        async function handleReturnFormSubmit(e) {
+            e.preventDefault();
+            const warehouseId = document.getElementById('r-warehouse').value;
+            const productId = document.getElementById('r-product').value;
+            const qty = Math.abs(parseInt(document.getElementById('r-qty').value));
+            
+            if (!warehouseId || !productId || !qty) {
+                return showMessage("الرجاء تعبئة جميع الحقول المطلوبة.");
+            }
+
+            const productRef = doc(db, 'products', productId);
+            const warehouse = warehousesCache.find(w => w.id === warehouseId);
+            const product = productsCache.find(p => p.id === productId);
+
+            if (!product || !warehouse) {
+                return showMessage("المنتج أو المستودع المحدد غير صالح.");
+            }
+            if (product.warehouseId !== warehouseId) {
+                return showMessage("المنتج المحدد لا ينتمي إلى المستودع المختار.");
+            }
+
+            const returnData = {
+                date: document.getElementById('r-date').value,
+                warehouseId: warehouseId,
+                warehouseName: warehouse.name,
+                productId: productId,
+                productName: product.name,
+                qty: qty,
+                reason: document.getElementById('r-reason').value.trim()
+            };
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const newReturnRef = doc(collection(db, 'returns'));
+                    transaction.set(newReturnRef, returnData);
+                    transaction.update(productRef, { qty: increment(qty) });
+                });
+
+                await logActivity('تسجيل إرجاع', `منتج: ${returnData.productName}, كمية: ${returnData.qty}`);
+                resetForm('add-return-form');
+                await refreshReturns();
+                await refreshProducts();
+                showMessage('تم تسجيل عملية الإرجاع بنجاح.');
+
+            } catch (error) {
+                console.error("Return transaction failed: ", error);
+                showMessage(`فشل تسجيل الإرجاع: ${error.message}`);
             }
         }
         
@@ -2740,11 +3053,70 @@
             }
         }
 
+        async function handleQuotationFormSubmit(e) {
+            e.preventDefault();
+            const customerId = document.getElementById('q-customer').value;
+            if (!customerId) return showMessage('الرجاء اختيار عميل.');
+            const customerDoc = await getDoc(doc(db, 'customers', customerId));
+            if (!customerDoc.exists()) return showMessage('العميل المحدد غير موجود');
+
+            const quotationItems = [];
+            document.querySelectorAll('#quotation-items-container .quotation-item-row').forEach(row => {
+                const item = {
+                    productName: row.querySelector('.q-item-name').value,
+                    qty: Math.abs(parseInt(row.querySelector('.q-item-qty').value)),
+                    price: Math.abs(parseFloat(row.querySelector('.q-item-price').value))
+                };
+                item.total = item.qty * item.price;
+                quotationItems.push(item);
+            });
+
+            if (quotationItems.some(item => !item.productName || !item.qty || !item.price)) {
+                return showMessage('الرجاء تعبئة جميع الحقول في بنود عرض السعر.');
+            }
+
+            const totalAmount = quotationItems.reduce((sum, item) => sum + item.total, 0);
+            const settingsDocRef = doc(db, 'settings', 'appConfig');
+            
+            try {
+                let newQuotationNumber;
+                await runTransaction(db, async (transaction) => {
+                    const settingsDoc = await transaction.get(settingsDocRef);
+                    newQuotationNumber = (settingsDoc.data()?.lastQuotationNumber || 0) + 1;
+                    
+                    const quotationData = {
+                        quotationNumber: newQuotationNumber,
+                        date: document.getElementById('q-date').value,
+                        customerId,
+                        customerName: customerDoc.data().name,
+                        items: quotationItems,
+                        totalAmount,
+                        status: 'new' // 'new', 'converted', 'canceled'
+                    };
+                    
+                    const newQuotationRef = doc(collection(db, 'quotations'));
+                    transaction.set(newQuotationRef, quotationData);
+                    transaction.update(settingsDocRef, { lastQuotationNumber: newQuotationNumber });
+                });
+
+                await logActivity('إنشاء عرض سعر', `رقم: ${newQuotationNumber}, للعميل: ${customerDoc.data().name}`);
+                resetForm('add-quotation-form');
+                await refreshQuotations();
+                showMessage(`تم إنشاء عرض السعر رقم ${newQuotationNumber} بنجاح.`);
+
+            } catch (error) {
+                console.error("Quotation creation failed: ", error);
+                showMessage("فشل إنشاء عرض السعر. الرجاء المحاولة مرة أخرى.");
+            }
+        }
+
         async function handleInvoiceFormSubmit(e) {
             e.preventDefault();
             const customerId = document.getElementById('i-customer').value;
             const customerDoc = await getDoc(doc(db, 'customers', customerId));
             if (!customerDoc.exists()) return showMessage('العميل المحدد غير موجود');
+            const sourceQuotationId = document.getElementById('invoice-source-quotation-id').value;
+
 
             const invoiceItems = [];
             document.querySelectorAll('.invoice-item-row').forEach(row => {
@@ -2760,15 +3132,15 @@
                     item.price = Math.abs(parseFloat(row.querySelector('.i-price').value));
                 } else {
                     item.productName = row.querySelector('.i-manual-name').value;
-                    item.qty = 1;
+                    item.qty = Math.abs(parseInt(row.querySelector('.i-manual-qty').value)) || 1;
                     item.price = Math.abs(parseFloat(row.querySelector('.i-manual-price').value));
                 }
                 item.total = item.qty * item.price;
                 invoiceItems.push(item);
             });
 
-            if (invoiceItems.some(item => !item.productName || !item.price || (item.type === 'product' && (!item.qty || !item.warehouseId)) )) {
-                return showMessage('الرجاء تعبئة جميع الحقول في بنود الفاتورة، بما في ذلك المستودع لكل منتج.');
+            if (invoiceItems.some(item => !item.productName || !item.price || !item.qty )) {
+                return showMessage('الرجاء تعبئة جميع الحقول في بنود الفاتورة.');
             }
 
             for (const item of invoiceItems) {
@@ -2796,12 +3168,18 @@
                         customerName: customerDoc.data().name,
                         customerDetails: customerDoc.data(),
                         items: invoiceItems,
-                        totalAmount
+                        totalAmount,
+                        sourceQuotationId: sourceQuotationId || null
                     };
 
                     const newInvoiceRef = doc(collection(db, 'invoices'));
                     transaction.set(newInvoiceRef, invoiceData);
                     transaction.update(settingsDocRef, { lastInvoiceNumber: newInvoiceNumber });
+
+                    if (sourceQuotationId) {
+                        const quotationRef = doc(db, 'quotations', sourceQuotationId);
+                        transaction.update(quotationRef, { status: 'converted' });
+                    }
 
                     for (const item of invoiceItems) {
                         const saleData = {
@@ -2830,7 +3208,7 @@
                         } else {
                             Object.assign(saleData, {
                                 type: 'service',
-                                qty: 1,
+                                qty: item.qty,
                                 cost: 0,
                                 amount: item.total,
                                 productId: null
@@ -2843,11 +3221,10 @@
 
                 await logActivity('إنشاء فاتورة ومبيعات', `فاتورة رقم ${newInvoiceNumber} للعميل: ${customerDoc.data().name}`);
                 resetForm('add-invoice-form');
-                document.getElementById('invoice-items-container').innerHTML = '';
-                addInvoiceItemRow(false);
                 await refreshInvoices();
                 await refreshSales();
                 await refreshProducts();
+                await refreshQuotations();
                 await updateDashboard();
                 showMessage(`تم إنشاء الفاتورة والمبيعات المرتبطة بها بنجاح.`);
 
@@ -2880,14 +3257,22 @@
              const title = document.getElementById(`${category}-form-title`);
              const submitBtn = document.getElementById(`${category}-form-submit-btn`);
              const cancelBtn = document.getElementById(`${category}-form-cancel-btn`);
-             const originalTitles = { 'product': 'إضافة منتج جديد', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل شراء جديد', 'expense': 'تسجيل مصروف جديد', 'customer': 'إضافة عميل جديد', 'supplier': 'إضافة مورد جديد', 'employee': 'إضافة موظف جديد', 'warehouse': 'إضافة مستودع جديد' };
-             const originalButtons = { 'product': 'إضافة المنتج', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل الشراء', 'expense': 'تسجيل المصروف', 'customer': 'إضافة العميل', 'supplier': 'إضافة المورد', 'employee': 'إضافة موظف', 'warehouse': 'إضافة مستودع' };
+             const originalTitles = { 'product': 'إضافة منتج جديد', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل شراء جديد', 'expense': 'تسجيل مصروف جديد', 'customer': 'إضافة عميل جديد', 'supplier': 'إضافة مورد جديد', 'employee': 'إضافة موظف جديد', 'warehouse': 'إضافة مستودع جديد', 'return': 'تسجيل عملية إرجاع', 'quotation': 'إنشاء عرض سعر جديد' };
+             const originalButtons = { 'product': 'إضافة المنتج', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل الشراء', 'expense': 'تسجيل المصروف', 'customer': 'إضافة العميل', 'supplier': 'إضافة المورد', 'employee': 'إضافة موظف', 'warehouse': 'إضافة مستودع', 'return': 'تسجيل الإرجاع', 'quotation': 'إنشاء عرض السعر' };
              if(title) title.textContent = originalTitles[category];
              if(submitBtn) submitBtn.textContent = originalButtons[category];
              if(cancelBtn) cancelBtn.classList.add('hidden');
              if(category === 'sale') handleSaleTypeChange();
              if(category === 'expense') handleExpenseTypeChange();
              if(category === 'purchase') togglePurchaseFields();
+             if(category === 'quotation') {
+                document.getElementById('quotation-items-container').innerHTML = '';
+                addQuotationItemRow();
+                updateQuotationTotal();
+             }
+             if(category === 'invoice') {
+                document.getElementById('invoice-source-quotation-id').value = '';
+             }
              itemToEdit = null;
         }
         
@@ -2992,6 +3377,60 @@
             document.getElementById('w-name').value = item.name;
         }
 
+        function addQuotationItemRow() {
+            const container = document.getElementById('quotation-items-container');
+            const row = document.createElement('div');
+            row.className = 'grid grid-cols-12 gap-2 items-center quotation-item-row';
+            row.innerHTML = `
+                <div class="col-span-5"><input type="text" class="input q-item-name" placeholder="اسم البند/الخدمة"></div>
+                <div class="col-span-3"><input type="number" step="1" min="1" class="input q-item-qty" placeholder="الكمية" value="1"></div>
+                <div class="col-span-3"><input type="number" step="0.01" min="0" class="input q-item-price" placeholder="السعر"></div>
+                <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-quotation-item-btn"><i class="fas fa-trash"></i></button></div>
+            `;
+            container.appendChild(row);
+            row.querySelector('.remove-quotation-item-btn').addEventListener('click', () => {
+                row.remove();
+                updateQuotationTotal();
+            });
+        }
+
+        function updateQuotationTotal() {
+            let total = 0;
+            document.querySelectorAll('.quotation-item-row').forEach(row => {
+                const qty = Math.abs(parseInt(row.querySelector('.q-item-qty').value)) || 0;
+                const price = Math.abs(parseFloat(row.querySelector('.q-item-price').value)) || 0;
+                total += qty * price;
+            });
+            document.getElementById('quotation-total').textContent = `${total.toFixed(2)} ${appSettings.currency}`;
+        }
+
+        async function convertQuotationToInvoice(quotationId) {
+            const quotationDoc = await getDoc(doc(db, 'quotations', quotationId));
+            if (!quotationDoc.exists()) return showMessage('عرض السعر غير موجود.');
+            const quotation = quotationDoc.data();
+
+            switchTab('invoices');
+            resetForm('add-invoice-form');
+
+            document.getElementById('invoice-source-quotation-id').value = quotationId;
+            document.getElementById('i-date').value = getLocalDate();
+            document.getElementById('i-customer').value = quotation.customerId;
+
+            const itemsContainer = document.getElementById('invoice-items-container');
+            itemsContainer.innerHTML = ''; // Clear existing items
+
+            for (const item of quotation.items) {
+                await addInvoiceItemRow(true); // Add as manual item
+                const newRow = itemsContainer.lastElementChild;
+                newRow.querySelector('.i-manual-name').value = item.productName;
+                newRow.querySelector('.i-manual-qty').value = item.qty;
+                newRow.querySelector('.i-manual-price').value = item.price;
+            }
+
+            updateInvoiceTotal();
+            showMessage('تم نقل بيانات عرض السعر إلى فاتورة جديدة. يرجى المراجعة والضغط على "إنشاء الفاتورة".');
+        }
+
         async function addInvoiceItemRow(isManual = false) {
              const container = document.getElementById('invoice-items-container');
              const row = document.createElement('div');
@@ -3000,9 +3439,10 @@
 
             if (isManual) {
                 row.innerHTML = `
-                    <div class="col-span-6"><input type="text" class="input i-manual-name" placeholder="اسم البند اليدوي"></div>
-                    <div class="col-span-4"><input type="number" step="0.01" min="0" class="input i-manual-price" placeholder="السعر"></div>
-                    <div class="col-span-2"><button type="button" class="w-full btn btn-danger remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
+                    <div class="col-span-5"><input type="text" class="input i-manual-name" placeholder="اسم البند اليدوي"></div>
+                    <div class="col-span-3"><input type="number" step="1" min="1" class="input i-manual-qty" placeholder="الكمية" value="1"></div>
+                    <div class="col-span-3"><input type="number" step="0.01" min="0" class="input i-manual-price" placeholder="السعر"></div>
+                    <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
                 `;
             } else {
                  row.innerHTML = `
@@ -3040,14 +3480,15 @@
             let total = 0;
             document.querySelectorAll('.invoice-item-row').forEach(row => {
                 const type = row.dataset.type;
+                let qty, price;
                 if (type === 'product') {
-                    const qty = Math.abs(parseInt(row.querySelector('.i-qty').value)) || 0;
-                    const price = Math.abs(parseFloat(row.querySelector('.i-price').value)) || 0;
-                    total += qty * price;
+                    qty = Math.abs(parseInt(row.querySelector('.i-qty').value)) || 0;
+                    price = Math.abs(parseFloat(row.querySelector('.i-price').value)) || 0;
                 } else {
-                    const price = Math.abs(parseFloat(row.querySelector('.i-manual-price').value)) || 0;
-                    total += price;
+                    qty = Math.abs(parseInt(row.querySelector('.i-manual-qty').value)) || 0;
+                    price = Math.abs(parseFloat(row.querySelector('.i-manual-price').value)) || 0;
                 }
+                total += qty * price;
             });
             document.getElementById('invoice-total').textContent = `${total.toFixed(2)} ${appSettings.currency}`;
         }
@@ -3395,7 +3836,10 @@
                    await setDoc(doc(db, 'settings', 'appConfig'), { supplierCounter: 0 }, { merge: true });
                  }
             } else {
-                 await setDoc(doc(db, 'settings', 'appConfig'), { supplierCounter: 0 });
+                 await setDoc(doc(db, 'settings', 'appConfig'), { 
+                    supplierCounter: 0,
+                    lastQuotationNumber: 0
+                 });
             }
             document.getElementById('setting-company-name').value = appSettings.companyName;
             document.getElementById('setting-company-address').value = appSettings.companyAddress;
@@ -3518,7 +3962,8 @@
                 #delete-selected-products-btn, 
                 #import-products-excel, 
                 #add-invoice-item-btn, 
-                #add-manual-invoice-item-btn
+                #add-manual-invoice-item-btn,
+                #add-quotation-item-btn
             `);
 
             restrictedElements.forEach(el => {
@@ -3570,7 +4015,7 @@
         async function exportBackup() {
             showMessage('جاري تحضير النسخة الاحتياطية... قد يستغرق هذا بعض الوقت.');
             const backupData = {};
-            const collectionsToBackup = ['products', 'sales', 'purchases', 'expenses', 'customers', 'suppliers', 'invoices', 'users', 'activity_log', 'employees'];
+            const collectionsToBackup = ['products', 'sales', 'purchases', 'expenses', 'customers', 'suppliers', 'invoices', 'users', 'activity_log', 'employees', 'returns', 'quotations'];
 
             try {
                 for (const collectionName of collectionsToBackup) {
@@ -3615,7 +4060,7 @@
                         showMessage('جاري استعادة النسخة الاحتياطية... الرجاء عدم إغلاق الصفحة.');
                         
                         try {
-                            const allCollections = ['products', 'sales', 'purchases', 'expenses', 'customers', 'suppliers', 'invoices', 'users', 'settings', 'activity_log', 'employees'];
+                            const allCollections = ['products', 'sales', 'purchases', 'expenses', 'customers', 'suppliers', 'invoices', 'users', 'settings', 'activity_log', 'employees', 'returns', 'quotations'];
                             
                             for (const collectionName of allCollections) {
                                 const snapshot = await getDocs(collection(db, collectionName));
@@ -3662,8 +4107,9 @@
         function main() {
             setupEventListeners();
             addInvoiceItemRow(false);
+            addQuotationItemRow();
             const today = getLocalDate();
-            ['s-date', 'p-date', 'e-date', 'i-date', 'dashboard-date', 'start-date', 'end-date', 'invoice-start-date', 'invoice-end-date'].forEach(id => {
+            ['s-date', 'p-date', 'e-date', 'i-date', 'r-date', 'q-date', 'dashboard-date', 'start-date', 'end-date', 'invoice-start-date', 'invoice-end-date'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.value = today;
             });
