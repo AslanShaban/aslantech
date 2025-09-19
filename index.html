@@ -27,15 +27,6 @@
 			--shadow-color: rgba(0, 0, 0, 0.07);
             --border-color: #e2e8f0;
 		}
-        html.dark-mode {
-            --background-primary: #1e293b;
-            --background-secondary: #334155;
-            --background-secondary-hover: #475569;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --shadow-color: rgba(0, 0, 0, 0.2);
-            --border-color: #475569;
-        }
 		body {
 			font-family: 'Cairo', sans-serif;
 			background-color: var(--background-primary);
@@ -86,6 +77,11 @@
 			padding: 1rem;
 			text-align: right;
 			border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+		}
+        .data-table td.allow-wrap, .data-table th.allow-wrap {
+			white-space: normal;
+			min-width: 150px; /* Provide a minimum width for wrapped content */
 		}
 		.data-table thead {
             border-bottom: 2px solid var(--border-color);
@@ -145,7 +141,6 @@
 			background-color: var(--background-secondary);
 			color: var(--text-primary);
 		}
-        html.dark-mode .input::placeholder, html.dark-mode .select::placeholder { color: var(--text-secondary); }
 		.input:focus, .select:focus {
 			outline: none;
 			border-color: var(--accent-primary);
@@ -191,6 +186,7 @@
 		.report-table th, .report-table td {
 			padding: 0.75rem 1rem;
 			border: 1px solid var(--border-color);
+			white-space: nowrap;
 		}
 		.report-table thead th {
 			background-color: var(--background-secondary-hover);
@@ -218,17 +214,17 @@
 <body class="p-0 sm:p-4">
 	
 	<!-- شاشة تسجيل الدخول -->
-	<div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-100 dark:bg-slate-900">
-		<div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg dark:bg-slate-800 text-center">
+	<div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-100">
+		<div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg text-center">
 			<h2 class="text-3xl font-bold text-sky-600">تسجيل الدخول</h2>
-			<p class="text-slate-500 dark:text-slate-400">أهلاً بك مجدداً! الرجاء إدخال بياناتك.</p>
+			<p class="text-slate-500">أهلاً بك مجدداً! الرجاء إدخال بياناتك.</p>
 			<form id="login-form">
 				<div class="mb-4 text-right">
-					<label for="username" class="block mb-2 font-semibold text-slate-700 dark:text-slate-300">البريد الإلكتروني</label>
+					<label for="username" class="block mb-2 font-semibold text-slate-700">البريد الإلكتروني</label>
 					<input type="email" id="username" class="input" required>
 				</div>
 				<div class="mb-6 text-right">
-					<label for="password" class="block mb-2 font-semibold text-slate-700 dark:text-slate-300">كلمة المرور</label>
+					<label for="password" class="block mb-2 font-semibold text-slate-700">كلمة المرور</label>
 					<input type="password" id="password" class="input" required>
 				</div>
 				 <p id="login-error" class="text-red-500 mb-4 hidden">البريد الإلكتروني أو كلمة المرور غير صحيحة.</p>
@@ -241,22 +237,20 @@
 	</div>
 
 	<!-- حاوية التطبيق الرئيسية -->
-	<div id="app-container" class="hidden container p-4 sm:p-8 bg-white dark:bg-slate-800 rounded-none sm:rounded-2xl shadow-lg">
-		<header class="pb-6 mb-8 border-b border-slate-200 dark:border-slate-700">
+	<div id="app-container" class="hidden container p-4 sm:p-8 bg-white rounded-none sm:rounded-2xl shadow-lg">
+		<header class="pb-6 mb-8 border-b border-slate-200">
 			<div class="flex flex-wrap items-center justify-between gap-4">
 				<div class="flex items-center gap-4">
-					 <i class="fas fa-tasks text-4xl text-sky-500"></i>
+                     <img id="header-logo" src="" alt="Company Logo" class="h-12 w-auto max-h-12 object-contain hidden">
+					 <i id="header-default-icon" class="fas fa-tasks text-4xl text-sky-500"></i>
 					<div>
 						<h1 class="mb-1 text-3xl font-bold sm:text-4xl text-sky-600" id="header-company-name">إدارة الأعمال</h1>
-						<p class="text-slate-500 dark:text-slate-400">لوحة تحكم شاملة لإدارة أعمالك بفعالية.</p>
+						<p class="text-slate-500">لوحة تحكم شاملة لإدارة أعمالك بفعالية.</p>
 					</div>
 				</div>
 				<div class="flex items-center gap-4">
-                    <button id="dark-mode-toggle" class="btn bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600">
-                        <i class="fas fa-moon"></i>
-                    </button>
 					<div id="user-info" class="text-right">
-						 <p id="user-email" class="font-semibold hidden sm:block text-slate-700 dark:text-slate-200"></p>
+						 <p id="user-email" class="font-semibold hidden sm:block text-slate-700"></p>
 						 <p id="user-role-display" class="text-sm font-bold text-sky-600"></p>
 					</div>
 					<button id="logout-btn" class="btn btn-danger">
@@ -292,7 +286,7 @@
 					<h3 class="text-2xl font-semibold mb-4">عرض بيانات يوم محدد</h3>
 					<form id="dashboard-date-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
 						<div>
-							<label for="dashboard-date" class="text-slate-600 dark:text-slate-300 mb-1">تحديد التاريخ</label>
+							<label for="dashboard-date" class="text-slate-600 mb-1">تحديد التاريخ</label>
 							<input type="date" id="dashboard-date" class="input">
 						</div>
 						<button type="submit" class="btn btn-primary w-full md:w-auto">عرض البيانات</button>
@@ -385,35 +379,35 @@
 
 			<!-- تبويب المستودع (المنتجات) -->
 			<div id="products" class="tab-pane hidden">
-				<h2 class="text-3xl font-bold mb-6 text-center text-slate-800 dark:text-slate-100">إدارة المنتجات</h2>
+				<h2 class="text-3xl font-bold mb-6 text-center text-slate-800">إدارة المنتجات</h2>
 				<div class="form-section">
 					<h3 class="text-2xl font-semibold mb-4" id="product-form-title">إضافة منتج جديد</h3>
 					<form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
 						<input type="hidden" id="product-id">
 						<div class="flex flex-col">
-							<label for="p-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم المنتج</label>
+							<label for="p-name" class="text-slate-600 mb-1">اسم المنتج</label>
 							<input type="text" id="p-name" class="input" required>
 						</div>
 						<div class="flex flex-col">
-							<label for="p-category" class="text-slate-600 dark:text-slate-300 mb-1">نوع المنتج</label>
+							<label for="p-category" class="text-slate-600 mb-1">نوع المنتج</label>
 							<input type="text" id="p-category" class="input" placeholder="مثال: شاشة، كفر" required>
 						</div>
 						<div class="flex flex-col">
-							<label for="p-cost" class="text-slate-600 dark:text-slate-300 mb-1">سعر التكلفة</label>
+							<label for="p-cost" class="text-slate-600 mb-1">سعر التكلفة</label>
 							<input type="number" id="p-cost" class="input" min="0" step="0.01" required>
 						</div>
 						<div class="flex flex-col">
-							<label for="p-qty" class="text-slate-600 dark:text-slate-300 mb-1">الكمية</label>
+							<label for="p-qty" class="text-slate-600 mb-1">الكمية</label>
 							<input type="number" id="p-qty" class="input" min="0" required>
 						</div>
 						<div class="flex flex-col">
-							<label for="p-supplier" class="text-slate-600 dark:text-slate-300 mb-1">المورد</label>
+							<label for="p-supplier" class="text-slate-600 mb-1">المورد</label>
 							<select id="p-supplier" class="select">
 								<option value="">اختر مورد</option>
 							</select>
 						</div>
 						<div class="flex flex-col">
-							<label for="p-warehouse" class="text-slate-600 dark:text-slate-300 mb-1">المستودع</label>
+							<label for="p-warehouse" class="text-slate-600 mb-1">المستودع</label>
 							<select id="p-warehouse" class="select" required>
 								<option value="">اختر مستودع</option>
 							</select>
@@ -427,21 +421,21 @@
 				
 				<div class="data-table-wrapper mt-8">
 					<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 text-center">
-						<div class="p-4 bg-sky-50 dark:bg-sky-900/50 rounded-lg">
-							<h4 class="text-sm font-semibold text-sky-800 dark:text-sky-200">إجمالي المنتجات</h4>
-							<p id="stats-total-products" class="text-2xl font-bold text-sky-900 dark:text-sky-100">0</p>
+						<div class="p-4 bg-sky-50 rounded-lg">
+							<h4 class="text-sm font-semibold text-sky-800">إجمالي المنتجات</h4>
+							<p id="stats-total-products" class="text-2xl font-bold text-sky-900">0</p>
 						</div>
-						<div class="p-4 bg-green-50 dark:bg-green-900/50 rounded-lg">
-							<h4 class="text-sm font-semibold text-green-800 dark:text-green-200">قيمة المخزون</h4>
-							<p id="stats-stock-value" class="text-2xl font-bold text-green-900 dark:text-green-100">0</p>
+						<div class="p-4 bg-green-50 rounded-lg">
+							<h4 class="text-sm font-semibold text-green-800">قيمة المخزون</h4>
+							<p id="stats-stock-value" class="text-2xl font-bold text-green-900">0</p>
 						</div>
-						<div class="p-4 bg-yellow-50 dark:bg-yellow-900/50 rounded-lg">
-							<h4 class="text-sm font-semibold text-yellow-800 dark:text-yellow-200">منخفض المخزون</h4>
-							<p id="stats-low-stock" class="text-2xl font-bold text-yellow-900 dark:text-yellow-100">0</p>
+						<div class="p-4 bg-yellow-50 rounded-lg">
+							<h4 class="text-sm font-semibold text-yellow-800">منخفض المخزون</h4>
+							<p id="stats-low-stock" class="text-2xl font-bold text-yellow-900">0</p>
 						</div>
-						<div class="p-4 bg-red-50 dark:bg-red-900/50 rounded-lg">
-							<h4 class="text-sm font-semibold text-red-800 dark:text-red-200">منتجات نافدة</h4>
-							<p id="stats-out-of-stock" class="text-2xl font-bold text-red-900 dark:text-red-100">0</p>
+						<div class="p-4 bg-red-50 rounded-lg">
+							<h4 class="text-sm font-semibold text-red-800">منتجات نافدة</h4>
+							<p id="stats-out-of-stock" class="text-2xl font-bold text-red-900">0</p>
 						</div>
 					</div>
 					<div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 pb-4 table-header-bar">
@@ -491,50 +485,50 @@
 
 			<!-- تبويب المبيعات -->
 			<div id="sales" class="tab-pane hidden">
-				<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة المبيعات</h2>
+				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة المبيعات</h2>
 				<div class="form-section">
 					 <h3 class="text-2xl font-semibold mb-4" id="sale-form-title">تسجيل عملية البيع</h3>
 					 <form id="add-sale-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
 						 <input type="hidden" id="sale-id">
 						 <div class="flex flex-col">
-							 <label for="s-date" class="text-slate-600 dark:text-slate-300 mb-1">التاريخ</label>
+							 <label for="s-date" class="text-slate-600 mb-1">التاريخ</label>
 							 <input type="date" id="s-date" class="input" required>
 						 </div>
 						 <div class="flex flex-col">
-							<label for="s-warehouse" class="text-slate-600 dark:text-slate-300 mb-1">المستودع</label>
+							<label for="s-warehouse" class="text-slate-600 mb-1">المستودع</label>
 							<select id="s-warehouse" class="select" required>
 								<option value="">اختر مستودع</option>
 							</select>
 						</div>
 						 <div class="flex flex-col">
-							 <label for="s-type" class="text-slate-600 dark:text-slate-300 mb-1">نوع البيع</label>
+							 <label for="s-type" class="text-slate-600 mb-1">نوع البيع</label>
 							 <select id="s-type" class="select">
 								 <option value="product">منتج</option>
 								 <option value="service">خدمة (صيانة)</option>
 							 </select>
 						 </div>
 						 <div class="flex flex-col" id="s-product-container">
-							 <label for="s-product" class="text-slate-600 dark:text-slate-300 mb-1">المنتج</label>
+							 <label for="s-product" class="text-slate-600 mb-1">المنتج</label>
                              <select id="s-product" class="select" required></select>
 						 </div>
 						 <div class="flex flex-col hidden" id="s-service-container">
-							 <label for="s-service-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم الخدمة</label>
+							 <label for="s-service-name" class="text-slate-600 mb-1">اسم الخدمة</label>
 							 <input type="text" id="s-service-name" class="input">
 						 </div>
 						 <div class="flex flex-col" id="s-qty-container">
-							 <label for="s-qty" class="text-slate-600 dark:text-slate-300 mb-1">الكمية</label>
+							 <label for="s-qty" class="text-slate-600 mb-1">الكمية</label>
 							 <input type="number" id="s-qty" class="input" min="1" required>
 						 </div>
 						 <div class="flex flex-col" id="s-cost-container">
-							<label for="s-cost" class="text-slate-600 dark:text-slate-300 mb-1">سعر التكلفة</label>
+							<label for="s-cost" class="text-slate-600 mb-1">سعر التكلفة</label>
 							<input type="number" id="s-cost" class="input" min="0" step="0.01" placeholder="تلقائي للمنتج / يدوي للخدمة" required>
 						</div>
 						 <div class="flex flex-col" id="s-price-container">
-							 <label for="s-price" class="text-slate-600 dark:text-slate-300 mb-1">سعر البيع</label>
+							 <label for="s-price" class="text-slate-600 mb-1">سعر البيع</label>
 							 <input type="number" id="s-price" class="input" min="0" step="0.01" required>
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="s-customer" class="text-slate-600 dark:text-slate-300 mb-1">العميل</label>
+							 <label for="s-customer" class="text-slate-600 mb-1">العميل</label>
 							 <select id="s-customer" class="select">
 								 <option value="">اختر عميل</option>
 							 </select>
@@ -551,7 +545,7 @@
 						<form id="sales-filter-form" class="flex flex-wrap items-end gap-2">
 							<input type="date" id="sales-filter-date" class="input text-sm p-2 w-48">
 							<button type="submit" class="btn btn-primary text-sm">عرض</button>
-							<button type="button" id="sales-clear-filter" class="btn bg-slate-300 dark:bg-slate-600 text-sm">عرض الكل</button>
+							<button type="button" id="sales-clear-filter" class="btn bg-slate-300 text-sm">عرض الكل</button>
 						</form>
 						<div class="flex flex-wrap gap-2">
 							<button id="export-sales-btn" class="btn btn-primary bg-sky-500 hover:bg-sky-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
@@ -579,31 +573,31 @@
 
 			<!-- تبويب المرتجعات -->
 			<div id="returns" class="tab-pane hidden">
-				<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة المرتجعات</h2>
+				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة المرتجعات</h2>
 				<div class="form-section">
 					<h3 class="text-2xl font-semibold mb-4" id="return-form-title">تسجيل عملية إرجاع</h3>
 					<form id="add-return-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
 						<input type="hidden" id="return-id">
 						<div class="flex flex-col">
-							<label for="r-date" class="text-slate-600 dark:text-slate-300 mb-1">التاريخ</label>
+							<label for="r-date" class="text-slate-600 mb-1">التاريخ</label>
 							<input type="date" id="r-date" class="input" required>
 						</div>
 						<div class="flex flex-col">
-							<label for="r-warehouse" class="text-slate-600 dark:text-slate-300 mb-1">المستودع</label>
+							<label for="r-warehouse" class="text-slate-600 mb-1">المستودع</label>
 							<select id="r-warehouse" class="select" required>
 								<option value="">اختر مستودع</option>
 							</select>
 						</div>
 						<div class="flex flex-col">
-							<label for="r-product" class="text-slate-600 dark:text-slate-300 mb-1">المنتج المرتجع</label>
+							<label for="r-product" class="text-slate-600 mb-1">المنتج المرتجع</label>
 							<select id="r-product" class="select" required></select>
 						</div>
 						<div class="flex flex-col">
-							<label for="r-qty" class="text-slate-600 dark:text-slate-300 mb-1">الكمية المرتجعة</label>
+							<label for="r-qty" class="text-slate-600 mb-1">الكمية المرتجعة</label>
 							<input type="number" id="r-qty" class="input" min="1" required>
 						</div>
 						<div class="flex flex-col col-span-full">
-							<label for="r-reason" class="text-slate-600 dark:text-slate-300 mb-1">سبب الإرجاع (اختياري)</label>
+							<label for="r-reason" class="text-slate-600 mb-1">سبب الإرجاع (اختياري)</label>
 							<textarea id="r-reason" class="input" rows="2"></textarea>
 						</div>
 						<div class="flex items-end col-span-full gap-2">
@@ -639,46 +633,46 @@
 
 			 <!-- تبويب المشتريات -->
 			<div id="purchases" class="tab-pane hidden">
-				 <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة المشتريات</h2>
+				 <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة المشتريات</h2>
 				 <div class="form-section">
 					 <h3 class="text-2xl font-semibold mb-4" id="purchase-form-title">تسجيل شراء جديد</h3>
 					 <form id="add-purchase-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
 						 <input type="hidden" id="purchase-id">
 						 <div class="flex flex-col">
-							 <label for="p-date" class="text-slate-600 dark:text-slate-300 mb-1">التاريخ</label>
+							 <label for="p-date" class="text-slate-600 mb-1">التاريخ</label>
 							 <input type="date" id="p-date" class="input" required>
 						 </div>
 						 <div class="flex flex-col">
-							<label for="purchase-warehouse" class="text-slate-600 dark:text-slate-300 mb-1">المستودع</label>
+							<label for="purchase-warehouse" class="text-slate-600 mb-1">المستودع</label>
 							<select id="purchase-warehouse" class="select" required>
 								<option value="">اختر مستودع</option>
 							</select>
 						</div>
 						 <div class="flex flex-col">
-							 <label for="p-type" class="text-slate-600 dark:text-slate-300 mb-1">نوع الشراء</label>
+							 <label for="p-type" class="text-slate-600 mb-1">نوع الشراء</label>
 							 <select id="p-type" class="select">
 								 <option value="product">منتج من المخزون</option>
 								 <option value="other">منتج آخر</option>
 							 </select>
 						 </div>
 						 <div class="flex flex-col" id="p-product-container">
-							 <label for="p-product" class="text-slate-600 dark:text-slate-300 mb-1">المنتج</label>
+							 <label for="p-product" class="text-slate-600 mb-1">المنتج</label>
                              <select id="p-product" class="select"></select>
 						 </div>
 						 <div class="flex flex-col hidden" id="p-other-product-container">
-							 <label for="p-other-product-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم المنتج</label>
+							 <label for="p-other-product-name" class="text-slate-600 mb-1">اسم المنتج</label>
 							 <input type="text" id="p-other-product-name" class="input">
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="p-cost-input" class="text-slate-600 dark:text-slate-300 mb-1">سعر الشراء</label>
+							 <label for="p-cost-input" class="text-slate-600 mb-1">سعر الشراء</label>
 							 <input type="number" id="p-cost-input" class="input" min="0" step="0.01" required>
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="p-qty-input" class="text-slate-600 dark:text-slate-300 mb-1">الكمية</label>
+							 <label for="p-qty-input" class="text-slate-600 mb-1">الكمية</label>
 							 <input type="number" id="p-qty-input" class="input" min="1" required>
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="p-supplier-purchase" class="text-slate-600 dark:text-slate-300 mb-1">المورد</label>
+							 <label for="p-supplier-purchase" class="text-slate-600 mb-1">المورد</label>
 							 <select id="p-supplier-purchase" class="select">
 								 <option value="">اختر مورد</option>
 							 </select>
@@ -695,7 +689,7 @@
 						<form id="purchases-filter-form" class="flex flex-wrap items-end gap-2">
 							<input type="date" id="purchases-filter-date" class="input text-sm p-2 w-48">
 							<button type="submit" class="btn btn-primary text-sm">عرض</button>
-							<button type="button" id="purchases-clear-filter" class="btn bg-slate-300 dark:bg-slate-600 text-sm">عرض الكل</button>
+							<button type="button" id="purchases-clear-filter" class="btn bg-slate-300 text-sm">عرض الكل</button>
 						</form>
 						 <div class="flex flex-wrap gap-2">
 							 <button id="export-purchases-btn" class="btn btn-primary bg-sky-500 hover:bg-sky-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
@@ -722,34 +716,34 @@
 
 			<!-- تبويب المصاريف -->
 			<div id="expenses" class="tab-pane hidden">
-				<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة المصاريف</h2>
+				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة المصاريف</h2>
 				 <div class="form-section">
 					 <h3 class="text-2xl font-semibold mb-4" id="expense-form-title">تسجيل مصروف جديد</h3>
 					 <form id="add-expense-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
 						 <input type="hidden" id="expense-id">
 						 <div class="flex flex-col">
-							 <label for="e-date" class="text-slate-600 dark:text-slate-300 mb-1">التاريخ</label>
+							 <label for="e-date" class="text-slate-600 mb-1">التاريخ</label>
 							 <input type="date" id="e-date" class="input" required>
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="e-type" class="text-slate-600 dark:text-slate-300 mb-1">نوع المصروف</label>
+							 <label for="e-type" class="text-slate-600 mb-1">نوع المصروف</label>
 							 <select id="e-type" class="select" required>
 								 <option value="رواتب">رواتب</option>
 								 <option value="مصاريف اخرى">مصاريف اخرى</option>
 							 </select>
 						 </div>
                          <div class="flex flex-col hidden" id="e-employee-container">
-                             <label for="e-employee" class="text-slate-600 dark:text-slate-300 mb-1">الموظف</label>
+                             <label for="e-employee" class="text-slate-600 mb-1">الموظف</label>
                              <select id="e-employee" class="select">
                                  <option value="">اختر موظف</option>
                              </select>
                          </div>
 						 <div class="flex flex-col">
-							 <label for="e-amount" class="text-slate-600 dark:text-slate-300 mb-1">المبلغ</label>
+							 <label for="e-amount" class="text-slate-600 mb-1">المبلغ</label>
 							 <input type="number" id="e-amount" class="input" min="0" step="0.01" required>
 						 </div>
 						 <div class="flex flex-col col-span-full">
-							 <label for="e-desc" class="text-slate-600 dark:text-slate-300 mb-1">الوصف</label>
+							 <label for="e-desc" class="text-slate-600 mb-1">الوصف</label>
 							 <textarea id="e-desc" class="input" rows="2"></textarea>
 						 </div>
 						 <div class="flex items-end col-span-full gap-2">
@@ -764,7 +758,7 @@
 						<form id="expenses-filter-form" class="flex flex-wrap items-end gap-2">
 							<input type="date" id="expenses-filter-date" class="input text-sm p-2 w-48">
 							<button type="submit" class="btn btn-primary text-sm">عرض</button>
-							<button type="button" id="expenses-clear-filter" class="btn bg-slate-300 dark:bg-slate-600 text-sm">عرض الكل</button>
+							<button type="button" id="expenses-clear-filter" class="btn bg-slate-300 text-sm">عرض الكل</button>
 						</form>
 						<div class="flex flex-wrap gap-2">
 							<button id="export-expenses-btn" class="btn btn-primary bg-sky-500 hover:bg-sky-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
@@ -789,25 +783,25 @@
 
 			<!-- تبويب العملاء -->
 			<div id="customers" class="tab-pane hidden">
-				<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة العملاء</h2>
+				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة العملاء</h2>
 				 <div class="form-section">
 					 <h3 class="text-2xl font-semibold mb-4" id="customer-form-title">إضافة عميل جديد</h3>
 					 <form id="add-customer-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
 						 <input type="hidden" id="customer-id">
 						 <div class="flex flex-col">
-							 <label for="c-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم العميل</label>
+							 <label for="c-name" class="text-slate-600 mb-1">اسم العميل</label>
 							 <input type="text" id="c-name" class="input" required>
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="c-phone" class="text-slate-600 dark:text-slate-300 mb-1">رقم الهاتف</label>
+							 <label for="c-phone" class="text-slate-600 mb-1">رقم الهاتف</label>
 							 <input type="text" id="c-phone" class="input">
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="c-email" class="text-slate-600 dark:text-slate-300 mb-1">البريد الإلكتروني</label>
+							 <label for="c-email" class="text-slate-600 mb-1">البريد الإلكتروني</label>
 							 <input type="email" id="c-email" class="input">
 						 </div>
 						 <div class="flex flex-col col-span-full">
-							 <label for="c-address" class="text-slate-600 dark:text-slate-300 mb-1">العنوان</label>
+							 <label for="c-address" class="text-slate-600 mb-1">العنوان</label>
 							 <textarea id="c-address" class="input" rows="2"></textarea>
 						 </div>
 						 <div class="flex items-end col-span-full gap-2">
@@ -843,25 +837,25 @@
 
 			<!-- تبويب الموردين -->
 			<div id="suppliers" class="tab-pane hidden">
-				 <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة الموردين</h2>
+				 <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة الموردين</h2>
 				 <div class="form-section">
 					 <h3 class="text-2xl font-semibold mb-4" id="supplier-form-title">إضافة مورد جديد</h3>
 					 <form id="add-supplier-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
 						 <input type="hidden" id="supplier-id">
 						 <div class="flex flex-col">
-							 <label for="sup-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم المورد</label>
+							 <label for="sup-name" class="text-slate-600 mb-1">اسم المورد</label>
 							 <input type="text" id="sup-name" class="input" required>
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="sup-phone" class="text-slate-600 dark:text-slate-300 mb-1">رقم الهاتف</label>
+							 <label for="sup-phone" class="text-slate-600 mb-1">رقم الهاتف</label>
 							 <input type="text" id="sup-phone" class="input">
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="sup-email" class="text-slate-600 dark:text-slate-300 mb-1">البريد الإلكتروني</label>
+							 <label for="sup-email" class="text-slate-600 mb-1">البريد الإلكتروني</label>
 							 <input type="email" id="sup-email" class="input">
 						 </div>
 						 <div class="flex flex-col col-span-full">
-							 <label for="sup-address" class="text-slate-600 dark:text-slate-300 mb-1">العنوان</label>
+							 <label for="sup-address" class="text-slate-600 mb-1">العنوان</label>
 							 <textarea id="sup-address" class="input" rows="2"></textarea>
 						 </div>
 						 <div class="flex items-end col-span-full gap-2">
@@ -897,23 +891,23 @@
 
 			<!-- تبويب عروض الأسعار -->
 			<div id="quotations" class="tab-pane hidden">
-				<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة عروض الأسعار</h2>
+				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة عروض الأسعار</h2>
 				<div class="form-section">
 					<h3 class="text-2xl font-semibold mb-4" id="quotation-form-title">إنشاء عرض سعر جديد</h3>
 					<form id="add-quotation-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
 						 <input type="hidden" id="quotation-id">
 						 <div class="flex flex-col">
-							 <label for="q-date" class="text-slate-600 dark:text-slate-300 mb-1">تاريخ عرض السعر</label>
+							 <label for="q-date" class="text-slate-600 mb-1">تاريخ عرض السعر</label>
 							 <input type="date" id="q-date" class="input" required>
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="q-customer" class="text-slate-600 dark:text-slate-300 mb-1">العميل</label>
+							 <label for="q-customer" class="text-slate-600 mb-1">العميل</label>
 							 <select id="q-customer" class="select" required>
 								 <option value="">اختر عميل</option>
 							 </select>
 						 </div>
 						 <div class="flex flex-col col-span-full">
-							 <label class="text-slate-600 dark:text-slate-300 mb-1">بنود عرض السعر</label>
+							 <label class="text-slate-600 mb-1">بنود عرض السعر</label>
 							 <div id="quotation-items-container" class="space-y-4">
 								 <!-- Quotation item rows will be added here -->
 							 </div>
@@ -931,7 +925,12 @@
 					</form>
 				</div>
 				<div class="data-table-wrapper mt-8">
-					<h3 class="text-2xl font-semibold mb-4">قائمة عروض الأسعار</h3>
+					<div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 pb-4 table-header-bar">
+						<h3 class="text-2xl font-semibold">قائمة عروض الأسعار</h3>
+						<div class="flex flex-wrap gap-2">
+							<button id="export-quotations-btn" class="btn btn-primary bg-sky-500 hover:bg-sky-600"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+						</div>
+					</div>
 					<div class="data-table-container">
 						<table class="data-table" id="quotations-table-export">
 							<thead>
@@ -952,23 +951,23 @@
 
 			<!-- تبويب الفواتير -->
 			<div id="invoices" class="tab-pane hidden">
-				 <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">إدارة الفواتير</h2>
+				 <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة الفواتير</h2>
 				 <div class="form-section">
 					 <h3 class="text-2xl font-semibold mb-4">إنشاء فاتورة جديدة</h3>
 					 <form id="add-invoice-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                          <input type="hidden" id="invoice-source-quotation-id">
 						 <div class="flex flex-col">
-							 <label for="i-date" class="text-slate-600 dark:text-slate-300 mb-1">تاريخ الفاتورة</label>
+							 <label for="i-date" class="text-slate-600 mb-1">تاريخ الفاتورة</label>
 							 <input type="date" id="i-date" class="input" required>
 						 </div>
 						 <div class="flex flex-col">
-							 <label for="i-customer" class="text-slate-600 dark:text-slate-300 mb-1">العميل</label>
+							 <label for="i-customer" class="text-slate-600 mb-1">العميل</label>
 							 <select id="i-customer" class="select" required>
 								 <option value="">اختر عميل</option>
 							 </select>
 						 </div>
 						 <div class="flex flex-col col-span-full">
-							 <label class="text-slate-600 dark:text-slate-300 mb-1">تفاصيل المنتجات</label>
+							 <label class="text-slate-600 mb-1">تفاصيل المنتجات</label>
 							 <div id="invoice-items-container" class="space-y-4">
 								 <!-- صفوف بنود الفاتورة ستضاف هنا -->
 							 </div>
@@ -1021,16 +1020,16 @@
 
 			<!-- تبويب التقارير -->
 			  <div id="reports" class="tab-pane hidden">
-				  <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">التقارير المتقدمة</h2>
+				  <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">التقارير المتقدمة</h2>
 				  <div class="form-section no-print">
 					  <h3 class="text-2xl font-semibold">تحديد فترة التقرير</h3>
 					  <form id="reports-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mt-4">
 						  <div class="flex flex-col">
-							  <label for="start-date" class="text-slate-600 dark:text-slate-300 mb-1">تاريخ البدء</label>
+							  <label for="start-date" class="text-slate-600 mb-1">تاريخ البدء</label>
 							  <input type="date" id="start-date" class="input" required>
 						  </div>
 						  <div class="flex flex-col">
-							  <label for="end-date" class="text-slate-600 dark:text-slate-300 mb-1">تاريخ الانتهاء</label>
+							  <label for="end-date" class="text-slate-600 mb-1">تاريخ الانتهاء</label>
 							  <input type="date" id="end-date" class="input" required>
 						  </div>
 						  <button type="submit" class="btn btn-primary w-full">عرض التقرير</button>
@@ -1041,11 +1040,14 @@
 					  <div id="printable-content">
 						  <!-- بداية رأس التقرير -->
 						  <div class="p-6 mb-6 bg-white rounded-lg shadow-md">
-							  <div class="flex justify-between items-center pb-4 border-b border-slate-200">
-								  <div>
-									  <h3 class="text-2xl font-bold text-sky-600" id="report-company-name">اسم الشركة</h3>
-									  <p class="text-sm text-slate-500" id="report-company-address">عنوان الشركة</p>
-								  </div>
+							  <div class="flex justify-between items-start pb-4 border-b border-slate-200">
+								  <div class="flex items-center gap-4">
+                                      <div id="report-logo-container"></div>
+                                      <div>
+                                          <h3 class="text-2xl font-bold text-sky-600" id="report-company-name">اسم الشركة</h3>
+                                          <p class="text-sm text-slate-500" id="report-company-address">عنوان الشركة</p>
+                                      </div>
+                                  </div>
 								  <div class="text-right">
 									  <h4 class="text-xl font-bold" id="report-title">تقرير الأداء</h4>
 									  <p class="text-sm text-slate-500" id="report-date-range">للفترة من ... إلى ...</p>
@@ -1122,43 +1124,53 @@
 							  <div class="space-y-8">
 								  <div class="dashboard-card">
 									  <h4 class="text-lg font-semibold mb-4">المنتجات الأكثر مبيعاً</h4>
-									  <table class="report-table" id="top-products-table-export">
-										  <thead><tr><th>المنتج</th><th>الكمية المباعة</th><th>إجمالي الأرباح</th></tr></thead>
-										  <tbody id="top-products-table"></tbody>
-									  </table>
+									  <div class="data-table-container">
+										  <table class="report-table" id="top-products-table-export">
+											  <thead><tr><th>المنتج</th><th>الكمية المباعة</th><th>إجمالي الأرباح</th></tr></thead>
+											  <tbody id="top-products-table"></tbody>
+										  </table>
+									  </div>
 								  </div>
 								  <div class="dashboard-card">
 									  <h4 class="text-lg font-semibold mb-4">أفضل العملاء</h4>
-									  <table class="report-table" id="top-customers-table-export">
-										  <thead><tr><th>العميل</th><th>إجمالي المشتريات</th></tr></thead>
-										  <tbody id="top-customers-table"></tbody>
-									  </table>
+									  <div class="data-table-container">
+										  <table class="report-table" id="top-customers-table-export">
+											  <thead><tr><th>العميل</th><th>إجمالي المشتريات</th></tr></thead>
+											  <tbody id="top-customers-table"></tbody>
+										  </table>
+									  </div>
 								  </div>
 								   <div class="dashboard-card">
-									  <h4 class="text-lg font-semibold mb-4">تقرير المصاريف التفصيلي</h4>
-									  <table class="report-table" id="detailed-expenses-report-table">
-										  <thead><tr><th>التاريخ</th><th>النوع</th><th>الوصف/البيان</th><th>المبلغ</th></tr></thead>
-										  <tbody id="detailed-expenses-report-table-body"></tbody>
-									  </table>
+									  <h4 class="text-lg font-semibold mb-4">ملخص المصاريف حسب النوع</h4>
+									  <div class="data-table-container">
+										  <table class="report-table" id="detailed-expenses-report-table">
+											  <thead><tr><th>نوع المصروف</th><th>إجمالي المبلغ</th></tr></thead>
+											  <tbody id="detailed-expenses-report-table-body"></tbody>
+										  </table>
+									  </div>
 								  </div>
 								  <div class="dashboard-card">
 									  <h4 class="text-lg font-semibold mb-4">تقرير الرواتب للموظفين</h4>
-									  <table class="report-table" id="salaries-by-employee-report-table">
-										  <thead>
-											  <tr>
-												  <th>اسم الموظف</th>
-												  <th>إجمالي المبلغ المدفوع</th>
-											  </tr>
-										  </thead>
-										  <tbody id="salaries-by-employee-report-table-body"></tbody>
-									  </table>
+									  <div class="data-table-container">
+										  <table class="report-table" id="salaries-by-employee-report-table">
+											  <thead>
+												  <tr>
+													  <th>اسم الموظف</th>
+													  <th>إجمالي المبلغ المدفوع</th>
+												  </tr>
+											  </thead>
+											  <tbody id="salaries-by-employee-report-table-body"></tbody>
+										  </table>
+									  </div>
 								  </div>
 								  <div class="dashboard-card">
 									  <h4 class="text-lg font-semibold mb-4">تنبيهات نفاد المخزون (الكمية صفر)</h4>
-									  <table class="report-table" id="low-stock-table-export">
-										  <thead><tr><th>المنتج</th><th>المستودع</th><th>الكمية المتبقية</th></tr></thead>
-										  <tbody id="low-stock-table"></tbody>
-									  </table>
+									  <div class="data-table-container">
+										  <table class="report-table" id="low-stock-table-export">
+											  <thead><tr><th>المنتج</th><th>المستودع</th><th>الكمية المتبقية</th></tr></thead>
+											  <tbody id="low-stock-table"></tbody>
+										  </table>
+									  </div>
 								  </div>
 							  </div>
 						  </div>
@@ -1169,7 +1181,7 @@
 
             <!-- تبويب سجل النشاط -->
             <div id="activity_log" class="tab-pane hidden">
-                <h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">سجل نشاط المستخدمين</h2>
+                <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">سجل نشاط المستخدمين</h2>
                 <div class="data-table-wrapper">
 					<div class="data-table-container">
 						<table class="data-table">
@@ -1190,53 +1202,61 @@
 
 			<!-- تبويب الإعدادات -->
 			<div id="settings" class="tab-pane hidden">
-				<h2 class="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-6 text-center">الإعدادات</h2>
+				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">الإعدادات</h2>
 				 <div class="settings-card">
-					 <h3 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-slate-600">معلومات الشركة والإعدادات المالية</h3>
+					 <h3 class="text-2xl font-semibold mb-4 border-b pb-2">معلومات الشركة والإعدادات المالية</h3>
 					 <form id="settings-form" class="space-y-4">
 						 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 							 <div>
-								 <label for="setting-company-name" class="block mb-1 font-semibold text-slate-700 dark:text-slate-300">اسم الشركة</label>
+								 <label for="setting-company-name" class="block mb-1 font-semibold text-slate-700">اسم الشركة</label>
 								 <input type="text" id="setting-company-name" class="input">
 							 </div>
 							 <div>
-								 <label for="setting-company-phone" class="block mb-1 font-semibold text-slate-700 dark:text-slate-300">الهاتف</label>
+								 <label for="setting-company-phone" class="block mb-1 font-semibold text-slate-700">الهاتف</label>
 								 <input type="text" id="setting-company-phone" class="input">
 							 </div>
 						 </div>
 						 <div>
-							 <label for="setting-company-address" class="block mb-1 font-semibold text-slate-700 dark:text-slate-300">العنوان</label>
+							 <label for="setting-company-address" class="block mb-1 font-semibold text-slate-700">العنوان</label>
 							 <input type="text" id="setting-company-address" class="input">
 						 </div>
 						  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 							 <div>
-								 <label for="setting-currency" class="block mb-1 font-semibold text-slate-700 dark:text-slate-300">رمز العملة</label>
+								 <label for="setting-currency" class="block mb-1 font-semibold text-slate-700">رمز العملة</label>
 								 <input type="text" id="setting-currency" class="input" placeholder="e.g., JOD, USD, SAR">
 							 </div>
 							 <div>
-								 <label for="setting-initial-fund" class="block mb-1 font-semibold text-slate-700 dark:text-slate-300">رأس مال الصندوق الأولي</label>
+								 <label for="setting-initial-fund" class="block mb-1 font-semibold text-slate-700">رأس مال الصندوق الأولي</label>
 								 <input type="number" step="0.01" id="setting-initial-fund" class="input">
 							 </div>
 						 </div>
                          <div>
-                             <label for="setting-loyalty-points" class="block mb-1 font-semibold text-slate-700 dark:text-slate-300">نقاط الولاء (نقطة لكل X مبلغ)</label>
+                             <label for="setting-loyalty-points" class="block mb-1 font-semibold text-slate-700">نقاط الولاء (نقطة لكل X مبلغ)</label>
                              <input type="number" step="1" id="setting-loyalty-points" class="input" placeholder="مثال: 10 (نقطة لكل 10 دنانير)">
                          </div>
 						 <div class="text-left">
 							 <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
 						 </div>
 					 </form>
+                     <div class="mt-6 pt-4 border-t">
+                         <label for="setting-company-logo" class="block mb-2 font-semibold text-slate-700">شعار الشركة</label>
+                         <input type="file" id="setting-company-logo" class="input" accept="image/png, image/jpeg, image/gif">
+                         <div class="mt-4">
+                             <img id="company-logo-preview" src="" alt="معاينة الشعار" class="max-h-24 rounded hidden bg-slate-100 p-2">
+                             <button id="remove-logo-btn" class="btn btn-danger mt-2 hidden"><i class="fas fa-trash"></i> إزالة الشعار</button>
+                         </div>
+                     </div>
 				 </div>
 
 				 <!-- قسم إدارة المستودعات -->
 				 <div id="warehouse-management-section" class="settings-card">
-					<h3 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-slate-600">إدارة المستودعات</h3>
+					<h3 class="text-2xl font-semibold mb-4 border-b pb-2">إدارة المستودعات</h3>
 					<div class="form-section p-0 m-0 shadow-none">
 						<h4 class="text-xl font-semibold mb-4" id="warehouse-form-title">إضافة مستودع جديد</h4>
 						<form id="add-warehouse-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
 							<input type="hidden" id="warehouse-id">
 							<div class="flex flex-col md:col-span-2">
-								<label for="w-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم المستودع</label>
+								<label for="w-name" class="text-slate-600 mb-1">اسم المستودع</label>
 								<input type="text" id="w-name" class="input" required>
 							</div>
 							<div class="flex items-end col-span-full md:col-span-1 gap-2">
@@ -1263,17 +1283,17 @@
 
                  <!-- قسم إدارة الموظفين - جديد -->
                  <div id="employee-management-section" class="settings-card" style="display: none;">
-                     <h3 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-slate-600">إدارة الموظفين</h3>
+                     <h3 class="text-2xl font-semibold mb-4 border-b pb-2">إدارة الموظفين</h3>
                      <div class="form-section p-0 m-0 shadow-none">
                          <h4 class="text-xl font-semibold mb-4" id="employee-form-title">إضافة موظف جديد</h4>
                          <form id="add-employee-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                              <input type="hidden" id="employee-id">
                              <div class="flex flex-col">
-                                 <label for="emp-name" class="text-slate-600 dark:text-slate-300 mb-1">اسم الموظف</label>
+                                 <label for="emp-name" class="text-slate-600 mb-1">اسم الموظف</label>
                                  <input type="text" id="emp-name" class="input" required>
                              </div>
                              <div class="flex flex-col">
-                                 <label for="emp-position" class="text-slate-600 dark:text-slate-300 mb-1">المنصب الوظيفي</label>
+                                 <label for="emp-position" class="text-slate-600 mb-1">المنصب الوظيفي</label>
                                  <input type="text" id="emp-position" class="input">
                              </div>
                              <div class="flex items-end col-span-full md:col-span-1 gap-2">
@@ -1300,27 +1320,27 @@
                  </div>
 
 				 <div id="user-management-section" class="settings-card">
-					 <h3 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-slate-600">إدارة المستخدمين</h3>
+					 <h3 class="text-2xl font-semibold mb-4 border-b pb-2">إدارة المستخدمين</h3>
 					 <div class="p-0 m-0 shadow-none form-section">
 						 <h4 class="text-xl font-semibold mb-4" id="user-form-title">إنشاء مستخدم جديد</h4>
 						 <form id="add-user-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
 							 <div class="flex flex-col">
-								 <label for="user-email-input" class="text-slate-600 dark:text-slate-300 mb-1">البريد الإلكتروني</label>
+								 <label for="user-email-input" class="text-slate-600 mb-1">البريد الإلكتروني</label>
 								 <input type="email" id="user-email-input" class="input" required>
 							 </div>
 							  <div class="flex flex-col">
-								 <label for="user-password-input" class="text-slate-600 dark:text-slate-300 mb-1">كلمة المرور</label>
+								 <label for="user-password-input" class="text-slate-600 mb-1">كلمة المرور</label>
 								 <input type="password" id="user-password-input" class="input" required>
 							 </div>
 							 <div class="flex flex-col">
-								 <label for="user-role-select" class="text-slate-600 dark:text-slate-300 mb-1">الصلاحية</label>
+								 <label for="user-role-select" class="text-slate-600 mb-1">الصلاحية</label>
 								 <select id="user-role-select" class="select" required>
 									 <option value="admin">مدير</option>
 									 <option value="user">مستخدم</option>
 									 <option value="visitor">زائر</option>
 								 </select>
 							 </div>
-							 <div id="permissions-display" class="hidden col-span-full p-4 mt-2 text-sm border rounded-lg bg-sky-50 border-sky-200 text-sky-800 dark:bg-sky-900/50 dark:border-sky-700 dark:text-sky-200">
+							 <div id="permissions-display" class="hidden col-span-full p-4 mt-2 text-sm border rounded-lg bg-sky-50 border-sky-200 text-sky-800">
 								 <!-- Permissions will be displayed here -->
 							 </div>
 							 <div class="col-span-full">
@@ -1345,7 +1365,7 @@
 					  </div>
 				 </div>
                 <div id="backup-management-section" class="settings-card" style="display: none;">
-                    <h3 class="text-2xl font-semibold mb-4 border-b pb-2 dark:border-slate-600">النسخ الاحتياطي والاستعادة</h3>
+                    <h3 class="text-2xl font-semibold mb-4 border-b pb-2">النسخ الاحتياطي والاستعادة</h3>
                     <div class="flex flex-wrap items-center gap-4">
                         <button id="export-backup-btn" class="btn btn-primary bg-sky-600 hover:bg-sky-700">
                             <i class="fas fa-file-export"></i> تصدير نسخة احتياطية
@@ -1355,7 +1375,7 @@
                             <input type="file" id="import-backup-input" class="hidden" accept=".json">
                         </label>
                     </div>
-                    <p class="p-3 mt-4 text-sm text-red-600 bg-red-50 rounded-lg dark:bg-red-900/50 dark:text-red-200"><i class="mr-2 fas fa-exclamation-triangle"></i><strong>تحذير:</strong> استيراد نسخة احتياطية سيقوم بحذف جميع البيانات الحالية بشكل نهائي واستبدالها ببيانات الملف الذي تم رفعه. يرجى توخي الحذر الشديد.</p>
+                    <p class="p-3 mt-4 text-sm text-red-600 bg-red-50 rounded-lg"><i class="mr-2 fas fa-exclamation-triangle"></i><strong>تحذير:</strong> استيراد نسخة احتياطية سيقوم بحذف جميع البيانات الحالية بشكل نهائي واستبدالها ببيانات الملف الذي تم رفعه. يرجى توخي الحذر الشديد.</p>
                 </div>
 			</div>
 
@@ -1365,37 +1385,37 @@
 
 	<!-- Modals -->
 	<div id="custom-overlay" class="fixed inset-0 z-40 flex items-center justify-center hidden bg-black bg-opacity-50"></div>
-	<div id="custom-alert" class="fixed z-50 hidden w-full max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg top-1/2 left-1/2 dark:bg-slate-700">
+	<div id="custom-alert" class="fixed z-50 hidden w-full max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg top-1/2 left-1/2">
 		<p id="alert-message" class="mb-4 text-lg font-semibold text-center"></p>
 		<div class="flex justify-center">
 			<button id="alert-ok-btn" class="w-1/2 btn btn-primary">حسناً</button>
 		</div>
 	</div>
-	<div id="custom-confirm" class="fixed z-50 hidden w-full max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg top-1/2 left-1/2 dark:bg-slate-700">
+	<div id="custom-confirm" class="fixed z-50 hidden w-full max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg top-1/2 left-1/2">
 		<p id="confirm-message" class="mb-6 text-lg font-semibold text-center"></p>
 		<div class="flex justify-center gap-4">
 			<button id="confirm-ok-btn" class="w-1/2 btn btn-danger">تأكيد</button>
-			<button id="confirm-cancel-btn" class="w-1/2 btn bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500">إلغاء</button>
+			<button id="confirm-cancel-btn" class="w-1/2 btn bg-slate-200 hover:bg-slate-300">إلغاء</button>
 		</div>
 	</div>
-	<div id="invoice-view-modal" class="fixed z-50 hidden w-full max-w-4xl p-4 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl md:p-8 top-1/2 left-1/2 dark:bg-slate-800">
+	<div id="invoice-view-modal" class="fixed z-50 hidden w-full max-w-4xl p-4 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl md:p-8 top-1/2 left-1/2">
 		<div id="invoice-view-content"></div>
-		<div class="flex justify-end gap-4 p-4 mt-4 rounded-b-lg bg-slate-50 dark:bg-slate-700 no-print">
+		<div class="flex justify-end gap-4 p-4 mt-4 rounded-b-lg bg-slate-50 no-print">
 			<button id="invoice-print-btn" class="btn btn-primary"><i class="fas fa-print"></i> طباعة / حفظ PDF</button>
 			<button id="invoice-close-btn" class="btn btn-danger bg-slate-500 hover:bg-slate-600">إغلاق</button>
 		</div>
 	</div>
-    <div id="forgot-password-modal" class="fixed z-50 hidden w-full max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg top-1/2 left-1/2 dark:bg-slate-700">
+    <div id="forgot-password-modal" class="fixed z-50 hidden w-full max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg top-1/2 left-1/2">
 		<h3 class="mb-4 text-xl font-bold text-center">إعادة تعيين كلمة المرور</h3>
-        <p class="mb-6 text-center text-slate-600 dark:text-slate-400">أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة مرورك.</p>
+        <p class="mb-6 text-center text-slate-600">أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة مرورك.</p>
 		<form id="forgot-password-form">
             <div class="mb-4">
-                <label for="reset-email" class="block mb-2 font-semibold text-right text-slate-700 dark:text-slate-300">البريد الإلكتروني</label>
+                <label for="reset-email" class="block mb-2 font-semibold text-right text-slate-700">البريد الإلكتروني</label>
                 <input type="email" id="reset-email" class="input" required>
             </div>
             <div class="flex justify-center gap-4 mt-6">
                 <button type="submit" class="w-1/2 btn btn-primary">إرسال الرابط</button>
-                <button type="button" id="forgot-password-cancel-btn" class="w-1/2 btn bg-slate-200 hover:bg-slate-300 dark:bg-slate-600">إلغاء</button>
+                <button type="button" id="forgot-password-cancel-btn" class="w-1/2 btn bg-slate-200 hover:bg-slate-300">إلغاء</button>
             </div>
         </form>
 	</div>
@@ -1539,9 +1559,9 @@
             const profitableProductsDiv = document.getElementById('most-profitable-products');
             if (topProducts.length > 0) {
                 profitableProductsDiv.innerHTML = topProducts.map(([name, profit]) => `
-                    <div class="flex justify-between items-center text-sm py-1 border-b border-slate-200 dark:border-slate-700">
+                    <div class="flex justify-between items-center text-sm py-1 border-b border-slate-200">
                         <span>${name}</span>
-                        <span class="font-bold text-green-600 dark:text-green-400">${profit.toFixed(2)} ${appSettings.currency}</span>
+                        <span class="font-bold text-green-600">${profit.toFixed(2)} ${appSettings.currency}</span>
                     </div>
                 `).join('');
             } else {
@@ -1570,9 +1590,8 @@
                 }
             });
 
-            const isDarkMode = document.documentElement.classList.contains('dark-mode');
-            const chartTextColor = isDarkMode ? '#f8fafc' : '#1e293b';
-            const chartGridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const chartTextColor = '#1e293b';
+            const chartGridColor = 'rgba(0, 0, 0, 0.1)';
 
             if (monthlySalesChart) {
                 monthlySalesChart.destroy();
@@ -1616,13 +1635,13 @@
 
             const kpiContainer = document.getElementById('kpi-container');
             kpiContainer.innerHTML = `
-                <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
                     <span class="font-semibold">إجمالي عدد العملاء</span>
-                    <span class="font-bold text-lg text-sky-600 dark:text-sky-400">${totalCustomers}</span>
+                    <span class="font-bold text-lg text-sky-600">${totalCustomers}</span>
                 </div>
-                <div class="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
                     <span class="font-semibold">متوسط قيمة الفاتورة</span>
-                    <span class="font-bold text-lg text-sky-600 dark:text-sky-400">${averageSale.toFixed(2)} ${appSettings.currency}</span>
+                    <span class="font-bold text-lg text-sky-600">${averageSale.toFixed(2)} ${appSettings.currency}</span>
                 </div>
             `;
         }
@@ -1816,7 +1835,7 @@
 				else if (p.qty > 0 && p.qty <= 10) lowStockCount++;
 
 				const row = tableBody.insertRow();
-				let qtyClass = p.qty <= 0 ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-200 font-bold' : (p.qty <= 10 ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-200' : '');
+				let qtyClass = p.qty <= 0 ? 'bg-red-100 text-red-700 font-bold' : (p.qty <= 10 ? 'bg-yellow-100 text-yellow-700' : '');
 				row.innerHTML = `
 					<td class="no-export"><input type="checkbox" class="product-checkbox" data-id="${p.id}"></td>
 					<td class="whitespace-nowrap">${p.name}</td>
@@ -1883,7 +1902,7 @@
                     <td class="whitespace-nowrap">${r.productName}</td>
                     <td>${r.warehouseName || '-'}</td>
                     <td>${r.qty}</td>
-                    <td>${r.reason || ''}</td>
+                    <td class="allow-wrap">${r.reason || ''}</td>
                     <td class="whitespace-nowrap no-export">
                         <button class="btn btn-danger text-sm delete-btn" data-id="${r.id}" data-category="returns">حذف</button>
                     </td>`;
@@ -1941,7 +1960,7 @@
                     <td>${e.date}</td>
                     <td>${e.type}</td>
                     <td>${(e.amount || 0).toFixed(2)} ${appSettings.currency}</td>
-                    <td>${description}</td>
+                    <td class="allow-wrap">${description}</td>
                     <td class="whitespace-nowrap no-export">
                         <button class="btn btn-edit text-sm edit-btn" data-id="${e.id}" data-category="expense">تعديل</button>
                         <button class="btn btn-danger text-sm delete-btn" data-id="${e.id}" data-category="expenses">حذف</button>
@@ -1963,7 +1982,7 @@
                     <td>${c.phone || ''}</td>
                     <td>${c.email || ''}</td>
                     <td>${c.loyaltyPoints || 0}</td>
-                    <td>${c.address || ''}</td>
+                    <td class="allow-wrap">${c.address || ''}</td>
                     <td class="whitespace-nowrap no-export">
                         <button class="btn btn-edit text-sm edit-btn" data-id="${c.id}" data-category="customer">تعديل</button>
                         <button class="btn btn-danger text-sm delete-btn" data-id="${c.id}" data-category="customers">حذف</button>
@@ -2007,7 +2026,7 @@
 					<td class="whitespace-nowrap">${s.name}</td>
 					<td>${s.phone || ''}</td>
 					<td>${s.email || ''}</td>
-					<td>${s.address || ''}</td>
+					<td class="allow-wrap">${s.address || ''}</td>
 					<td class="whitespace-nowrap no-export">
 						<button class="btn btn-edit text-sm edit-btn" data-id="${s.id}" data-category="supplier">تعديل</button>
 						<button class="btn btn-danger text-sm delete-btn" data-id="${s.id}" data-category="suppliers">حذف</button>
@@ -2256,10 +2275,20 @@
                 return;
             }
             
+            const chartTextColor = '#1e293b';
+            const chartGridColor = 'rgba(0, 0, 0, 0.1)';
+            
             document.getElementById('report-title').textContent = `تقرير الأداء`;
             document.getElementById('report-date-range').textContent = `للفترة من ${startDate} إلى ${endDate}`;
             document.getElementById('report-company-name').textContent = appSettings.companyName;
             document.getElementById('report-company-address').textContent = appSettings.companyAddress;
+            const logoData = localStorage.getItem('companyLogo');
+            const reportLogoContainer = document.getElementById('report-logo-container');
+            if (logoData) {
+                reportLogoContainer.innerHTML = `<img src="${logoData}" alt="Company Logo" class="max-h-16">`;
+            } else {
+                reportLogoContainer.innerHTML = '';
+            }
 
             const salesQuery = query(collection(db, 'sales'), where('date', '>=', startDate), where('date', '<=', endDate));
             const purchasesQuery = query(collection(db, 'purchases'), where('date', '>=', startDate), where('date', '<=', endDate));
@@ -2310,38 +2339,39 @@
             const outOfStockProducts = productsCache.filter(p => p.qty === 0);
             document.getElementById('low-stock-table').innerHTML = outOfStockProducts.length > 0 ? outOfStockProducts.map(p => `<tr><td>${p.name}</td><td>${p.warehouseName}</td><td>${p.qty}</td></tr>`).join('') : `<tr><td colspan="3" class="text-center">لا توجد منتجات نافدة</td></tr>`;
 
-            // Detailed Expenses Report
-			const expensesReportTable = document.getElementById('detailed-expenses-report-table');
+            // Expenses Summary Report
+            const expensesReportTable = document.getElementById('detailed-expenses-report-table');
 			const expensesReportTableBody = document.getElementById('detailed-expenses-report-table-body');
-			const sortedExpensesData = expensesData.sort((a, b) => a.date.localeCompare(b.date));
+            
+            const expensesByType = expensesData.reduce((acc, expense) => {
+                const type = expense.type || 'غير محدد';
+                if (!acc[type]) {
+                    acc[type] = 0;
+                }
+                acc[type] += expense.amount;
+                return acc;
+            }, {});
 
-            // Clear previous tfoot if exists
+            const sortedExpenses = Object.entries(expensesByType).sort(([,a],[,b]) => b-a);
+
             const existingTfoot = expensesReportTable.querySelector('tfoot');
             if (existingTfoot) existingTfoot.remove();
 
-			expensesReportTableBody.innerHTML = sortedExpensesData.length > 0
-				? sortedExpensesData.map(e => {
-                    let description = e.description || '-';
-                    if (e.type === 'رواتب' && e.employeeName) {
-                         description = `راتب: ${e.employeeName}` + (e.description ? ` - ${e.description}` : '');
-                    }
-                    return `
+			expensesReportTableBody.innerHTML = sortedExpenses.length > 0
+				? sortedExpenses.map(([type, totalAmount]) => `
 					<tr>
-						<td>${e.date}</td>
-						<td>${e.type}</td>
-						<td>${description}</td>
-						<td>${(e.amount || 0).toFixed(2)} ${appSettings.currency}</td>
+						<td>${type}</td>
+						<td>${totalAmount.toFixed(2)} ${appSettings.currency}</td>
 					</tr>
-				`}).join('')
-				: `<tr><td colspan="4" class="text-center">لا توجد مصاريف في هذه الفترة</td></tr>`;
-
-            // Add total row
-            if (sortedExpensesData.length > 0) {
+				`).join('')
+				: `<tr><td colspan="2" class="text-center">لا توجد مصاريف في هذه الفترة</td></tr>`;
+            
+            if (sortedExpenses.length > 0) {
                 const totalExpenses = expensesData.reduce((sum, e) => sum + e.amount, 0);
                 const tfoot = document.createElement('tfoot');
                 tfoot.innerHTML = `
-                    <tr class="font-bold bg-slate-100 dark:bg-slate-700">
-                        <td colspan="3" class="p-2 text-left font-bold">المجموع الكلي</td>
+                    <tr class="font-bold bg-slate-100">
+                        <td class="p-2 text-left font-bold">المجموع الكلي</td>
                         <td class="p-2 font-bold">${totalExpenses.toFixed(2)} ${appSettings.currency}</td>
                     </tr>
                 `;
@@ -2380,7 +2410,7 @@
                 const totalSalaries = salariesData.reduce((sum, s) => sum + s.amount, 0);
                 const tfoot = document.createElement('tfoot');
                 tfoot.innerHTML = `
-                    <tr class="font-bold bg-slate-100 dark:bg-slate-700">
+                    <tr class="font-bold bg-slate-100">
                         <td class="p-2 text-left font-bold">المجموع الكلي للرواتب</td>
                         <td class="p-2 font-bold">${totalSalaries.toFixed(2)} ${appSettings.currency}</td>
                     </tr>
@@ -2403,7 +2433,24 @@
                         backgroundColor: ['#0ea5e9', '#f59e0b', '#ef4444', '#10b981'],
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: chartTextColor },
+                            grid: { color: chartGridColor }
+                        },
+                        x: {
+                            ticks: { color: chartTextColor },
+                            grid: { color: chartGridColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: chartTextColor } }
+                    }
+                }
             });
 
             // Sales Distribution Chart (Pie)
@@ -2426,7 +2473,17 @@
                              hoverOffset: 4
                          }]
                      },
-                     options: { responsive: true, maintainAspectRatio: false }
+                     options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: chartTextColor
+                                }
+                            }
+                        }
+                     }
                  });
             } else {
                  document.getElementById('salesDistributionChart').getContext('2d').clearRect(0,0,300,300);
@@ -2521,6 +2578,7 @@
             document.getElementById('export-customers-btn').addEventListener('click', () => exportToExcel('customers-table-export', 'العملاء', 'Customers.xlsx'));
             document.getElementById('export-suppliers-btn').addEventListener('click', () => exportToExcel('suppliers-table-export', 'الموردين', 'Suppliers.xlsx'));
             document.getElementById('export-returns-btn').addEventListener('click', () => exportToExcel('returns-table-export', 'المرتجعات', 'Returns.xlsx'));
+            document.getElementById('export-quotations-btn').addEventListener('click', () => exportToExcel('quotations-table-export', 'عروض الأسعار', 'Quotations.xlsx'));
             
             document.getElementById('forgot-password-link').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -2535,14 +2593,6 @@
 
             document.getElementById('export-backup-btn').addEventListener('click', exportBackup);
             document.getElementById('import-backup-input').addEventListener('change', handleImportBackup);
-
-            const toggle = document.getElementById('dark-mode-toggle');
-            toggle.addEventListener('click', () => {
-                const isDarkMode = document.documentElement.classList.toggle('dark-mode');
-                localStorage.setItem('darkMode', isDarkMode);
-                toggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-                updateAdvancedDashboardMetrics();
-            });
         }
         
         async function handleLogin(e) {
@@ -3499,11 +3549,14 @@
              const invoice = invoiceDoc.data();
              currentInvoiceId = invoiceId;
              const contentEl = document.getElementById('invoice-view-content');
+             const logoData = localStorage.getItem('companyLogo');
+             const logoImgHtml = logoData ? `<img src="${logoData}" alt="Company Logo" class="max-h-16 mb-4">` : '';
              contentEl.innerHTML = `
                  <div id="printable-invoice">
                      <div class="p-8">
                          <div class="flex justify-between items-start mb-8">
                              <div>
+                                 ${logoImgHtml}
                                  <h2 class="text-3xl font-bold text-sky-600">${appSettings.companyName}</h2>
                                  <p>${appSettings.companyAddress || ''}</p>
                                  <p>${appSettings.companyPhone || ''}</p>
@@ -3514,14 +3567,14 @@
                                  <p>التاريخ: ${invoice.date}</p>
                              </div>
                          </div>
-                         <div class="mb-8 p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                         <div class="mb-8 p-4 bg-slate-50 rounded-lg">
                              <h4 class="font-bold mb-2">فاتورة إلى:</h4>
                              <p>${invoice.customerName}</p>
                              <p>${invoice.customerDetails.address || ''}</p>
                              <p>${invoice.customerDetails.phone || ''}</p>
                          </div>
                          <table class="w-full text-right mb-8">
-                             <thead class="bg-slate-100 dark:bg-slate-600">
+                             <thead class="bg-slate-100">
                                  <tr>
                                      <th class="p-2">البند</th>
 									 <th class="p-2">المستودع</th>
@@ -3532,7 +3585,7 @@
                              </thead>
                              <tbody>
                                  ${invoice.items.map(item => `
-                                     <tr class="border-b dark:border-slate-600">
+                                     <tr class="border-b">
                                          <td class="p-2">${item.productName}</td>
 										 <td class="p-2">${item.warehouseName || '-'}</td>
                                          <td class="p-2">${item.qty}</td>
@@ -3848,6 +3901,7 @@
             document.getElementById('setting-initial-fund').value = appSettings.initialFund;
             document.getElementById('setting-loyalty-points').value = appSettings.loyaltyPointsRate;
             document.getElementById('header-company-name').textContent = appSettings.companyName || 'إدارة الأعمال';
+            loadAndDisplayLogo();
         }
 
         async function handleSettingsSave(e) {
@@ -4006,7 +4060,7 @@
                     <td class="whitespace-nowrap">${timestamp}</td>
                     <td>${log.userEmail}</td>
                     <td>${log.action}</td>
-                    <td class="whitespace-normal">${log.details}</td>
+                    <td class="allow-wrap">${log.details}</td>
                 `;
             });
         }
@@ -4103,6 +4157,30 @@
             reader.readAsText(file);
         }
 
+        function loadAndDisplayLogo() {
+            const logoData = localStorage.getItem('companyLogo');
+            const logoPreview = document.getElementById('company-logo-preview');
+            const headerLogo = document.getElementById('header-logo');
+            const defaultIcon = document.getElementById('header-default-icon');
+            const removeBtn = document.getElementById('remove-logo-btn');
+
+            if (logoData) {
+                logoPreview.src = logoData;
+                headerLogo.src = logoData;
+                logoPreview.classList.remove('hidden');
+                headerLogo.classList.remove('hidden');
+                removeBtn.classList.remove('hidden');
+                if(defaultIcon) defaultIcon.classList.add('hidden');
+            } else {
+                logoPreview.src = '';
+                headerLogo.src = '';
+                logoPreview.classList.add('hidden');
+                headerLogo.classList.add('hidden');
+                removeBtn.classList.add('hidden');
+                if(defaultIcon) defaultIcon.classList.remove('hidden');
+            }
+        }
+
         // --- Initialization ---
         function main() {
             setupEventListeners();
@@ -4114,11 +4192,6 @@
                 if(el) el.value = today;
             });
 
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.documentElement.classList.add('dark-mode');
-                document.getElementById('dark-mode-toggle').innerHTML = '<i class="fas fa-sun"></i>';
-            }
-            
             onAuthStateChanged(auth, async user => {
                 if (user) {
                     // ... Authentication logic
