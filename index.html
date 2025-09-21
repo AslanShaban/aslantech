@@ -66,7 +66,7 @@
 		}
 		.data-table-container {
 			overflow-x: auto;
-			max-height: 550px; /* This is key for independent scrolling */
+			max-height: 280px; /* This is key for independent scrolling */
 			overflow-y: auto; /* This is key for independent scrolling */
 		}
 		.data-table {
@@ -164,7 +164,27 @@
 		#nav-tabs {
 			border-bottom: 1px solid var(--border-color);
 		}
-		#invoice-view-modal {
+        #main-content {
+            transition: margin-right 0.3s ease;
+        }
+        @media (min-width: 768px) {
+            #sidebar {
+                transition: width 0.3s ease;
+            }
+        }
+        .tab-btn {
+            justify-content: flex-start;
+            text-align: right;
+            border-bottom: none;
+            border-right: 4px solid transparent;
+            border-radius: 0.5rem;
+        }
+        .tab-btn.active {
+            color: var(--accent-primary);
+            background-color: var(--background-secondary-hover);
+            border-right-color: var(--accent-primary);
+        }
+		#invoice-view-modal, #quotation-view-modal {
 			max-height: 90vh;
 			overflow-y: auto;
 		}
@@ -211,7 +231,7 @@
 		}
 	</style>
 </head>
-<body class="p-0 sm:p-4">
+<body class="bg-slate-50">
 	
 	<!-- شاشة تسجيل الدخول -->
 	<div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-100">
@@ -237,49 +257,52 @@
 	</div>
 
 	<!-- حاوية التطبيق الرئيسية -->
-	<div id="app-container" class="hidden container p-4 sm:p-8 bg-white rounded-none sm:rounded-2xl shadow-lg">
-		<header class="pb-6 mb-8 border-b border-slate-200">
-			<div class="flex flex-wrap items-center justify-between gap-4">
-				<div class="flex items-center gap-4">
-                     <img id="header-logo" src="" alt="Company Logo" class="h-12 w-auto max-h-12 object-contain hidden">
-					 <i id="header-default-icon" class="fas fa-tasks text-4xl text-sky-500"></i>
-					<div>
-						<h1 class="mb-1 text-3xl font-bold sm:text-4xl text-sky-600" id="header-company-name">إدارة الأعمال</h1>
-						<p class="text-slate-500">لوحة تحكم شاملة لإدارة أعمالك بفعالية.</p>
-					</div>
-				</div>
-				<div class="flex items-center gap-4">
-					<div id="user-info" class="text-right">
-						 <p id="user-email" class="font-semibold hidden sm:block text-slate-700"></p>
-						 <p id="user-role-display" class="text-sm font-bold text-sky-600"></p>
-					</div>
-					<button id="logout-btn" class="btn btn-danger">
-						<i class="fas fa-sign-out-alt"></i>
-						<span class="hidden sm:inline">تسجيل الخروج</span>
-					</button>
-				</div>
-			</div>
-		</header>
+    <div id="app-container" class="hidden md:flex bg-slate-50">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed top-0 right-0 h-full bg-white shadow-lg md:relative md:w-64 transition-transform duration-300 ease-in-out transform md:translate-x-0 -translate-x-full z-40">
+            <div class="p-5 text-center border-b">
+                <img id="header-logo" src="" alt="Company Logo" class="h-12 max-h-12 object-contain hidden mx-auto mb-2">
+                <i id="header-default-icon" class="fas fa-tasks text-4xl text-sky-500 mx-auto mb-2"></i>
+                <h1 class="text-xl font-bold text-sky-600" id="header-company-name">إدارة الأعمال</h1>
+            </div>
+            <nav id="nav-tabs" class="flex flex-col p-4 space-y-2">
+                <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-tachometer-alt w-6"></i> الرئيسية</button>
+                <button class="tab-btn" data-tab="products"><i class="fas fa-boxes w-6"></i> المستودعات</button>
+                <button class="tab-btn" data-tab="sales"><i class="fas fa-chart-line w-6"></i> المبيعات</button>
+                <button class="tab-btn" data-tab="returns"><i class="fas fa-undo w-6"></i> المرتجعات</button>
+                <button class="tab-btn" data-tab="purchases"><i class="fas fa-shopping-cart w-6"></i> المشتريات</button>
+                <button class="tab-btn" data-tab="expenses"><i class="fas fa-wallet w-6"></i> المصاريف</button>
+                <button class="tab-btn" data-tab="customers"><i class="fas fa-users w-6"></i> العملاء</button>
+                <button class="tab-btn" data-tab="suppliers"><i class="fas fa-truck w-6"></i> الموردين</button>
+                <button class="tab-btn" data-tab="quotations"><i class="fas fa-file-invoice w-6"></i> عروض الأسعار</button>
+                <button class="tab-btn" data-tab="invoices"><i class="fas fa-file-invoice-dollar w-6"></i> الفواتير</button>
+                <button class="tab-btn" data-tab="reports"><i class="fas fa-chart-pie w-6"></i> التقارير</button>
+                <button class="tab-btn" data-tab="activity_log" id="activity-log-tab-btn" style="display: none;"><i class="fas fa-history w-6"></i> سجل النشاط</button>
+                <button class="tab-btn" data-tab="settings" id="settings-tab-btn"><i class="fas fa-cog w-6"></i> الإعدادات</button>
+            </nav>
+        </aside>
 
-		<!-- أزرار التنقل -->
-		<div class="flex flex-wrap justify-center gap-2 mb-8" id="nav-tabs">
-			<button class="tab-btn active" data-tab="dashboard">الرئيسية</button>
-			<button class="tab-btn" data-tab="products">المستودعات</button>
-			<button class="tab-btn" data-tab="sales">المبيعات</button>
-			<button class="tab-btn" data-tab="returns">المرتجعات</button>
-			<button class="tab-btn" data-tab="purchases">المشتريات</button>
-			<button class="tab-btn" data-tab="expenses">المصاريف</button>
-			<button class="tab-btn" data-tab="customers">العملاء</button>
-			<button class="tab-btn" data-tab="suppliers">الموردين</button>
-            <button class="tab-btn" data-tab="quotations">عروض الأسعار</button>
-			<button class="tab-btn" data-tab="invoices">الفواتير</button>
-			<button class="tab-btn" data-tab="reports">التقارير</button>
-            <button class="tab-btn" data-tab="activity_log" id="activity-log-tab-btn" style="display: none;">سجل النشاط</button>
-			<button class="tab-btn" data-tab="settings" id="settings-tab-btn">الإعدادات</button>
-		</div>
+        <!-- Main Content -->
+        <div id="main-content" class="flex-1 flex flex-col h-screen">
+            <header class="bg-white shadow-md p-4 flex justify-between items-center">
+                <button id="menu-toggle" class="md:hidden btn btn-primary">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center gap-4">
+                    <div id="user-info" class="text-right">
+                        <p id="user-email" class="font-semibold hidden sm:block text-slate-700"></p>
+                        <p id="user-role-display" class="text-sm font-bold text-sky-600"></p>
+                    </div>
+                    <button id="logout-btn" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="hidden sm:inline">تسجيل الخروج</span>
+                    </button>
+                </div>
+            </header>
 
-		<!-- محتوى التبويبات -->
-		<div id="tab-content">
+            <main class="flex-1 p-4 sm:p-8 overflow-y-auto">
+		        <!-- محتوى التبويبات -->
+		        <div id="tab-content">
 			<!-- تبويب الرئيسية -->
 			<div id="dashboard" class="tab-pane">
 				<div class="form-section">
@@ -894,34 +917,70 @@
 				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة عروض الأسعار</h2>
 				<div class="form-section">
 					<h3 class="text-2xl font-semibold mb-4" id="quotation-form-title">إنشاء عرض سعر جديد</h3>
-					<form id="add-quotation-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-						 <input type="hidden" id="quotation-id">
-						 <div class="flex flex-col">
-							 <label for="q-date" class="text-slate-600 mb-1">تاريخ عرض السعر</label>
-							 <input type="date" id="q-date" class="input" required>
-						 </div>
-						 <div class="flex flex-col">
-							 <label for="q-customer" class="text-slate-600 mb-1">العميل</label>
-							 <select id="q-customer" class="select" required>
-								 <option value="">اختر عميل</option>
-							 </select>
-						 </div>
-						 <div class="flex flex-col col-span-full">
-							 <label class="text-slate-600 mb-1">بنود عرض السعر</label>
-							 <div id="quotation-items-container" class="space-y-4">
-								 <!-- Quotation item rows will be added here -->
-							 </div>
-							 <div class="flex gap-2 mt-4">
-								 <button type="button" id="add-quotation-item-btn" class="btn btn-primary self-start">إضافة بند</button>
-							 </div>
-						 </div>
-						 <div class="flex flex-col col-span-full">
-							 <p class="text-lg font-bold">المجموع الكلي: <span id="quotation-total">0.00</span></p>
-						 </div>
-						 <div class="flex items-end col-span-full">
-							 <button type="submit" class="btn btn-primary w-full" id="quotation-form-submit-btn">إنشاء عرض السعر</button>
-							 <button type="button" class="btn bg-slate-500 text-white w-full hidden" id="quotation-form-cancel-btn">إلغاء التعديل</button>
-						 </div>
+					<form id="add-quotation-form" class="space-y-4">
+						<input type="hidden" id="quotation-id">
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div>
+								<label for="q-customer" class="block text-sm font-medium text-slate-700">العميل</label>
+								<select id="q-customer" class="input" required>
+									<option value="">اختر عميل</option>
+								</select>
+							</div>
+							<div>
+								<label for="q-date" class="block text-sm font-medium text-slate-700">تاريخ عرض السعر</label>
+								<input type="date" id="q-date" class="input" required>
+							</div>
+							<div>
+								<label for="q-expiry-date" class="block text-sm font-medium text-slate-700">تاريخ الانتهاء</label>
+								<input type="date" id="q-expiry-date" class="input">
+							</div>
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium text-slate-700 mb-2">بنود عرض السعر</label>
+							<div id="quotation-items-container" class="space-y-2">
+								<!-- Quotation item rows will be added here dynamically -->
+							</div>
+							<button type="button" id="add-quotation-item-btn" class="mt-2 btn bg-green-500 text-white hover:bg-green-600 text-sm"><i class="fas fa-plus mr-2"></i>إضافة بند</button>
+						</div>
+
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+							<div>
+								<label for="q-notes" class="block text-sm font-medium text-slate-700">ملاحظات</label>
+								<textarea id="q-notes" rows="4" class="input mt-1"></textarea>
+							</div>
+							<div class="space-y-2 p-4 bg-slate-50 rounded-lg">
+								<div class="flex justify-between items-center">
+									<span class="text-slate-600">المجموع الفرعي:</span>
+									<span id="quotation-subtotal" class="font-semibold">0.00</span>
+								</div>
+								<div class="flex justify-between items-center">
+									<label for="q-discount" class="text-slate-600">خصم (%):</label>
+									<input type="number" id="q-discount" value="0" min="0" class="input w-24 text-center">
+								</div>
+								<div class="flex justify-between items-center">
+									<span>قيمة الخصم:</span>
+									<span id="quotation-discount-amount" class="font-semibold text-red-600">-0.00</span>
+								</div>
+								<div class="flex justify-between items-center">
+									<label for="q-tax" class="text-slate-600">ضريبة (%):</label>
+									<input type="number" id="q-tax" value="0" min="0" class="input w-24 text-center">
+								</div>
+								<div class="flex justify-between items-center">
+									<span>قيمة الضريبة:</span>
+									<span id="quotation-tax-amount" class="font-semibold text-green-600">+0.00</span>
+								</div>
+								<div class="flex justify-between items-center text-xl font-bold text-slate-800 border-t pt-2 mt-2">
+									<span>الإجمالي:</span>
+									<span id="quotation-total">0.00</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="flex items-end col-span-full gap-2 pt-4">
+							<button type="submit" class="btn btn-primary w-full" id="quotation-form-submit-btn">حفظ عرض السعر</button>
+							<button type="button" class="btn bg-slate-500 text-white w-full hidden" id="quotation-form-cancel-btn">إلغاء التعديل</button>
+						</div>
 					</form>
 				</div>
 				<div class="data-table-wrapper mt-8">
@@ -939,6 +998,9 @@
 									<th>التاريخ</th>
 									<th>العميل</th>
 									<th>المبلغ الإجمالي</th>
+									<th>الخصم</th>
+                                    <th>الضريبة</th>
+									<th>تاريخ الانتهاء</th>
 									<th>الحالة</th>
 									<th class="no-export">الإجراءات</th>
 								</tr>
@@ -954,34 +1016,70 @@
 				 <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة الفواتير</h2>
 				 <div class="form-section">
 					 <h3 class="text-2xl font-semibold mb-4">إنشاء فاتورة جديدة</h3>
-					 <form id="add-invoice-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+					 <form id="add-invoice-form" class="space-y-4">
+                         <input type="hidden" id="invoice-id">
                          <input type="hidden" id="invoice-source-quotation-id">
-						 <div class="flex flex-col">
-							 <label for="i-date" class="text-slate-600 mb-1">تاريخ الفاتورة</label>
-							 <input type="date" id="i-date" class="input" required>
+						 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div>
+								<label for="i-date" class="block text-sm font-medium text-slate-700">تاريخ الفاتورة</label>
+								<input type="date" id="i-date" class="input" required>
+							</div>
+							<div>
+								<label for="i-customer" class="block text-sm font-medium text-slate-700">العميل</label>
+								<select id="i-customer" class="select" required>
+									<option value="">اختر عميل</option>
+								</select>
+							</div>
 						 </div>
-						 <div class="flex flex-col">
-							 <label for="i-customer" class="text-slate-600 mb-1">العميل</label>
-							 <select id="i-customer" class="select" required>
-								 <option value="">اختر عميل</option>
-							 </select>
-						 </div>
-						 <div class="flex flex-col col-span-full">
-							 <label class="text-slate-600 mb-1">تفاصيل المنتجات</label>
-							 <div id="invoice-items-container" class="space-y-4">
+
+						 <div>
+							 <label class="block text-sm font-medium text-slate-700 mb-2">تفاصيل الفاتورة</label>
+							 <div id="invoice-items-container" class="space-y-2">
 								 <!-- صفوف بنود الفاتورة ستضاف هنا -->
 							 </div>
-							 <div class="flex gap-2 mt-4">
-								 <button type="button" id="add-invoice-item-btn" class="btn btn-primary self-start">إضافة منتج آخر</button>
-								 <button type="button" id="add-manual-invoice-item-btn" class="btn bg-green-600 text-white self-start">إضافة بند يدوي</button>
+							 <div class="flex gap-2 mt-2">
+								 <button type="button" id="add-invoice-item-btn" class="btn btn-primary self-start text-sm"><i class="fas fa-plus mr-2"></i>إضافة منتج</button>
+								 <button type="button" id="add-manual-invoice-item-btn" class="btn bg-green-500 text-white self-start text-sm"><i class="fas fa-edit mr-2"></i>إضافة بند يدوي</button>
 							 </div>
 						 </div>
-						 <div class="flex flex-col col-span-full">
-							 <p class="text-lg font-bold">المجموع الكلي: <span id="invoice-total">0.00</span></p>
-						 </div>
-						 <div class="flex items-end col-span-full">
-							 <button type="submit" class="btn btn-primary w-full">إنشاء الفاتورة</button>
-						 </div>
+
+						 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+                             <div>
+                               <label for="i-notes" class="text-slate-600 mb-1">ملاحظات</label>
+                               <textarea id="i-notes" class="input" rows="3"></textarea>
+                            </div>
+                            <div class="flex flex-col gap-2 p-4 bg-slate-50 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-600">المجموع الفرعي:</span>
+                                    <span id="invoice-subtotal" class="font-semibold">0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <label for="i-discount" class="text-slate-600">خصم (%):</label>
+                                    <input type="number" id="i-discount" value="0" min="0" class="input w-24 text-center">
+                                </div>
+                                <div class="flex justify-between items-center text-red-600">
+                                    <span>قيمة الخصم:</span>
+                                    <span id="invoice-discount-amount" class="font-semibold">-0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <label for="i-tax" class="text-slate-600">ضريبة (%):</label>
+                                    <input type="number" id="i-tax" value="0" min="0" class="input w-24 text-center">
+                                </div>
+                                <div class="flex justify-between items-center text-green-600">
+                                    <span>قيمة الضريبة:</span>
+                                    <span id="invoice-tax-amount" class="font-semibold">+0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xl font-bold text-slate-800 border-t pt-2 mt-2">
+                                    <span>الإجمالي:</span>
+                                    <span id="invoice-total">0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+						<div class="flex items-end col-span-full gap-2 pt-4">
+							<button type="submit" class="btn btn-primary w-full" id="invoice-form-submit-btn">إنشاء الفاتورة</button>
+                            <button type="button" class="btn bg-slate-500 text-white w-full hidden" id="invoice-form-cancel-btn">إلغاء</button>
+						</div>
 					 </form>
 				 </div>
 				<div class="data-table-wrapper mt-8">
@@ -1405,6 +1503,13 @@
 			<button id="invoice-close-btn" class="btn btn-danger bg-slate-500 hover:bg-slate-600">إغلاق</button>
 		</div>
 	</div>
+    <div id="quotation-view-modal" class="fixed z-50 hidden w-full max-w-4xl p-4 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl md:p-8 top-1/2 left-1/2" style="max-height: 90vh; overflow-y: auto;">
+		<div id="quotation-view-content"></div>
+		<div class="flex justify-end gap-4 p-4 mt-4 rounded-b-lg bg-slate-50 no-print">
+			<button id="quotation-print-btn" class="btn btn-primary"><i class="fas fa-print"></i> طباعة / حفظ PDF</button>
+			<button id="quotation-close-btn" class="btn bg-slate-500 hover:bg-slate-600">إغلاق</button>
+		</div>
+	</div>
     <div id="forgot-password-modal" class="fixed z-50 hidden w-full max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg top-1/2 left-1/2">
 		<h3 class="mb-4 text-xl font-bold text-center">إعادة تعيين كلمة المرور</h3>
         <p class="mb-6 text-center text-slate-600">أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة مرورك.</p>
@@ -1450,6 +1555,13 @@
             serverTimestamp,
             increment
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { 
+            getStorage, 
+            ref, 
+            uploadString, 
+            getDownloadURL,
+            deleteObject
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- Firebase Settings ---
         const firebaseConfig = {
@@ -1464,6 +1576,7 @@
         // --- Initialize Firebase ---
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const storage = getStorage(app);
         const auth = getAuth(app);
         // A secondary app instance for creating users without signing out the admin
         const secondaryApp = initializeApp(firebaseConfig, "secondary");
@@ -1476,6 +1589,7 @@
         let salesDistributionChart = null;
         let monthlySalesChart = null;
         let currentInvoiceId = null;
+        let currentQuotationId = null;
         let currentUser = {
             auth: null,
             role: 'visitor' // Default role
@@ -1649,12 +1763,20 @@
         // --- Firebase Core Functions ---
         async function addOrUpdateItem(collectionName, data, id = null, actionDetails = null) {
             try {
-                if (id) {
-                    await setDoc(doc(db, collectionName, id), data, { merge: true });
-                    if(actionDetails) await logActivity(actionDetails.update, `ID: ${id}`);
-                } else {
-                    const docRef = await addDoc(collection(db, collectionName), data);
-                    if(actionDetails) await logActivity(actionDetails.add, `ID: ${docRef.id}`);
+                const action = id ? 'update' : 'add';
+                const docRef = id ? doc(db, collectionName, id) : doc(collection(db, collectionName));
+                
+                if(action === 'add') {
+                    data.createdAt = serverTimestamp();
+                }
+                data.updatedAt = serverTimestamp();
+
+                await setDoc(docRef, data, { merge: true });
+
+                if (actionDetails) {
+                    const logAction = action === 'add' ? actionDetails.add : actionDetails.update;
+                    const logId = id || docRef.id;
+                    await logActivity(logAction, `ID: ${logId}`);
                 }
                 return true;
             } catch (e) {
@@ -2063,16 +2185,30 @@
             tableBody.innerHTML = '';
             quotations.forEach(q => {
                 const row = tableBody.insertRow();
-                const statusClasses = q.status === 'converted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
-                const statusText = q.status === 'converted' ? 'تم تحويلها' : 'جديد';
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                const isExpired = q.expiryDate && new Date(q.expiryDate) < today;
+
+                const statusClasses = q.status === 'converted' 
+                    ? 'bg-green-100 text-green-800' 
+                    : isExpired ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
+                const statusText = q.status === 'converted' 
+                    ? 'تم تحويلها' 
+                    : isExpired ? 'منتهية الصلاحية' : 'جديد';
+
                 row.innerHTML = `
                     <td>${q.quotationNumber}</td>
                     <td class="whitespace-nowrap">${q.date}</td>
                     <td class="whitespace-nowrap">${q.customerName}</td>
                     <td>${(q.totalAmount || 0).toFixed(2)} ${appSettings.currency}</td>
+                    <td>${q.discount || 0}%</td>
+                    <td>${q.tax || 0}%</td>
+                    <td>${q.expiryDate || 'N/A'}</td>
                     <td><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClasses}">${statusText}</span></td>
                     <td class="whitespace-nowrap no-export">
-                        ${q.status !== 'converted' ? `<button class="btn bg-green-500 text-white text-sm convert-quotation-btn" data-id="${q.id}">تحويل إلى فاتورة</button>` : ''}
+                        <button class="btn bg-blue-500 text-white text-sm view-quotation-btn" data-id="${q.id}" data-category="quotation">عرض</button>
+                        <button class="btn btn-edit text-sm edit-btn" data-id="${q.id}" data-category="quotation">تعديل</button>
+                        ${q.status !== 'converted' ? `<button class="btn bg-green-500 text-white text-sm convert-quotation-btn" data-id="${q.id}" data-category="quotation">تحويل إلى فاتورة</button>` : ''}
                         <button class="btn btn-danger text-sm delete-btn" data-id="${q.id}" data-category="quotations">حذف</button>
                     </td>`;
             });
@@ -2547,14 +2683,25 @@
             document.getElementById('p-type').addEventListener('change', togglePurchaseFields);
             document.getElementById('add-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(false));
             document.getElementById('add-manual-invoice-item-btn').addEventListener('click', () => addInvoiceItemRow(true));
-            document.getElementById('invoice-items-container').addEventListener('change', updateInvoiceTotal);
+            document.getElementById('invoice-items-container').addEventListener('input', updateInvoiceTotal);
+            document.getElementById('i-discount').addEventListener('input', updateInvoiceTotal);
+            document.getElementById('i-tax').addEventListener('input', updateInvoiceTotal);
+            
             document.getElementById('add-quotation-item-btn').addEventListener('click', () => addQuotationItemRow());
-            document.getElementById('quotation-items-container').addEventListener('change', updateQuotationTotal);
+            document.getElementById('quotation-items-container').addEventListener('input', updateQuotationTotal);
+            document.getElementById('q-discount').addEventListener('input', updateQuotationTotal);
+            document.getElementById('q-tax').addEventListener('input', updateQuotationTotal);
+
             document.getElementById('invoice-close-btn').addEventListener('click', () => {
                 document.getElementById('invoice-view-modal').classList.add('hidden');
                 document.getElementById('custom-overlay').classList.add('hidden');
             });
+            document.getElementById('quotation-close-btn').addEventListener('click', () => {
+                document.getElementById('quotation-view-modal').classList.add('hidden');
+                document.getElementById('custom-overlay').classList.add('hidden');
+            });
             document.getElementById('invoice-print-btn').addEventListener('click', ()=>exportToPdfWithArabic('printable-invoice', 'فاتورة', `invoice-${currentInvoiceId}.pdf`));
+            document.getElementById('quotation-print-btn').addEventListener('click', ()=>exportToPdfWithArabic('printable-quotation', 'عرض سعر', `quotation-${currentQuotationId}.pdf`));
 
             document.getElementById('print-report-btn').addEventListener('click', () => window.print());
             document.getElementById('export-report-pdf-btn').addEventListener('click', () => exportToPdfWithArabic('printable-content', 'تقرير الأداء', 'PerformanceReport.pdf'));
@@ -2593,6 +2740,9 @@
 
             document.getElementById('export-backup-btn').addEventListener('click', exportBackup);
             document.getElementById('import-backup-input').addEventListener('change', handleImportBackup);
+            
+            document.getElementById('setting-company-logo').addEventListener('change', handleLogoUpload);
+            document.getElementById('remove-logo-btn').addEventListener('click', handleRemoveLogo);
         }
         
         async function handleLogin(e) {
@@ -2643,12 +2793,14 @@
 
             const category = target.dataset.category;
             if (target.classList.contains('view-invoice-btn')) { if (id) await viewInvoice(id); return; }
+            if (target.classList.contains('view-quotation-btn')) { if (id) await viewQuotation(id); return; }
             if (target.classList.contains('create-invoice-from-sale-btn')) { if (id) await createInvoiceFromSale(id); return; }
             if (target.classList.contains('convert-quotation-btn')) { if (id) await convertQuotationToInvoice(id); return; }
             if (!category) return;
 
             let collectionName = category.endsWith('s') ? category : category + 's';
             if (category === 'user') collectionName = 'users';
+            if (category === 'quotation') collectionName = 'quotations';
 
 
             if (target.classList.contains('edit-btn')) {
@@ -2656,10 +2808,11 @@
                 if (itemDoc.exists()) {
                     const item = { id: itemDoc.id, ...itemDoc.data()};
                     itemToEdit = { ...item, category };
-                    const editFunctions = { product: prepareProductEdit, sale: prepareSaleEdit, purchase: preparePurchaseEdit, expense: prepareExpenseEdit, customer: prepareCustomerEdit, supplier: prepareSupplierEdit, employee: prepareEmployeeEdit, warehouse: prepareWarehouseEdit };
+                    const editFunctions = { product: prepareProductEdit, sale: prepareSaleEdit, purchase: preparePurchaseEdit, expense: prepareExpenseEdit, customer: prepareCustomerEdit, supplier: prepareSupplierEdit, employee: prepareEmployeeEdit, warehouse: prepareWarehouseEdit, quotation: prepareQuotationEdit };
                     if (editFunctions[category]) {
                         editFunctions[category](item);
-                        switchTab(collectionName === 'employees' || collectionName === 'warehouses' ? 'settings' : collectionName);
+                        const targetTab = ['employee', 'warehouse', 'user'].includes(category) ? 'settings' : collectionName;
+                        switchTab(targetTab);
                     }
                 }
             } else if (target.classList.contains('delete-btn')) {
@@ -3105,6 +3258,7 @@
 
         async function handleQuotationFormSubmit(e) {
             e.preventDefault();
+            const id = document.getElementById('quotation-id').value;
             const customerId = document.getElementById('q-customer').value;
             if (!customerId) return showMessage('الرجاء اختيار عميل.');
             const customerDoc = await getDoc(doc(db, 'customers', customerId));
@@ -3113,84 +3267,119 @@
             const quotationItems = [];
             document.querySelectorAll('#quotation-items-container .quotation-item-row').forEach(row => {
                 const item = {
-                    productName: row.querySelector('.q-item-name').value,
-                    qty: Math.abs(parseInt(row.querySelector('.q-item-qty').value)),
-                    price: Math.abs(parseFloat(row.querySelector('.q-item-price').value))
+                    productName: row.querySelector('.q-item-name').value.trim(),
+                    qty: Math.abs(parseInt(row.querySelector('.q-item-qty').value) || 0),
+                    price: Math.abs(parseFloat(row.querySelector('.q-item-price').value) || 0)
                 };
                 item.total = item.qty * item.price;
                 quotationItems.push(item);
             });
 
-            if (quotationItems.some(item => !item.productName || !item.qty || !item.price)) {
+            if (quotationItems.length === 0 || quotationItems.some(item => !item.productName || !item.qty || isNaN(item.price))) {
                 return showMessage('الرجاء تعبئة جميع الحقول في بنود عرض السعر.');
             }
 
-            const totalAmount = quotationItems.reduce((sum, item) => sum + item.total, 0);
-            const settingsDocRef = doc(db, 'settings', 'appConfig');
+            const subtotal = quotationItems.reduce((sum, item) => sum + item.total, 0);
+            const discount = parseFloat(document.getElementById('q-discount').value) || 0;
+            const tax = parseFloat(document.getElementById('q-tax').value) || 0;
+            const discountAmount = subtotal * (discount / 100);
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const taxAmount = subtotalAfterDiscount * (tax / 100);
+            const finalTotal = subtotalAfterDiscount + taxAmount;
             
-            try {
-                let newQuotationNumber;
-                await runTransaction(db, async (transaction) => {
-                    const settingsDoc = await transaction.get(settingsDocRef);
-                    newQuotationNumber = (settingsDoc.data()?.lastQuotationNumber || 0) + 1;
-                    
-                    const quotationData = {
-                        quotationNumber: newQuotationNumber,
-                        date: document.getElementById('q-date').value,
-                        customerId,
-                        customerName: customerDoc.data().name,
-                        items: quotationItems,
-                        totalAmount,
-                        status: 'new' // 'new', 'converted', 'canceled'
-                    };
-                    
-                    const newQuotationRef = doc(collection(db, 'quotations'));
-                    transaction.set(newQuotationRef, quotationData);
-                    transaction.update(settingsDocRef, { lastQuotationNumber: newQuotationNumber });
-                });
+            const quotationData = {
+                date: document.getElementById('q-date').value,
+                expiryDate: document.getElementById('q-expiry-date').value,
+                customerId,
+                customerName: customerDoc.data().name,
+                customerDetails: customerDoc.data(),
+                items: quotationItems,
+                subtotal: subtotal,
+                discount: discount,
+                tax: tax,
+                totalAmount: finalTotal,
+                notes: document.getElementById('q-notes').value.trim(),
+                status: 'new'
+            };
 
-                await logActivity('إنشاء عرض سعر', `رقم: ${newQuotationNumber}, للعميل: ${customerDoc.data().name}`);
-                resetForm('add-quotation-form');
-                await refreshQuotations();
-                showMessage(`تم إنشاء عرض السعر رقم ${newQuotationNumber} بنجاح.`);
+            if (id) {
+                 quotationData.quotationNumber = itemToEdit.quotationNumber; // Preserve original number on edit
+                 if (await addOrUpdateItem('quotations', quotationData, id, { update: `تعديل عرض السعر رقم: ${quotationData.quotationNumber}` })) {
+                    resetForm('add-quotation-form');
+                    await refreshQuotations();
+                    showMessage(`تم تحديث عرض السعر بنجاح.`);
+                }
+            } else {
+                const settingsDocRef = doc(db, 'settings', 'appConfig');
+                try {
+                    let newQuotationNumber;
+                    await runTransaction(db, async (transaction) => {
+                        const settingsDoc = await transaction.get(settingsDocRef);
+                        newQuotationNumber = (settingsDoc.data()?.lastQuotationNumber || 0) + 1;
+                        quotationData.quotationNumber = newQuotationNumber;
+                        
+                        const newQuotationRef = doc(collection(db, 'quotations'));
+                        transaction.set(newQuotationRef, quotationData);
+                        transaction.update(settingsDocRef, { lastQuotationNumber: increment(1) });
+                    });
 
-            } catch (error) {
-                console.error("Quotation creation failed: ", error);
-                showMessage("فشل إنشاء عرض السعر. الرجاء المحاولة مرة أخرى.");
+                    await logActivity('إنشاء عرض سعر', `رقم: ${newQuotationNumber}, للعميل: ${customerDoc.data().name}`);
+                    resetForm('add-quotation-form');
+                    await refreshQuotations();
+                    showMessage(`تم إنشاء عرض السعر رقم ${newQuotationNumber} بنجاح.`);
+
+                } catch (error) {
+                    console.error("Quotation creation failed: ", error);
+                    showMessage("فشل إنشاء عرض السعر. الرجاء المحاولة مرة أخرى.");
+                }
             }
         }
 
         async function handleInvoiceFormSubmit(e) {
             e.preventDefault();
             const customerId = document.getElementById('i-customer').value;
+            if (!customerId) {
+                showMessage("الرجاء اختيار العميل.");
+                return;
+            }
             const customerDoc = await getDoc(doc(db, 'customers', customerId));
-            if (!customerDoc.exists()) return showMessage('العميل المحدد غير موجود');
+            if (!customerDoc.exists()) {
+                showMessage('العميل المحدد غير موجود.');
+                return;
+            }
+            
             const sourceQuotationId = document.getElementById('invoice-source-quotation-id').value;
 
-
             const invoiceItems = [];
-            document.querySelectorAll('.invoice-item-row').forEach(row => {
+            let formIsValid = true;
+            document.querySelectorAll('#invoice-items-container .invoice-item-row').forEach(row => {
                 const type = row.dataset.type;
                 let item = { type };
                 if (type === 'product') {
-					item.warehouseId = row.querySelector('.i-warehouse-select').value;
-					const warehouse = warehousesCache.find(w => w.id === item.warehouseId);
-					item.warehouseName = warehouse ? warehouse.name : '';
+                    item.warehouseId = row.querySelector('.i-warehouse-select').value;
+                    const warehouse = warehousesCache.find(w => w.id === item.warehouseId);
+                    item.warehouseName = warehouse ? warehouse.name : '';
                     item.productId = row.querySelector('.i-product-select').value;
-                    item.productName = row.querySelector('.i-product-select').options[row.querySelector('.i-product-select').selectedIndex].text;
+                    item.productName = item.productId ? productsCache.find(p => p.id === item.productId)?.name : '';
                     item.qty = Math.abs(parseInt(row.querySelector('.i-qty').value));
                     item.price = Math.abs(parseFloat(row.querySelector('.i-price').value));
+                    if (!item.warehouseId || !item.productId || isNaN(item.qty) || isNaN(item.price)) {
+                        formIsValid = false;
+                    }
                 } else {
                     item.productName = row.querySelector('.i-manual-name').value;
                     item.qty = Math.abs(parseInt(row.querySelector('.i-manual-qty').value)) || 1;
                     item.price = Math.abs(parseFloat(row.querySelector('.i-manual-price').value));
+                     if (!item.productName || isNaN(item.qty) || isNaN(item.price)) {
+                        formIsValid = false;
+                    }
                 }
                 item.total = item.qty * item.price;
                 invoiceItems.push(item);
             });
 
-            if (invoiceItems.some(item => !item.productName || !item.price || !item.qty )) {
-                return showMessage('الرجاء تعبئة جميع الحقول في بنود الفاتورة.');
+            if (!formIsValid || invoiceItems.length === 0) {
+                return showMessage('الرجاء تعبئة جميع الحقول في بنود الفاتورة بشكل صحيح.');
             }
 
             for (const item of invoiceItems) {
@@ -3202,7 +3391,7 @@
                 }
             }
 
-            const totalAmount = invoiceItems.reduce((sum, item) => sum + item.total, 0);
+            const totalAmount = parseFloat(document.getElementById('invoice-total').textContent);
             
             try {
                 let newInvoiceNumber;
@@ -3218,7 +3407,11 @@
                         customerName: customerDoc.data().name,
                         customerDetails: customerDoc.data(),
                         items: invoiceItems,
-                        totalAmount,
+                        subtotal: parseFloat(document.getElementById('invoice-subtotal').textContent),
+                        discount: parseFloat(document.getElementById('i-discount').value) || 0,
+                        tax: parseFloat(document.getElementById('i-tax').value) || 0,
+                        totalAmount: totalAmount,
+                        notes: document.getElementById('i-notes').value,
                         sourceQuotationId: sourceQuotationId || null
                     };
 
@@ -3238,6 +3431,8 @@
                             customerName: invoiceData.customerName,
                             name: item.productName,
                             price: item.price,
+                            qty: item.qty,
+                            amount: item.total,
                         };
 
                         if (item.type === 'product') {
@@ -3247,21 +3442,18 @@
                             
                             Object.assign(saleData, {
                                 type: 'product',
-                                qty: item.qty,
                                 cost: product.cost || 0,
-                                amount: item.total,
                                 productId: item.productId,
 								warehouseId: item.warehouseId,
 								warehouseName: item.warehouseName
                             });
-
                         } else {
-                            Object.assign(saleData, {
+                             Object.assign(saleData, {
                                 type: 'service',
-                                qty: item.qty,
-                                cost: 0,
-                                amount: item.total,
-                                productId: null
+                                cost: 0, // Assuming no cost for manual items/services
+                                productId: null,
+                                warehouseId: null,
+                                warehouseName: ''
                             });
                         }
                         const newSaleRef = doc(collection(db, 'sales'));
@@ -3307,21 +3499,33 @@
              const title = document.getElementById(`${category}-form-title`);
              const submitBtn = document.getElementById(`${category}-form-submit-btn`);
              const cancelBtn = document.getElementById(`${category}-form-cancel-btn`);
-             const originalTitles = { 'product': 'إضافة منتج جديد', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل شراء جديد', 'expense': 'تسجيل مصروف جديد', 'customer': 'إضافة عميل جديد', 'supplier': 'إضافة مورد جديد', 'employee': 'إضافة موظف جديد', 'warehouse': 'إضافة مستودع جديد', 'return': 'تسجيل عملية إرجاع', 'quotation': 'إنشاء عرض سعر جديد' };
-             const originalButtons = { 'product': 'إضافة المنتج', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل الشراء', 'expense': 'تسجيل المصروف', 'customer': 'إضافة العميل', 'supplier': 'إضافة المورد', 'employee': 'إضافة موظف', 'warehouse': 'إضافة مستودع', 'return': 'تسجيل الإرجاع', 'quotation': 'إنشاء عرض السعر' };
+             const originalTitles = { 'product': 'إضافة منتج جديد', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل شراء جديد', 'expense': 'تسجيل مصروف جديد', 'customer': 'إضافة عميل جديد', 'supplier': 'إضافة مورد جديد', 'employee': 'إضافة موظف جديد', 'warehouse': 'إضافة مستودع جديد', 'return': 'تسجيل عملية إرجاع', 'quotation': 'إنشاء عرض سعر جديد', 'invoice': 'إنشاء فاتورة جديدة' };
+             const originalButtons = { 'product': 'إضافة المنتج', 'sale': 'تسجيل عملية البيع', 'purchase': 'تسجيل الشراء', 'expense': 'تسجيل المصروف', 'customer': 'إضافة العميل', 'supplier': 'إضافة المورد', 'employee': 'إضافة موظف', 'warehouse': 'إضافة مستودع', 'return': 'تسجيل الإرجاع', 'quotation': 'حفظ عرض السعر', 'invoice': 'إنشاء الفاتورة' };
              if(title) title.textContent = originalTitles[category];
              if(submitBtn) submitBtn.textContent = originalButtons[category];
              if(cancelBtn) cancelBtn.classList.add('hidden');
-             if(category === 'sale') handleSaleTypeChange();
-             if(category === 'expense') handleExpenseTypeChange();
-             if(category === 'purchase') togglePurchaseFields();
-             if(category === 'quotation') {
+             
+             if (category === 'sale') {
+                handleSaleTypeChange();
+             } else if (category === 'expense') {
+                handleExpenseTypeChange();
+             } else if (category === 'purchase') {
+                togglePurchaseFields();
+             } else if (category === 'quotation') {
                 document.getElementById('quotation-items-container').innerHTML = '';
                 addQuotationItemRow();
+                document.getElementById('q-discount').value = 0;
+                document.getElementById('q-tax').value = 0;
+                document.getElementById('q-notes').value = '';
                 updateQuotationTotal();
-             }
-             if(category === 'invoice') {
+             } else if (category === 'invoice') {
                 document.getElementById('invoice-source-quotation-id').value = '';
+                document.getElementById('invoice-items-container').innerHTML = '';
+                addInvoiceItemRow(false);
+                document.getElementById('i-discount').value = 0;
+                document.getElementById('i-tax').value = 0;
+                document.getElementById('i-notes').value = '';
+                updateInvoiceTotal();
              }
              itemToEdit = null;
         }
@@ -3427,14 +3631,33 @@
             document.getElementById('w-name').value = item.name;
         }
 
-        function addQuotationItemRow() {
+        function prepareQuotationEdit(quote) {
+            prepareFormForEdit('quotation', quote);
+            
+            document.getElementById('quotation-id').value = quote.id;
+            document.getElementById('q-customer').value = quote.customerId;
+            document.getElementById('q-date').value = quote.date;
+            document.getElementById('q-expiry-date').value = quote.expiryDate;
+            document.getElementById('q-notes').value = quote.notes || '';
+            document.getElementById('q-discount').value = quote.discount || 0;
+            document.getElementById('q-tax').value = quote.tax || 0;
+            
+            const itemsContainer = document.getElementById('quotation-items-container');
+            itemsContainer.innerHTML = '';
+            quote.items.forEach(item => {
+                addQuotationItemRow(item);
+            });
+            updateQuotationTotal();
+        }
+
+        function addQuotationItemRow(item = null) {
             const container = document.getElementById('quotation-items-container');
             const row = document.createElement('div');
             row.className = 'grid grid-cols-12 gap-2 items-center quotation-item-row';
             row.innerHTML = `
-                <div class="col-span-5"><input type="text" class="input q-item-name" placeholder="اسم البند/الخدمة"></div>
-                <div class="col-span-3"><input type="number" step="1" min="1" class="input q-item-qty" placeholder="الكمية" value="1"></div>
-                <div class="col-span-3"><input type="number" step="0.01" min="0" class="input q-item-price" placeholder="السعر"></div>
+                <div class="col-span-5"><input type="text" class="input q-item-name" placeholder="اسم البند/الخدمة" value="${item ? item.productName : ''}" required></div>
+                <div class="col-span-3"><input type="number" step="1" min="1" class="input q-item-qty" placeholder="الكمية" value="${item ? item.qty : '1'}" required></div>
+                <div class="col-span-3"><input type="number" step="0.01" min="0" class="input q-item-price" placeholder="السعر" value="${item ? item.price : ''}" required></div>
                 <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-quotation-item-btn"><i class="fas fa-trash"></i></button></div>
             `;
             container.appendChild(row);
@@ -3445,38 +3668,54 @@
         }
 
         function updateQuotationTotal() {
-            let total = 0;
-            document.querySelectorAll('.quotation-item-row').forEach(row => {
-                const qty = Math.abs(parseInt(row.querySelector('.q-item-qty').value)) || 0;
-                const price = Math.abs(parseFloat(row.querySelector('.q-item-price').value)) || 0;
-                total += qty * price;
+            let subtotal = 0;
+            document.querySelectorAll('#quotation-items-container .quotation-item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.q-item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.q-item-price').value) || 0;
+                subtotal += qty * price;
             });
-            document.getElementById('quotation-total').textContent = `${total.toFixed(2)} ${appSettings.currency}`;
+            
+            const discountPercent = parseFloat(document.getElementById('q-discount').value) || 0;
+            const taxPercent = parseFloat(document.getElementById('q-tax').value) || 0;
+
+            const discountAmount = subtotal * (discountPercent / 100);
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const taxAmount = subtotalAfterDiscount * (taxPercent / 100);
+            const finalTotal = subtotalAfterDiscount + taxAmount;
+
+            document.getElementById('quotation-subtotal').textContent = `${subtotal.toFixed(2)} ${appSettings.currency}`;
+            document.getElementById('quotation-discount-amount').textContent = `-${discountAmount.toFixed(2)} ${appSettings.currency}`;
+            document.getElementById('quotation-tax-amount').textContent = `+${taxAmount.toFixed(2)} ${appSettings.currency}`;
+            document.getElementById('quotation-total').textContent = `${finalTotal.toFixed(2)} ${appSettings.currency}`;
         }
 
         async function convertQuotationToInvoice(quotationId) {
             const quotationDoc = await getDoc(doc(db, 'quotations', quotationId));
             if (!quotationDoc.exists()) return showMessage('عرض السعر غير موجود.');
-            const quotation = quotationDoc.data();
+            const quote = quotationDoc.data();
 
             switchTab('invoices');
             resetForm('add-invoice-form');
 
             document.getElementById('invoice-source-quotation-id').value = quotationId;
             document.getElementById('i-date').value = getLocalDate();
-            document.getElementById('i-customer').value = quotation.customerId;
+            document.getElementById('i-customer').value = quote.customerId;
+            document.getElementById('i-discount').value = quote.discount || 0;
+            document.getElementById('i-tax').value = quote.tax || 0;
+            document.getElementById('i-notes').value = quote.notes || '';
+
 
             const itemsContainer = document.getElementById('invoice-items-container');
-            itemsContainer.innerHTML = ''; // Clear existing items
+            itemsContainer.innerHTML = ''; 
 
-            for (const item of quotation.items) {
-                await addInvoiceItemRow(true); // Add as manual item
+            for (const item of quote.items) {
+                 addInvoiceItemRow(true); // Add as manual item
                 const newRow = itemsContainer.lastElementChild;
                 newRow.querySelector('.i-manual-name').value = item.productName;
                 newRow.querySelector('.i-manual-qty').value = item.qty;
                 newRow.querySelector('.i-manual-price').value = item.price;
             }
-
+            
             updateInvoiceTotal();
             showMessage('تم نقل بيانات عرض السعر إلى فاتورة جديدة. يرجى المراجعة والضغط على "إنشاء الفاتورة".');
         }
@@ -3489,58 +3728,73 @@
 
             if (isManual) {
                 row.innerHTML = `
-                    <div class="col-span-5"><input type="text" class="input i-manual-name" placeholder="اسم البند اليدوي"></div>
-                    <div class="col-span-3"><input type="number" step="1" min="1" class="input i-manual-qty" placeholder="الكمية" value="1"></div>
-                    <div class="col-span-3"><input type="number" step="0.01" min="0" class="input i-manual-price" placeholder="السعر"></div>
+                    <div class="col-span-5"><input type="text" class="input i-manual-name" placeholder="اسم البند اليدوي" required></div>
+                    <div class="col-span-3"><input type="number" step="1" min="1" class="input i-manual-qty" placeholder="الكمية" value="1" required></div>
+                    <div class="col-span-3"><input type="number" step="0.01" min="0" class="input i-manual-price" placeholder="السعر" required></div>
                     <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
                 `;
             } else {
                  row.innerHTML = `
-					<div class="col-span-3"><select class="select i-warehouse-select"><option value="">اختر مستودع</option></select></div>
-                    <div class="col-span-4"><select class="select i-product-select"><option value="">اختر منتج</option></select></div>
-                    <div class="col-span-2"><input type="number" class="input i-qty" placeholder="الكمية" min="1" value="1"></div>
-                    <div class="col-span-2"><input type="number" step="0.01" min="0" class="input i-price" placeholder="سعر البيع"></div>
+					<div class="col-span-3"><select class="select i-warehouse-select" required><option value="">اختر مستودع</option></select></div>
+                    <div class="col-span-4"><select class="select i-product-select" required><option value="">اختر منتج</option></select></div>
+                    <div class="col-span-2"><input type="number" class="input i-qty" placeholder="الكمية" min="1" value="1" required></div>
+                    <div class="col-span-2"><input type="number" step="0.01" min="0" class="input i-price" placeholder="سعر البيع" required></div>
                     <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
                 `;
             }
             container.appendChild(row);
             if (!isManual) {
 				const warehouseSelect = row.querySelector('.i-warehouse-select');
-				populateSelect(warehouseSelect.id, warehousesCache, 'id', 'name', null, true);
+				populateSelect(warehouseSelect, warehousesCache, 'id', 'name', null, true);
 				
-				// Add a unique ID to be able to re-select it later
-				const uniqueId = `i-warehouse-select-${Date.now()}`;
-				warehouseSelect.id = uniqueId;
-
 				warehouseSelect.addEventListener('change', async (e) => {
 					const warehouseId = e.target.value;
 					const productSelect = row.querySelector('.i-product-select');
+                    productSelect.innerHTML = '<option value="">جاري التحميل...</option>';
 					const productsInWarehouse = productsCache.filter(p => p.warehouseId === warehouseId);
-					populateSelect(productSelect.id, productsInWarehouse, 'id', 'name', null, true);
+					populateSelect(productSelect, productsInWarehouse, 'id', 'name', (p) => `${p.name} (المتاح: ${p.qty})`, true);
 					row.dataset.warehouseId = warehouseId;
 				});
 
-				// Also add unique ID to product select
-				row.querySelector('.i-product-select').id = `i-product-select-${Date.now()}`;
+                const productSelect = row.querySelector('.i-product-select');
+                productSelect.addEventListener('change', (e) => {
+                    const productId = e.target.value;
+                    const product = productsCache.find(p => p.id === productId);
+                    if (product) {
+                        row.querySelector('.i-price').value = product.price || '';
+                    }
+                });
 			}
+
+            row.querySelectorAll('input').forEach(input => input.addEventListener('input', updateInvoiceTotal));
             row.querySelector('.remove-invoice-item-btn').addEventListener('click', () => { row.remove(); updateInvoiceTotal(); });
         }
         
         function updateInvoiceTotal() {
-            let total = 0;
+            let subtotal = 0;
             document.querySelectorAll('.invoice-item-row').forEach(row => {
                 const type = row.dataset.type;
                 let qty, price;
                 if (type === 'product') {
-                    qty = Math.abs(parseInt(row.querySelector('.i-qty').value)) || 0;
-                    price = Math.abs(parseFloat(row.querySelector('.i-price').value)) || 0;
+                    qty = parseFloat(row.querySelector('.i-qty').value) || 0;
+                    price = parseFloat(row.querySelector('.i-price').value) || 0;
                 } else {
-                    qty = Math.abs(parseInt(row.querySelector('.i-manual-qty').value)) || 0;
-                    price = Math.abs(parseFloat(row.querySelector('.i-manual-price').value)) || 0;
+                    qty = parseFloat(row.querySelector('.i-manual-qty').value) || 0;
+                    price = parseFloat(row.querySelector('.i-manual-price').value) || 0;
                 }
-                total += qty * price;
+                subtotal += qty * price;
             });
-            document.getElementById('invoice-total').textContent = `${total.toFixed(2)} ${appSettings.currency}`;
+            const discountPercent = parseFloat(document.getElementById('i-discount').value) || 0;
+            const taxPercent = parseFloat(document.getElementById('i-tax').value) || 0;
+            const discountAmount = subtotal * (discountPercent / 100);
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const taxAmount = subtotalAfterDiscount * (taxPercent / 100);
+            const finalTotal = subtotalAfterDiscount + taxAmount;
+
+            document.getElementById('invoice-subtotal').textContent = `${subtotal.toFixed(2)} ${appSettings.currency}`;
+            document.getElementById('invoice-discount-amount').textContent = `-${discountAmount.toFixed(2)} ${appSettings.currency}`;
+            document.getElementById('invoice-tax-amount').textContent = `+${taxAmount.toFixed(2)} ${appSettings.currency}`;
+            document.getElementById('invoice-total').textContent = `${finalTotal.toFixed(2)} ${appSettings.currency}`;
         }
         
         async function viewInvoice(invoiceId) {
@@ -3551,53 +3805,81 @@
              const contentEl = document.getElementById('invoice-view-content');
              const logoData = localStorage.getItem('companyLogo');
              const logoImgHtml = logoData ? `<img src="${logoData}" alt="Company Logo" class="max-h-16 mb-4">` : '';
+             
+             const subtotal = invoice.subtotal || invoice.items.reduce((sum, item) => sum + item.total, 0);
+             const discount = invoice.discount || 0;
+             const tax = invoice.tax || 0;
+             const discountAmount = subtotal * (discount / 100);
+             const taxAmount = (subtotal - discountAmount) * (tax / 100);
+             const totalAmount = invoice.totalAmount;
+             
              contentEl.innerHTML = `
                  <div id="printable-invoice">
-                     <div class="p-8">
+                     <div class="p-8 text-right">
                          <div class="flex justify-between items-start mb-8">
                              <div>
                                  ${logoImgHtml}
-                                 <h2 class="text-3xl font-bold text-sky-600">${appSettings.companyName}</h2>
+                                 <h2 class="text-2xl font-bold text-sky-600">${appSettings.companyName}</h2>
                                  <p>${appSettings.companyAddress || ''}</p>
                                  <p>${appSettings.companyPhone || ''}</p>
                              </div>
-                             <div class="text-right">
+                             <div class="text-left">
                                  <h3 class="text-2xl font-bold">فاتورة</h3>
-                                 <p>رقم: ${invoice.invoiceNumber}</p>
+                                 <p>رقم الفاتورة: #${invoice.invoiceNumber}</p>
                                  <p>التاريخ: ${invoice.date}</p>
                              </div>
                          </div>
                          <div class="mb-8 p-4 bg-slate-50 rounded-lg">
                              <h4 class="font-bold mb-2">فاتورة إلى:</h4>
                              <p>${invoice.customerName}</p>
-                             <p>${invoice.customerDetails.address || ''}</p>
-                             <p>${invoice.customerDetails.phone || ''}</p>
+                             <p>${invoice.customerDetails?.address || ''}</p>
+                             <p>${invoice.customerDetails?.phone || ''}</p>
                          </div>
-                         <table class="w-full text-right mb-8">
+                         <table class="w-full text-right mb-4">
                              <thead class="bg-slate-100">
                                  <tr>
-                                     <th class="p-2">البند</th>
-									 <th class="p-2">المستودع</th>
-                                     <th class="p-2">الكمية</th>
-                                     <th class="p-2">السعر</th>
-                                     <th class="p-2">الإجمالي</th>
+                                     <th class="p-2 text-right">البند</th>
+									 <th class="p-2 text-center">الكمية</th>
+                                     <th class="p-2 text-center">سعر الوحدة</th>
+                                     <th class="p-2 text-left">الإجمالي</th>
                                  </tr>
                              </thead>
                              <tbody>
                                  ${invoice.items.map(item => `
                                      <tr class="border-b">
                                          <td class="p-2">${item.productName}</td>
-										 <td class="p-2">${item.warehouseName || '-'}</td>
-                                         <td class="p-2">${item.qty}</td>
-                                         <td class="p-2">${item.price.toFixed(2)}</td>
-                                         <td class="p-2">${(item.qty * item.price).toFixed(2)}</td>
+										 <td class="p-2 text-center">${item.qty}</td>
+                                         <td class="p-2 text-center">${(item.price || 0).toFixed(2)}</td>
+                                         <td class="p-2 text-left">${(item.total || 0).toFixed(2)}</td>
                                      </tr>
                                  `).join('')}
                              </tbody>
                          </table>
-                         <div class="text-left">
-                             <p class="text-xl font-bold">المجموع الكلي: ${invoice.totalAmount.toFixed(2)} ${appSettings.currency}</p>
+                         <div class="flex justify-end">
+                            <div class="w-full md:w-1/2">
+                                <table class="w-full">
+                                    <tbody>
+                                        <tr>
+                                            <td class="p-2 font-semibold">المجموع الفرعي:</td>
+                                            <td class="p-2 text-left">${subtotal.toFixed(2)} ${appSettings.currency}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 font-semibold">الخصم (${discount}%):</td>
+                                            <td class="p-2 text-left text-red-600">-${discountAmount.toFixed(2)} ${appSettings.currency}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 font-semibold">الضريبة (${tax}%):</td>
+                                            <td class="p-2 text-left text-green-600">+${taxAmount.toFixed(2)} ${appSettings.currency}</td>
+                                        </tr>
+                                        <tr class="border-t-2 font-bold text-lg">
+                                            <td class="p-2">الإجمالي:</td>
+                                            <td class="p-2 text-left">${totalAmount.toFixed(2)} ${appSettings.currency}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                          </div>
+                         ${invoice.notes ? `<div class="mt-8 pt-4 border-t"><h4 class="font-bold mb-2">ملاحظات:</h4><p class="text-slate-600">${invoice.notes}</p></div>` : ''}
                      </div>
                  </div>
              `;
@@ -3605,6 +3887,97 @@
             document.getElementById('custom-overlay').classList.remove('hidden');
         }
         
+        async function viewQuotation(quotationId) {
+             const quotationDoc = await getDoc(doc(db, 'quotations', quotationId));
+             if (!quotationDoc.exists()) return showMessage('عرض السعر غير موجود');
+             const quote = quotationDoc.data();
+             currentQuotationId = quotationId;
+             const contentEl = document.getElementById('quotation-view-content');
+             const logoData = localStorage.getItem('companyLogo');
+             const logoImgHtml = logoData ? `<img src="${logoData}" alt="Company Logo" class="max-h-16 mb-4">` : '';
+             
+             const subtotal = quote.subtotal || quote.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+             const discount = quote.discount || 0;
+             const tax = quote.tax || 0;
+             const discountAmount = subtotal * (discount / 100);
+             const taxAmount = (subtotal - discountAmount) * (tax / 100);
+             const totalAmount = quote.totalAmount;
+             
+             contentEl.innerHTML = `
+                 <div id="printable-quotation">
+                     <div class="p-8 text-right">
+                         <div class="flex justify-between items-start mb-8">
+                             <div>
+                                 ${logoImgHtml}
+                                 <h2 class="text-2xl font-bold text-sky-600">${appSettings.companyName}</h2>
+                                 <p>${appSettings.companyAddress || ''}</p>
+                                 <p>${appSettings.companyPhone || ''}</p>
+                             </div>
+                             <div class="text-left">
+                                 <h3 class="text-2xl font-bold">عرض سعر</h3>
+                                 <p>رقم العرض: #${quote.quotationNumber}</p>
+                                 <p>التاريخ: ${quote.date}</p>
+                                 <p>صالح لغاية: ${quote.expiryDate || 'N/A'}</p>
+                             </div>
+                         </div>
+                         <div class="mb-8 p-4 bg-slate-50 rounded-lg">
+                             <h4 class="font-bold mb-2">عرض سعر إلى:</h4>
+                             <p>${quote.customerName}</p>
+                             <p>${quote.customerDetails?.address || ''}</p>
+                             <p>${quote.customerDetails?.phone || ''}</p>
+                         </div>
+                         <table class="w-full text-right mb-4">
+                             <thead class="bg-slate-100">
+                                 <tr>
+                                     <th class="p-2 text-right">البند/الخدمة</th>
+									 <th class="p-2 text-center">الكمية</th>
+                                     <th class="p-2 text-center">سعر الوحدة</th>
+                                     <th class="p-2 text-left">الإجمالي</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 ${quote.items.map(item => `
+                                     <tr class="border-b">
+                                         <td class="p-2">${item.productName}</td>
+										 <td class="p-2 text-center">${item.qty}</td>
+                                         <td class="p-2 text-center">${(item.price || 0).toFixed(2)}</td>
+                                         <td class="p-2 text-left">${(item.qty * (item.price || 0)).toFixed(2)}</td>
+                                     </tr>
+                                 `).join('')}
+                             </tbody>
+                         </table>
+                         <div class="flex justify-end">
+                            <div class="w-full md:w-1/2">
+                                <table class="w-full">
+                                    <tbody>
+                                        <tr>
+                                            <td class="p-2 font-semibold">المجموع الفرعي:</td>
+                                            <td class="p-2 text-left">${subtotal.toFixed(2)} ${appSettings.currency}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 font-semibold">الخصم (${discount}%):</td>
+                                            <td class="p-2 text-left text-red-600">-${discountAmount.toFixed(2)} ${appSettings.currency}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2 font-semibold">الضريبة (${tax}%):</td>
+                                            <td class="p-2 text-left text-green-600">+${taxAmount.toFixed(2)} ${appSettings.currency}</td>
+                                        </tr>
+                                        <tr class="border-t-2 font-bold text-lg">
+                                            <td class="p-2">الإجمالي:</td>
+                                            <td class="p-2 text-left">${totalAmount.toFixed(2)} ${appSettings.currency}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                         </div>
+                         ${quote.notes ? `<div class="mt-8 pt-4 border-t"><h4 class="font-bold mb-2">ملاحظات وشروط:</h4><p class="text-slate-600 whitespace-pre-wrap">${quote.notes}</p></div>` : ''}
+                     </div>
+                 </div>
+             `;
+            document.getElementById('quotation-view-modal').classList.remove('hidden');
+            document.getElementById('custom-overlay').classList.remove('hidden');
+        }
+
         function exportToExcel(tableId, sheetName, fileName) {
             const table = document.getElementById(tableId);
             if (!table) return showMessage('لم يتم العثور على جدول للتصدير.');
@@ -3888,10 +4261,20 @@
                  if(!settingsDoc.data().supplierCounter) {
                    await setDoc(doc(db, 'settings', 'appConfig'), { supplierCounter: 0 }, { merge: true });
                  }
+                 if(!settingsDoc.data().lastQuotationNumber) {
+                   await setDoc(doc(db, 'settings', 'appConfig'), { lastQuotationNumber: 0 }, { merge: true });
+                 }
             } else {
                  await setDoc(doc(db, 'settings', 'appConfig'), { 
                     supplierCounter: 0,
-                    lastQuotationNumber: 0
+                    lastQuotationNumber: 0,
+                    lastInvoiceNumber: 0,
+                    companyName: 'شركتك',
+                    currency: 'د.أ',
+                    initialFund: 0,
+                    loyaltyPointsRate: 0,
+                    companyAddress: '',
+                    companyPhone: ''
                  });
             }
             document.getElementById('setting-company-name').value = appSettings.companyName;
@@ -3918,6 +4301,33 @@
             await logActivity('تحديث الإعدادات', 'تم تحديث معلومات الشركة والإعدادات المالية');
             await loadSettings();
             showMessage("تم حفظ الإعدادات بنجاح.");
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 1024 * 1024) { // 1MB limit
+                showMessage("حجم الشعار يجب أن يكون أقل من 1 ميجابايت.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const logoDataUrl = e.target.result;
+                localStorage.setItem('companyLogo', logoDataUrl);
+                loadAndDisplayLogo();
+                showMessage("تم تحديث الشعار بنجاح.");
+                logActivity('تحديث الشعار', 'تم رفع شعار جديد للشركة.');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleRemoveLogo() {
+            showConfirm("هل أنت متأكد من إزالة الشعار؟", () => {
+                localStorage.removeItem('companyLogo');
+                loadAndDisplayLogo();
+                showMessage("تم إزالة الشعار.");
+                logActivity('إزالة الشعار', 'تم حذف شعار الشركة.');
+            });
         }
 
         // --- User Management and Permissions ---
@@ -4013,23 +4423,43 @@
                 .edit-btn, 
                 .delete-btn, 
                 .create-invoice-from-sale-btn,
+                .convert-quotation-btn,
                 #delete-selected-products-btn, 
                 #import-products-excel, 
                 #add-invoice-item-btn, 
                 #add-manual-invoice-item-btn,
-                #add-quotation-item-btn
+                #add-quotation-item-btn,
+                #remove-logo-btn
             `);
 
             restrictedElements.forEach(el => {
-                const targetEl = el.id === 'import-products-excel' ? el.parentElement : el;
+                const targetEl = ['import-products-excel', 'setting-company-logo'].includes(el.id) ? el.parentElement : el;
                 if (isVisitor) {
                     targetEl.style.display = 'none';
-                } else {
+                } else if (role === 'user') {
+                    const adminOnlyIds = ['add-user-form', 'user-management-section', 'employee-management-section', 'backup-management-section'];
+                    const adminOnlyClasses = ['delete-btn']; // Users can't delete in this simplified model
+                    
+                    if (adminOnlyIds.includes(targetEl.closest('.settings-card')?.id) || adminOnlyIds.includes(targetEl.id)) {
+                         targetEl.style.display = 'none';
+                    } else {
+                         targetEl.style.display = '';
+                         targetEl.disabled = false;
+                         targetEl.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+                else { // Admin
                     targetEl.style.display = '';
                     targetEl.disabled = false;
                     targetEl.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
             });
+
+             // Specific logic for delete buttons for 'user' role
+            if (role === 'user') {
+                document.querySelectorAll('.delete-btn').forEach(btn => btn.style.display = 'none');
+                document.querySelectorAll('#add-user-form button[type="submit"]').forEach(btn => btn.style.display = 'none');
+            }
         }
         
         async function logActivity(action, details) {
@@ -4192,6 +4622,16 @@
                 if(el) el.value = today;
             });
 
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+
+            if (menuToggle) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('-translate-x-full');
+                    sidebar.classList.toggle('translate-x-0');
+                });
+            }
+
             onAuthStateChanged(auth, async user => {
                 if (user) {
                     // ... Authentication logic
@@ -4200,77 +4640,44 @@
                     setupDraggableDashboard();
                     switchTab('dashboard');
                 } else {
-                    // ... Logout logic
+                    document.getElementById('login-screen').classList.remove('hidden');
+                    document.getElementById('app-container').classList.add('hidden');
                 }
             });
         }
 		
 		function setupDraggableDashboard() {
+            const grid = document.getElementById('dashboard-metrics');
+            if(grid) {
+                const sortable = Sortable.create(grid, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    handle: '.handle', 
+                    onEnd: function (evt) {
+                        const cardOrder = Array.from(grid.children).map(card => card.dataset.id);
+                        localStorage.setItem('dashboardCardOrder', JSON.stringify(cardOrder));
+                    },
+                });
 
-const grid = document.getElementById('dashboard-metrics');
+                const savedOrder = localStorage.getItem('dashboardCardOrder');
+                if (savedOrder) {
+                    try {
+                        const cardOrder = JSON.parse(savedOrder);
+                        cardOrder.forEach(cardId => {
+                            const card = grid.querySelector(`[data-id="${cardId}"]`);
+                            if (card) {
+                                grid.appendChild(card);
+                            }
+                        });
+                    } catch(e) {
+                        console.error("Failed to parse dashboard card order from localStorage", e);
+                        localStorage.removeItem('dashboardCardOrder');
+                    }
+                }
+            }
+        }
 
-if(grid) {
-
-                const sortable = Sortable.create(grid, {
-
-                    animation: 150,
-
-                    ghostClass: 'sortable-ghost',
-
-                    handle: '.handle', 
-
-                    onEnd: function (evt) {
-
-                        const cardOrder = Array.from(grid.children).map(card => card.dataset.id);
-
-                        localStorage.setItem('dashboardCardOrder', JSON.stringify(cardOrder));
-
-                    },
-
-                });
-
-
-
-                const savedOrder = localStorage.getItem('dashboardCardOrder');
-
-                if (savedOrder) {
-
-                    try {
-
-                        const cardOrder = JSON.parse(savedOrder);
-
-                        cardOrder.forEach(cardId => {
-
-                            const card = grid.querySelector(`[data-id="${cardId}"]`);
-
-                            if (card) {
-
-                                grid.appendChild(card);
-
-                            }
-
-                        });
-
-                    } catch(e) {
-
-                        console.error("Failed to parse dashboard card order from localStorage", e);
-
-                        localStorage.removeItem('dashboardCardOrder');
-
-                    }
-
-                }
-
-            }
-
-}
-
-
-
-        main();
-
-    </script>
-
+		main();
+    </script>
 </body>
-
 </html>
