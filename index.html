@@ -5,6 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>تطبيق إدارة الأعمال الشامل</title>
 	<script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 	
 	<!-- مكتبات خارجية -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
@@ -229,6 +232,20 @@
 		.table-header-bar {
 			border-bottom: 1px solid var(--border-color);
 		}
+        @media (max-width: 767px) {
+            .dashboard-card, .form-section, .data-table-wrapper, .settings-card {
+                padding: 1rem;
+            }
+            .data-table th, .data-table td {
+                padding: 0.5rem 0.75rem;
+            }
+            h2 {
+                font-size: 1.25rem; /* text-xl */
+            }
+            h3 {
+                font-size: 1.125rem; /* text-lg */
+            }
+        }
 	</style>
 </head>
 <body class="bg-slate-50">
@@ -260,10 +277,10 @@
     <div id="app-container" class="hidden md:flex bg-slate-50">
         <!-- Sidebar -->
         <aside id="sidebar" class="fixed top-0 right-0 h-full bg-white shadow-lg md:relative md:w-64 transition-transform duration-300 ease-in-out transform md:translate-x-0 -translate-x-full z-40">
-            <div class="p-5 text-center border-b">
-                <img id="header-logo" src="" alt="Company Logo" class="h-12 max-h-12 object-contain hidden mx-auto mb-2">
-                <i id="header-default-icon" class="fas fa-tasks text-4xl text-sky-500 mx-auto mb-2"></i>
-                <h1 class="text-xl font-bold text-sky-600" id="header-company-name">إدارة الأعمال</h1>
+            <div class="p-5 flex items-center justify-center gap-3 border-b">
+                <img id="header-logo" src="" alt="شعار الشركة" class="h-14 max-h-14 object-contain hidden">
+                <i id="header-default-icon" class="fas fa-tasks text-3xl text-sky-500"></i>
+                <h1 class="text-lg font-bold text-sky-600" id="header-company-name">إدارة الأعمال</h1>
             </div>
             <nav id="nav-tabs" class="flex flex-col p-4 space-y-2">
                 <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-tachometer-alt w-6"></i> الرئيسية</button>
@@ -1340,7 +1357,7 @@
                          <label for="setting-company-logo" class="block mb-2 font-semibold text-slate-700">شعار الشركة</label>
                          <input type="file" id="setting-company-logo" class="input" accept="image/png, image/jpeg, image/gif">
                          <div class="mt-4">
-                             <img id="company-logo-preview" src="" alt="معاينة الشعار" class="max-h-24 rounded hidden bg-slate-100 p-2">
+                             <img id="company-logo-preview" src="" alt="معاينة الشعار" class="max-h-32 rounded hidden bg-slate-100 p-2">
                              <button id="remove-logo-btn" class="btn btn-danger mt-2 hidden"><i class="fas fa-trash"></i> إزالة الشعار</button>
                          </div>
                      </div>
@@ -2421,7 +2438,7 @@
             const logoData = localStorage.getItem('companyLogo');
             const reportLogoContainer = document.getElementById('report-logo-container');
             if (logoData) {
-                reportLogoContainer.innerHTML = `<img src="${logoData}" alt="Company Logo" class="max-h-16">`;
+                reportLogoContainer.innerHTML = `<img src="${logoData}" alt="Company Logo" class="max-h-20">`;
             } else {
                 reportLogoContainer.innerHTML = '';
             }
@@ -2811,7 +2828,7 @@
                     const editFunctions = { product: prepareProductEdit, sale: prepareSaleEdit, purchase: preparePurchaseEdit, expense: prepareExpenseEdit, customer: prepareCustomerEdit, supplier: prepareSupplierEdit, employee: prepareEmployeeEdit, warehouse: prepareWarehouseEdit, quotation: prepareQuotationEdit };
                     if (editFunctions[category]) {
                         editFunctions[category](item);
-                        const targetTab = ['employee', 'warehouse', 'user'].includes(category) ? 'settings' : collectionName;
+                        const targetTab = ['employee', 'warehouse', 'user', 'quotation'].includes(category) ? 'settings' : collectionName;
                         switchTab(targetTab);
                     }
                 }
@@ -3683,10 +3700,10 @@
             const taxAmount = subtotalAfterDiscount * (taxPercent / 100);
             const finalTotal = subtotalAfterDiscount + taxAmount;
 
-            document.getElementById('quotation-subtotal').textContent = `${subtotal.toFixed(2)} ${appSettings.currency}`;
-            document.getElementById('quotation-discount-amount').textContent = `-${discountAmount.toFixed(2)} ${appSettings.currency}`;
-            document.getElementById('quotation-tax-amount').textContent = `+${taxAmount.toFixed(2)} ${appSettings.currency}`;
-            document.getElementById('quotation-total').textContent = `${finalTotal.toFixed(2)} ${appSettings.currency}`;
+            document.getElementById('quotation-subtotal').textContent = `${subtotal.toFixed(2)}`;
+            document.getElementById('quotation-discount-amount').textContent = `-${discountAmount.toFixed(2)}`;
+            document.getElementById('quotation-tax-amount').textContent = `+${taxAmount.toFixed(2)}`;
+            document.getElementById('quotation-total').textContent = `${finalTotal.toFixed(2)}`;
         }
 
         async function convertQuotationToInvoice(quotationId) {
@@ -3791,10 +3808,10 @@
             const taxAmount = subtotalAfterDiscount * (taxPercent / 100);
             const finalTotal = subtotalAfterDiscount + taxAmount;
 
-            document.getElementById('invoice-subtotal').textContent = `${subtotal.toFixed(2)} ${appSettings.currency}`;
-            document.getElementById('invoice-discount-amount').textContent = `-${discountAmount.toFixed(2)} ${appSettings.currency}`;
-            document.getElementById('invoice-tax-amount').textContent = `+${taxAmount.toFixed(2)} ${appSettings.currency}`;
-            document.getElementById('invoice-total').textContent = `${finalTotal.toFixed(2)} ${appSettings.currency}`;
+            document.getElementById('invoice-subtotal').textContent = `${subtotal.toFixed(2)}`;
+            document.getElementById('invoice-discount-amount').textContent = `-${discountAmount.toFixed(2)}`;
+            document.getElementById('invoice-tax-amount').textContent = `+${taxAmount.toFixed(2)}`;
+            document.getElementById('invoice-total').textContent = `${finalTotal.toFixed(2)}`;
         }
         
         async function viewInvoice(invoiceId) {
@@ -3804,7 +3821,7 @@
              currentInvoiceId = invoiceId;
              const contentEl = document.getElementById('invoice-view-content');
              const logoData = localStorage.getItem('companyLogo');
-             const logoImgHtml = logoData ? `<img src="${logoData}" alt="Company Logo" class="max-h-16 mb-4">` : '';
+             const logoImgHtml = logoData ? `<img src="${logoData}" alt="Company Logo" class="max-h-20 mb-4">` : '';
              
              const subtotal = invoice.subtotal || invoice.items.reduce((sum, item) => sum + item.total, 0);
              const discount = invoice.discount || 0;
@@ -3894,7 +3911,7 @@
              currentQuotationId = quotationId;
              const contentEl = document.getElementById('quotation-view-content');
              const logoData = localStorage.getItem('companyLogo');
-             const logoImgHtml = logoData ? `<img src="${logoData}" alt="Company Logo" class="max-h-16 mb-4">` : '';
+             const logoImgHtml = logoData ? `<img src="${logoData}" alt="Company Logo" class="max-h-20 mb-4">` : '';
              
              const subtotal = quote.subtotal || quote.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
              const discount = quote.discount || 0;
@@ -4678,6 +4695,17 @@
         }
 
 		main();
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
     </script>
 </body>
 </html>
