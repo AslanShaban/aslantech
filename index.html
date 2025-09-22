@@ -168,12 +168,14 @@
 			border-bottom: 1px solid var(--border-color);
 		}
         #main-content {
-            transition: margin-right 0.3s ease;
+            transition: margin-left 0.3s ease;
         }
-        @media (min-width: 768px) {
-            #sidebar {
-                transition: width 0.3s ease;
-            }
+        #sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        #sidebar.active {
+            transform: translateX(0);
         }
         .tab-btn {
             justify-content: flex-start;
@@ -245,22 +247,6 @@
             h3 {
                 font-size: 1.125rem; /* text-lg */
             }
-			#sidebar {
-				position: fixed;
-				bottom: 0;
-				right: 0;
-				left: 0;
-				top: auto;
-				height: auto;
-				width: 100%;
-				transform: translateY(100%);
-				transition: transform 0.3s ease-in-out;
-				z-index: 50;
-				border-top: 1px solid var(--border-color);
-			}
-			#sidebar.active {
-				transform: translateY(0);
-			}
 			#nav-tabs {
 				flex-direction: row;
 				overflow-x: auto;
@@ -310,7 +296,7 @@
 	<!-- حاوية التطبيق الرئيسية -->
     <div id="app-container" class="hidden md:flex bg-slate-50">
         <!-- Sidebar -->
-        <aside id="sidebar" class="bg-white shadow-lg md:relative md:w-64 transition-transform duration-300 ease-in-out transform md:translate-x-0 translate-x-full z-40 md:h-full fixed top-0 right-0 h-full">
+        <aside id="sidebar" class="bg-white shadow-lg w-64 transition-transform duration-300 ease-in-out z-40 fixed top-0 right-0 h-full">
             <div class="p-5 flex items-center justify-center gap-3 border-b">
                 <img id="header-logo" src="" alt="شعار الشركة" class="h-14 max-h-14 object-contain hidden">
                 <i id="header-default-icon" class="fas fa-tasks text-3xl text-sky-500"></i>
@@ -336,7 +322,7 @@
         <!-- Main Content -->
         <div id="main-content" class="flex-1 flex flex-col h-screen">
             <header class="bg-white shadow-md p-4 flex justify-between items-center">
-                <button id="menu-toggle" class="md:hidden btn btn-primary">
+                <button id="menu-toggle" class="btn btn-primary">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="flex items-center gap-4">
@@ -4674,15 +4660,6 @@
                 if(el) el.value = today;
             });
 
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.getElementById('sidebar');
-
-            if (menuToggle) {
-                menuToggle.addEventListener('click', () => {
-                    sidebar.classList.toggle('active');
-                });
-            }
-
             onAuthStateChanged(auth, async user => {
                 if (user) {
                     // ... Authentication logic
@@ -4729,6 +4706,34 @@
         }
 
 		main();
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            const navTabs = document.getElementById('nav-tabs');
+
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('active');
+                });
+            }
+
+            if (navTabs && sidebar) {
+                navTabs.addEventListener('click', (e) => {
+                    if (e.target.closest('.tab-btn')) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
     </script>
     <script>
         if ('serviceWorker' in navigator) {
