@@ -7,6 +7,7 @@
 	<script src="https://cdn.tailwindcss.com"></script>
     <meta name="theme-color" content="#0ea5e9">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
 	
 	<!-- مكتبات خارجية -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
@@ -277,11 +278,11 @@
 			<form id="login-form">
 				<div class="mb-4 text-right">
 					<label for="username" class="block mb-2 font-semibold text-slate-700">البريد الإلكتروني</label>
-					<input type="email" id="username" class="input" required>
+					<input type="email" id="username" class="input" required autocomplete="email">
 				</div>
 				<div class="mb-6 text-right">
 					<label for="password" class="block mb-2 font-semibold text-slate-700">كلمة المرور</label>
-					<input type="password" id="password" class="input" required>
+					<input type="password" id="password" class="input" required autocomplete="current-password">
 				</div>
 				 <p id="login-error" class="text-red-500 mb-4 hidden">البريد الإلكتروني أو كلمة المرور غير صحيحة.</p>
 				<button type="submit" class="w-full text-lg btn btn-primary">دخول</button>
@@ -973,7 +974,7 @@
 						</div>
 
 						<div>
-							<label class="block text-sm font-medium text-slate-700 mb-2">بنود عرض السعر</label>
+							<h4 class="block text-sm font-medium text-slate-700 mb-2">بنود عرض السعر</h4>
 							<div id="quotation-items-container" class="space-y-2">
 								<!-- Quotation item rows will be added here dynamically -->
 							</div>
@@ -1069,7 +1070,7 @@
 						 </div>
 
 						 <div>
-							 <label class="block text-sm font-medium text-slate-700 mb-2">تفاصيل الفاتورة</label>
+							 <h4 class="block text-sm font-medium text-slate-700 mb-2">تفاصيل الفاتورة</h4>
 							 <div id="invoice-items-container" class="space-y-2">
 								 <!-- صفوف بنود الفاتورة ستضاف هنا -->
 							 </div>
@@ -1464,7 +1465,7 @@
 							 </div>
 							  <div class="flex flex-col">
 								 <label for="user-password-input" class="text-slate-600 mb-1">كلمة المرور</label>
-								 <input type="password" id="user-password-input" class="input" required>
+								 <input type="password" id="user-password-input" class="input" required autocomplete="new-password">
 							 </div>
 							 <div class="flex flex-col">
 								 <label for="user-role-select" class="text-slate-600 mb-1">الصلاحية</label>
@@ -1600,13 +1601,15 @@
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- Firebase Settings ---
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
-			apiKey: "AIzaSyCTqQyFH8EOslPZiyPm89cM9CMrY2G88WA",
-			authDomain: "aslantech.firebaseapp.com",
-			projectId: "aslantech",
-			storageBucket: "aslantech.appspot.com",
-			messagingSenderId: "305255252292",
-			appId: "1:305255252292:web:4107992083514d8eef5711"
+          apiKey: "AIzaSyAXAAe2GEqCf6KpuiJBGVhp82KchbiuIgQ",
+          authDomain: "aslan-tech.firebaseapp.com",
+          projectId: "aslan-tech",
+          storageBucket: "aslan-tech.firebasestorage.app",
+          messagingSenderId: "743540389534",
+          appId: "1:743540389534:web:b6f3f12d425233ebbd6d8f",
+          measurementId: "G-49VC8T9W8D"
         };
         
         // --- Initialize Firebase ---
@@ -1837,7 +1840,12 @@
 
                     if (collectionName === 'sales' && itemData.type === 'product' && itemData.productId) {
                         const productRef = doc(db, 'products', itemData.productId);
-                        transaction.update(productRef, { qty: increment(itemData.qty) });
+                        const productDoc = await transaction.get(productRef);
+                        if (productDoc.exists()) {
+                            transaction.update(productRef, { qty: increment(itemData.qty) });
+                        } else {
+                            console.warn(`Product with ID ${itemData.productId} not found when deleting sale ${id}. Stock not updated.`);
+                        }
                     } else if (collectionName === 'purchases' && itemData.productId) {
                         const productRef = doc(db, 'products', itemData.productId);
                         const productDoc = await transaction.get(productRef);
@@ -3689,12 +3697,14 @@
 
         function addQuotationItemRow(item = null) {
             const container = document.getElementById('quotation-items-container');
+            const rowId = `q-item-${Date.now()}-${container.children.length}`;
             const row = document.createElement('div');
             row.className = 'grid grid-cols-12 gap-2 items-center quotation-item-row';
+            row.id = rowId;
             row.innerHTML = `
-                <div class="col-span-5"><input type="text" class="input q-item-name" placeholder="اسم البند/الخدمة" value="${item ? item.productName : ''}" required></div>
-                <div class="col-span-3"><input type="number" step="1" min="1" class="input q-item-qty" placeholder="الكمية" value="${item ? item.qty : '1'}" required></div>
-                <div class="col-span-3"><input type="number" step="0.01" min="0" class="input q-item-price" placeholder="السعر" value="${item ? item.price : ''}" required></div>
+                <div class="col-span-5"><input type="text" id="${rowId}-name" name="${rowId}-name" class="input q-item-name" placeholder="اسم البند/الخدمة" value="${item ? item.productName : ''}" required></div>
+                <div class="col-span-3"><input type="number" id="${rowId}-qty" name="${rowId}-qty" step="1" min="1" class="input q-item-qty" placeholder="الكمية" value="${item ? item.qty : '1'}" required></div>
+                <div class="col-span-3"><input type="number" id="${rowId}-price" name="${rowId}-price" step="0.01" min="0" class="input q-item-price" placeholder="السعر" value="${item ? item.price : ''}" required></div>
                 <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-quotation-item-btn"><i class="fas fa-trash"></i></button></div>
             `;
             container.appendChild(row);
@@ -3759,23 +3769,25 @@
 
         async function addInvoiceItemRow(isManual = false) {
              const container = document.getElementById('invoice-items-container');
+             const rowId = `i-item-${Date.now()}-${container.children.length}`;
              const row = document.createElement('div');
              row.className = 'grid grid-cols-12 gap-2 items-center invoice-item-row';
+             row.id = rowId;
              row.dataset.type = isManual ? 'manual' : 'product';
 
             if (isManual) {
                 row.innerHTML = `
-                    <div class="col-span-5"><input type="text" class="input i-manual-name" placeholder="اسم البند اليدوي" required></div>
-                    <div class="col-span-3"><input type="number" step="1" min="1" class="input i-manual-qty" placeholder="الكمية" value="1" required></div>
-                    <div class="col-span-3"><input type="number" step="0.01" min="0" class="input i-manual-price" placeholder="السعر" required></div>
+                    <div class="col-span-5"><input type="text" id="${rowId}-name" name="${rowId}-name" class="input i-manual-name" placeholder="اسم البند اليدوي" required></div>
+                    <div class="col-span-3"><input type="number" id="${rowId}-qty" name="${rowId}-qty" step="1" min="1" class="input i-manual-qty" placeholder="الكمية" value="1" required></div>
+                    <div class="col-span-3"><input type="number" id="${rowId}-price" name="${rowId}-price" step="0.01" min="0" class="input i-manual-price" placeholder="السعر" required></div>
                     <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
                 `;
             } else {
                  row.innerHTML = `
-					<div class="col-span-3"><select class="select i-warehouse-select" required><option value="">اختر مستودع</option></select></div>
-                    <div class="col-span-4"><select class="select i-product-select" required><option value="">اختر منتج</option></select></div>
-                    <div class="col-span-2"><input type="number" class="input i-qty" placeholder="الكمية" min="1" value="1" required></div>
-                    <div class="col-span-2"><input type="number" step="0.01" min="0" class="input i-price" placeholder="سعر البيع" required></div>
+					<div class="col-span-3"><select id="${rowId}-warehouse" name="${rowId}-warehouse" class="select i-warehouse-select" required><option value="">اختر مستودع</option></select></div>
+                    <div class="col-span-4"><select id="${rowId}-product" name="${rowId}-product" class="select i-product-select" required><option value="">اختر منتج</option></select></div>
+                    <div class="col-span-2"><input type="number" id="${rowId}-qty" name="${rowId}-qty" class="input i-qty" placeholder="الكمية" min="1" value="1" required></div>
+                    <div class="col-span-2"><input type="number" id="${rowId}-price" name="${rowId}-price" step="0.01" min="0" class="input i-price" placeholder="سعر البيع" required></div>
                     <div class="col-span-1"><button type="button" class="w-full btn btn-danger remove-invoice-item-btn"><i class="fas fa-trash"></i></button></div>
                 `;
             }
