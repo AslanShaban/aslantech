@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1559,37 +1558,47 @@
         }
 
         // --- Authentication ---
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
-                try {
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    if (userDoc.exists()) {
-                        currentUser.role = userDoc.data().role;
-                    } else {
-                        const allUsersSnapshot = await getDocs(query(collection(db, 'users'), limit(1)));
-                        if (allUsersSnapshot.empty) { // First ever user becomes admin
-                            currentUser.role = 'admin';
-                            await setDoc(doc(db, 'users', user.uid), { email: user.email, role: 'admin' }, { merge: true });
+                // Immediately show the app and hide login screen
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                document.getElementById('user-email').textContent = user.email;
+                currentUser.auth = user;
+
+                // Asynchronously fetch role and data
+                const initializeAppForUser = async () => {
+                    try {
+                        const userDoc = await getDoc(doc(db, 'users', user.uid));
+                        if (userDoc.exists()) {
+                            currentUser.role = userDoc.data().role;
                         } else {
-                            currentUser.role = 'visitor'; // Default for safety if doc is missing
+                            const allUsersSnapshot = await getDocs(query(collection(db, 'users'), limit(1)));
+                            if (allUsersSnapshot.empty) { // First ever user becomes admin
+                                currentUser.role = 'admin';
+                                await setDoc(doc(db, 'users', user.uid), { email: user.email, role: 'admin' }, { merge: true });
+                            } else {
+                                currentUser.role = 'visitor'; // Default for safety
+                            }
                         }
+                        
+                        document.getElementById('user-role-display').textContent = translateRole(currentUser.role);
+                        
+                        // Apply permissions first to show/hide UI elements correctly
+                        applyPermissions(currentUser.role);
+
+                        // Now load all the data
+                        await refreshAllDataOnLogin();
+
+                    } catch (error) {
+                        console.error("Error during post-login data refresh:", error);
+                        showMessage("حدث خطأ أثناء تحميل بيانات التطبيق. قد لا تظهر بعض البيانات بشكل صحيح.");
+                        // Don't sign out automatically, let the user decide
                     }
-                    currentUser.auth = user;
+                };
 
-                    document.getElementById('user-email').textContent = user.email;
-                    document.getElementById('user-role-display').textContent = translateRole(currentUser.role);
-                    
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('app-container').classList.remove('hidden');
+                initializeAppForUser();
 
-                    await refreshAllDataOnLogin();
-                    
-                    applyPermissions(currentUser.role);
-                } catch (error) {
-                    console.error("Error during post-login data refresh:", error);
-                    showMessage("حدث خطأ أثناء تحميل بيانات التطبيق. يرجى محاولة تسجيل الخروج والدخول مرة أخرى.");
-                    await signOut(auth);
-                }
             } else {
                 currentUser = { auth: null, role: 'visitor' };
                 document.getElementById('login-screen').classList.remove('hidden');
@@ -2395,7 +2404,7 @@
             // Wire up all "Add New" buttons to their modals
             document.getElementById('show-add-product-modal-btn')?.addEventListener('click', () => showProductModal());
             document.getElementById('show-add-sale-modal-btn')?.addEventListener('click', () => showSaleModal());
-            document.getElementById('show-add-purchase-modal-btn')?.addEventListener('click', () => showPurchaseModal());
+            document.getElementById('show-add-purchase-modal-btn')?.addEventListener('click', () => showPurchaseModal_v2());
             document.getElementById('show-add-return-modal-btn')?.addEventListener('click', () => showReturnModal());
             document.getElementById('show-add-expense-modal-btn')?.addEventListener('click', () => showExpenseModal());
             document.getElementById('show-add-customer-modal-btn')?.addEventListener('click', () => showCustomerModal());
@@ -2528,6 +2537,253 @@
             }
         }
 
+        // --- NEW Purchase Modal Functions (v2) ---
+        function getPurchaseFormHTML_v2(item = null) {
+            const supplierOptions = (supplierIdToNameMap ? Array.from(supplierIdToNameMap.entries()) : []).map(([id, name]) => `<option value="${id}" ${item?.supplierId === id ? 'selected' : ''}>${name}</option>`).join('');
+            const productOptions = (productsCache || []).map(p => `<option value="${p.id}">${p.name} - ${p.warehouseName}</option>`).join('');
+            const warehouseOptions = (warehousesCache || []).map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+            const productTypeOptions = (productTypesCache || []).map(pt => `<option value="${pt.name}">${pt.name}</option>`).join('');
+
+            // Determine if we are editing. Old items are always 'expense'.
+            const isEditingExpense = !!item;
+
+            return `
+        <form id="modal-purchase-form-v2" class="space-y-4">
+            <div class="flex flex-col">
+                <label class="text-slate-600 mb-1">نوع الشراء</label>
+                <select id="modal-purchase-type-v2" class="select" ${isEditingExpense ? 'disabled' : ''}>
+                    <option value="expense" ${isEditingExpense ? 'selected' : ''}>مصروف عام (فاتورة خدمات، الخ)</option>
+                    <option value="stock">إضافة للمخزون (شراء بضاعة)</option>
+                </select>
+            </div>
+
+            <!-- Fields for General Expense -->
+            <div id="purchase-expense-fields-v2" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col">
+                    <label for="modal-p-date-expense-v2" class="text-slate-600 mb-1">التاريخ</label>
+                    <input type="date" id="modal-p-date-expense-v2" class="input" value="${item?.date || getLocalDate()}" required>
+                </div>
+                <div class="flex flex-col">
+                    <label for="modal-p-supplier-expense-v2" class="text-slate-600 mb-1">المورد</label>
+                    <select id="modal-p-supplier-expense-v2" class="select">
+                        <option value="">اختر مورد</option>
+                        ${supplierOptions}
+                    </select>
+                </div>
+                <div class="flex flex-col col-span-full">
+                    <label for="modal-p-item-name-expense-v2" class="text-slate-600 mb-1">اسم البند/الخدمة</label>
+                    <input type="text" id="modal-p-item-name-expense-v2" class="input" value="${item?.itemName || ''}" required>
+                </div>
+                <div class="flex flex-col col-span-full">
+                    <label for="modal-p-amount-expense-v2" class="text-slate-600 mb-1">المبلغ الإجمالي</label>
+                    <input type="number" id="modal-p-amount-expense-v2" class="input" min="0" step="0.01" value="${item?.amount || ''}" required>
+                </div>
+            </div>
+
+            <!-- Fields for Adding Stock -->
+            <div id="purchase-stock-fields-v2" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                <div class="col-span-full text-center text-sky-700 font-semibold bg-sky-50 p-2 rounded-lg">قسم إضافة المخزون</div>
+                 <div class="flex flex-col col-span-full">
+                    <label for="modal-p-warehouse-stock-v2" class="text-slate-600 mb-1">المستودع</label>
+                    <select id="modal-p-warehouse-stock-v2" class="select" required>
+                        <option value="">اختر مستودع</option>
+                        ${warehouseOptions}
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="modal-p-category-stock-v2" class="text-slate-600 mb-1">نوع المنتج</label>
+                    <select id="modal-p-category-stock-v2" class="select" required>
+                        <option value="">اختر نوع</option>
+                        ${productTypeOptions}
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="modal-p-new-product-name-v2" class="text-slate-600 mb-1">اسم المنتج</label>
+                    <input type="text" id="modal-p-new-product-name-v2" class="input" required>
+                </div>
+                <div class="flex flex-col">
+                    <label for="modal-p-qty-stock-v2" class="text-slate-600 mb-1">الكمية</label>
+                    <input type="number" id="modal-p-qty-stock-v2" class="input" min="1" required>
+                </div>
+                 <div class="flex flex-col">
+                    <label for="modal-p-cost-stock-v2" class="text-slate-600 mb-1">سعر التكلفة (للقطعة)</label>
+                    <input type="number" id="modal-p-cost-stock-v2" class="input" min="0" step="0.01" required>
+                </div>
+                 <div class="flex flex-col">
+                    <label for="modal-p-supplier-stock-v2" class="text-slate-600 mb-1">المورد</label>
+                    <select id="modal-p-supplier-stock-v2" class="select">
+                        <option value="">شراء مباشر (بدون مورد)</option>
+                        ${supplierOptions}
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="modal-p-date-stock-v2" class="text-slate-600 mb-1">التاريخ</label>
+                    <input type="date" id="modal-p-date-stock-v2" class="input" value="${getLocalDate()}" required>
+                </div>
+            </div>
+        </form>
+    `;
+        }
+
+        function showPurchaseModal_v2(item = null) {
+            const title = item ? 'تعديل عملية شراء' : 'إضافة عملية شراء';
+            const formHTML = getPurchaseFormHTML_v2(item);
+            showModal(title, formHTML, async () => {
+                const form = document.getElementById('modal-purchase-form-v2');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                await handlePurchaseFormSubmit_v2(item?.id);
+            });
+
+            // Post-render logic
+            const purchaseTypeSelect = document.getElementById('modal-purchase-type-v2');
+            const expenseFields = document.getElementById('purchase-expense-fields-v2');
+            const stockFields = document.getElementById('purchase-stock-fields-v2');
+
+            const handlePurchaseTypeChange = () => {
+                const isExpense = purchaseTypeSelect.value === 'expense';
+                expenseFields.style.display = isExpense ? 'grid' : 'none';
+                stockFields.style.display = isExpense ? 'none' : 'grid';
+
+                // Toggle required attributes for validation
+                expenseFields.querySelectorAll('input, select').forEach(el => el.required = isExpense);
+                stockFields.querySelectorAll('input, select').forEach(el => el.required = !isExpense);
+
+                // Supplier is not required in either form
+                document.getElementById('modal-p-supplier-expense-v2').required = false;
+                document.getElementById('modal-p-supplier-stock-v2').required = false;
+            };
+
+            purchaseTypeSelect.addEventListener('change', handlePurchaseTypeChange);
+
+            // Logic for editing: old purchases are always 'expense' type
+            if (item) {
+                purchaseTypeSelect.value = 'expense';
+                document.getElementById('modal-p-supplier-expense-v2').value = item.supplierId || '';
+            }
+
+            // Initial setup
+            handlePurchaseTypeChange();
+        }
+
+        async function handlePurchaseFormSubmit_v2(id = null) {
+            const purchaseType = document.getElementById('modal-purchase-type-v2').value;
+
+            if (id || purchaseType === 'expense') {
+                // Logic for general expense or editing an existing purchase
+                const supplierDocId = document.getElementById('modal-p-supplier-expense-v2').value;
+                const supplierName = supplierIdToNameMap.get(supplierDocId) || 'غير محدد';
+
+                const data = {
+                    date: document.getElementById('modal-p-date-expense-v2').value,
+                    itemName: document.getElementById('modal-p-item-name-expense-v2').value,
+                    amount: Math.abs(parseFloat(document.getElementById('modal-p-amount-expense-v2').value)),
+                    supplierId: supplierDocId || null,
+                    supplierName: supplierName,
+                    isStock: false // Mark as non-stock purchase
+                };
+
+                if (await addOrUpdateItem('purchases', data, id, {
+                    add: `إضافة شراء: ${data.itemName}`,
+                    update: `تعديل شراء: ${data.itemName}`
+                })) {
+                    hideModal();
+                    await refreshPurchases();
+                    await updateDashboard();
+                    showMessage('تم تسجيل المصروف بنجاح!');
+                }
+            } else { // purchaseType === 'stock'
+                // Logic for adding new stock
+                const qty = Math.abs(parseInt(document.getElementById('modal-p-qty-stock-v2').value));
+                const cost = Math.abs(parseFloat(document.getElementById('modal-p-cost-stock-v2').value));
+                const warehouseId = document.getElementById('modal-p-warehouse-stock-v2').value;
+                const category = document.getElementById('modal-p-category-stock-v2').value;
+                const newProductName = document.getElementById('modal-p-new-product-name-v2').value.trim();
+                const supplierId = document.getElementById('modal-p-supplier-stock-v2').value;
+                const supplierName = supplierIdToNameMap.get(supplierId) || 'شراء مباشر';
+                const date = document.getElementById('modal-p-date-stock-v2').value;
+
+                if (isNaN(qty) || isNaN(cost) || !warehouseId || !category || !newProductName) {
+                    return showMessage('الرجاء تعبئة جميع حقول المخزون المطلوبة.');
+                }
+
+                const totalAmount = qty * cost;
+
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        const warehouse = warehousesCache.find(w => w.id === warehouseId);
+                        
+                        // Check if a product with the same name and warehouse already exists
+                        const existingProductQuery = query(collection(db, 'products'),
+                            where('name', '==', newProductName),
+                            where('warehouseId', '==', warehouseId)
+                        );
+                        const existingProductSnapshot = await getDocs(existingProductQuery);
+
+                        let productId;
+                        if (!existingProductSnapshot.empty) {
+                            // Product exists, update it
+                            const existingProductDoc = existingProductSnapshot.docs[0];
+                            productId = existingProductDoc.id;
+                            const productRef = doc(db, 'products', productId);
+                            transaction.update(productRef, {
+                                qty: increment(qty),
+                                cost: cost, // Update cost to the latest purchase price
+                                category: category,
+                                supplierId: supplierId || null,
+                                supplierName: supplierName,
+                                updatedAt: serverTimestamp()
+                            });
+                        } else {
+                            // Product does not exist, create a new one
+                            const newProductData = {
+                                name: newProductName, category, cost, qty, warehouseId,
+                                warehouseName: warehouse.name,
+                                supplierId: supplierId || null,
+                                supplierName: supplierName,
+                                isOpeningStock: false,
+                                createdAt: serverTimestamp(),
+                                updatedAt: serverTimestamp()
+                            };
+                            const newProdRef = doc(collection(db, 'products'));
+                            transaction.set(newProdRef, newProductData);
+                            productId = newProdRef.id;
+                        }
+
+                        // Create a purchase record for financial tracking
+                        const purchaseData = {
+                            date,
+                            itemName: `شراء بضاعة: ${newProductName}`,
+                            amount: totalAmount,
+                            supplierId: supplierId || null,
+                            supplierName,
+                            productId: productId,
+                            qty,
+                            cost,
+                            isStock: true, // Mark as stock purchase
+                            createdAt: serverTimestamp(),
+                            updatedAt: serverTimestamp()
+                        };
+                        const newPurchaseRef = doc(collection(db, 'purchases'));
+                        transaction.set(newPurchaseRef, purchaseData);
+                    });
+
+                    await logActivity('إضافة مخزون', `المنتج: ${newProductName}, الكمية: ${qty}`);
+                    hideModal();
+                    await refreshProducts();
+                    await refreshPurchases();
+                    await updateDashboard();
+                    showMessage('تمت إضافة المخزون وتسجيل الشراء بنجاح!');
+
+                } catch (error) {
+                    console.error('Stock purchase failed:', error);
+                    showMessage(`حدث خطأ: ${error.message}`);
+                }
+            }
+        }
+
         async function handleTableActions(e) {
             const target = e.target.closest('button'); if (!target) return;
             const id = target.dataset.id;
@@ -2558,7 +2814,7 @@
             }
             if (target.classList.contains('edit-btn') && category === 'purchase') {
                 const itemDoc = await getDoc(doc(db, 'purchases', id));
-                if (itemDoc.exists()) showPurchaseModal({ id: itemDoc.id, ...itemDoc.data() });
+                if (itemDoc.exists()) showPurchaseModal_v2({ id: itemDoc.id, ...itemDoc.data() });
                 return;
             }
             if (target.classList.contains('edit-btn') && category === 'expense') {
@@ -2869,8 +3125,6 @@
                 const productId = productSelect.value;
                 const product = productsCache.find(p => p.id === productId);
 
-                warehouseSelect.innerHTML = '<option value="">اختر مستودع</option>'; // Reset warehouses
-
                 if (product) {
                     document.getElementById('modal-s-cost').value = product.cost;
                     const productInstances = productsCache.filter(p => p.name === product.name && p.qty > 0);
@@ -2879,7 +3133,11 @@
                     populateSelect(warehouseSelect.id, warehousesWithProduct, 'id', 'name', (w) => {
                         const instance = productInstances.find(p => p.warehouseId === w.id);
                         return `${w.name} (المتاح: ${instance.qty})`;
-                    }, warehousesWithProduct.length > 0);
+                    }, true);
+                } else {
+                    // This is the fix: if no product is selected, show all warehouses.
+                    populateSelect(warehouseSelect.id, warehousesCache, 'id', 'name', null, true);
+                    document.getElementById('modal-s-cost').value = ''; // Clear cost field
                 }
             };
 
@@ -3245,33 +3503,94 @@
         // --- Purchase Modal Functions (Refactored for financial entries only) ---
         function getPurchaseFormHTML(item = null) {
             const supplierOptions = (supplierIdToNameMap ? Array.from(supplierIdToNameMap.entries()) : []).map(([id, name]) => `<option value="${id}" ${item?.supplierId === id ? 'selected' : ''}>${name}</option>`).join('');
+            const productOptions = (productsCache || []).map(p => `<option value="${p.id}">${p.name} - ${p.warehouseName}</option>`).join('');
+            const warehouseOptions = (warehousesCache || []).map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+
             return `
-                <form id="modal-purchase-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form id="modal-purchase-form" class="space-y-4">
                     <div class="flex flex-col">
-                        <label for="modal-p-date" class="text-slate-600 mb-1">التاريخ</label>
-                        <input type="date" id="modal-p-date" class="input" value="${item?.date || getLocalDate()}" required>
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="modal-p-supplier-purchase" class="text-slate-600 mb-1">المورد</label>
-                        <select id="modal-p-supplier-purchase" class="select">
-                            <option value="">اختر مورد (اختياري)</option>
-                            ${supplierOptions}
+                        <label class="text-slate-600 mb-1">نوع الشراء</label>
+                        <select id="modal-purchase-type" class="select">
+                            <option value="expense">مصروف عام (فاتورة خدمات، الخ)</option>
+                            <option value="stock">إضافة للمخزون (شراء بضاعة)</option>
                         </select>
                     </div>
-                    <div class="flex flex-col col-span-full">
-                        <label for="modal-p-item-name" class="text-slate-600 mb-1">اسم البند أو الخدمة المشتراة</label>
-                        <input type="text" id="modal-p-item-name" class="input" value="${item?.itemName || ''}" required>
+
+                    <div id="purchase-expense-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label for="modal-p-date-expense" class="text-slate-600 mb-1">التاريخ</label>
+                            <input type="date" id="modal-p-date-expense" class="input" value="${item?.date || getLocalDate()}" required>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-supplier-expense" class="text-slate-600 mb-1">المورد</label>
+                            <select id="modal-p-supplier-expense" class="select">
+                                <option value="">اختر مورد</option>
+                                ${supplierOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col col-span-full">
+                            <label for="modal-p-item-name-expense" class="text-slate-600 mb-1">اسم البند/الخدمة</label>
+                            <input type="text" id="modal-p-item-name-expense" class="input" value="${item?.itemName || ''}" required>
+                        </div>
+                        <div class="flex flex-col col-span-full">
+                            <label for="modal-p-amount-expense" class="text-slate-600 mb-1">المبلغ الإجمالي</label>
+                            <input type="number" id="modal-p-amount-expense" class="input" min="0" step="0.01" value="${item?.amount || ''}" required>
+                        </div>
                     </div>
-                    <div class="flex flex-col col-span-full">
-                        <label for="modal-p-amount" class="text-slate-600 mb-1">المبلغ الإجمالي للشراء</label>
-                        <input type="number" id="modal-p-amount" class="input" min="0" step="0.01" value="${item?.amount || ''}" required>
+
+                    <div id="purchase-stock-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                        <div class="col-span-full text-center text-sky-700 font-semibold bg-sky-50 p-2 rounded-lg">قسم إضافة المخزون</div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-date-stock" class="text-slate-600 mb-1">التاريخ</label>
+                            <input type="date" id="modal-p-date-stock" class="input" value="${getLocalDate()}" required>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-supplier-stock" class="text-slate-600 mb-1">المورد</label>
+                            <select id="modal-p-supplier-stock" class="select">
+                                <option value="">اختر مورد</option>
+                                ${supplierOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-product-stock" class="text-slate-600 mb-1">المنتج الموجود</label>
+                            <select id="modal-p-product-stock" class="select">
+                                <option value="">اختر منتج لتزويده</option>
+                                ${productOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-new-product-name" class="text-slate-600 mb-1">أو اسم منتج جديد</label>
+                            <input type="text" id="modal-p-new-product-name" class="input" placeholder="في حال كان المنتج غير موجود">
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-warehouse-stock" class="text-slate-600 mb-1">المستودع</label>
+                            <select id="modal-p-warehouse-stock" class="select" required>
+                                <option value="">اختر مستودع</option>
+                                ${warehouseOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-category-stock" class="text-slate-600 mb-1">نوع المنتج</label>
+                            <select id="modal-p-category-stock" class="select" required>
+                                <option value="">اختر نوع</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-qty-stock" class="text-slate-600 mb-1">الكمية</label>
+                            <input type="number" id="modal-p-qty-stock" class="input" min="1" required>
+                        </div>
+                         <div class="flex flex-col">
+                            <label for="modal-p-cost-stock" class="text-slate-600 mb-1">سعر التكلفة (للقطعة)</label>
+                            <input type="number" id="modal-p-cost-stock" class="input" min="0" step="0.01" required>
+                        </div>
                     </div>
                 </form>
             `;
         }
 
         function showPurchaseModal(item = null) {
-            const title = item ? 'تعديل عملية شراء' : 'إضافة عملية شراء (مصروف)';
+            const title = item ? 'تعديل عملية شراء' : 'إضافة عملية شراء';
             const formHTML = getPurchaseFormHTML(item);
             showModal(title, formHTML, async () => {
                 const form = document.getElementById('modal-purchase-form');
@@ -3281,25 +3600,166 @@
                 }
                 await handlePurchaseFormSubmit(item?.id);
             });
+
+            // Post-render logic
+            const purchaseTypeSelect = document.getElementById('modal-purchase-type');
+            const expenseFields = document.getElementById('purchase-expense-fields');
+            const stockFields = document.getElementById('purchase-stock-fields');
+            
+            const handlePurchaseTypeChange = () => {
+                const isExpense = purchaseTypeSelect.value === 'expense';
+                expenseFields.style.display = isExpense ? 'grid' : 'none';
+                stockFields.style.display = isExpense ? 'none' : 'grid';
+
+                // Toggle required attributes for validation
+                expenseFields.querySelectorAll('input, select').forEach(el => el.required = isExpense);
+                stockFields.querySelectorAll('input, select').forEach(el => el.required = !isExpense);
+                
+                // Special cases for non-required fields
+                document.getElementById('modal-p-supplier-expense').required = false;
+                document.getElementById('modal-p-supplier-stock').required = false;
+                document.getElementById('modal-p-product-stock').required = false;
+                document.getElementById('modal-p-new-product-name').required = false;
+            };
+
+            purchaseTypeSelect.addEventListener('change', handlePurchaseTypeChange);
+            
+            // Populate dynamic selects
+            populateSelect('modal-p-category-stock', productTypesCache, 'name', 'name', null, true);
+
+            // Logic for editing: old purchases are always 'expense' type
+            if (item) {
+                purchaseTypeSelect.value = 'expense';
+                document.getElementById('modal-p-supplier-expense').value = item.supplierId || '';
+            }
+            
+            // Initial setup
+            handlePurchaseTypeChange();
+
+            // Link existing product selection to fields
+            document.getElementById('modal-p-product-stock').addEventListener('change', (e) => {
+                const productId = e.target.value;
+                const newProductNameInput = document.getElementById('modal-p-new-product-name');
+                if (productId) {
+                    const product = productsCache.find(p => p.id === productId);
+                    if (product) {
+                        document.getElementById('modal-p-cost-stock').value = product.cost;
+                        document.getElementById('modal-p-category-stock').value = product.category;
+                        document.getElementById('modal-p-warehouse-stock').value = product.warehouseId;
+                        newProductNameInput.value = '';
+                        newProductNameInput.disabled = true;
+                    }
+                } else {
+                    newProductNameInput.disabled = false;
+                }
+            });
         }
 
         async function handlePurchaseFormSubmit(id = null) {
-            const supplierDocId = document.getElementById('modal-p-supplier-purchase').value;
-            const supplierName = supplierIdToNameMap.get(supplierDocId) || 'غير محدد';
-            
-            const data = {
-                date: document.getElementById('modal-p-date').value,
-                itemName: document.getElementById('modal-p-item-name').value,
-                amount: Math.abs(parseFloat(document.getElementById('modal-p-amount').value)),
-                supplierId: supplierDocId || null,
-                supplierName: supplierName
-            };
+            const purchaseType = document.getElementById('modal-purchase-type').value;
 
-            if (await addOrUpdateItem('purchases', data, id, { add: `إضافة شراء: ${data.itemName}`, update: `تعديل شراء: ${data.itemName}` })) {
-                hideModal();
-                await refreshPurchases();
-                await updateDashboard();
-                showMessage('تم تسجيل عملية الشراء بنجاح!');
+            if (id || purchaseType === 'expense') {
+                // Logic for general expense or editing (old purchases are always expenses)
+                const supplierDocId = document.getElementById('modal-p-supplier-expense').value;
+                const supplierName = supplierIdToNameMap.get(supplierDocId) || 'غير محدد';
+                
+                const data = {
+                    date: document.getElementById('modal-p-date-expense').value,
+                    itemName: document.getElementById('modal-p-item-name-expense').value,
+                    amount: Math.abs(parseFloat(document.getElementById('modal-p-amount-expense').value)),
+                    supplierId: supplierDocId || null,
+                    supplierName: supplierName
+                };
+
+                if (await addOrUpdateItem('purchases', data, id, { add: `إضافة شراء: ${data.itemName}`, update: `تعديل شراء: ${data.itemName}` })) {
+                    hideModal();
+                    await refreshPurchases();
+                    await updateDashboard();
+                    showMessage('تم تسجيل المصروف بنجاح!');
+                }
+            } else { // purchaseType === 'stock'
+                // Logic for adding new stock
+                const existingProductId = document.getElementById('modal-p-product-stock').value;
+                const newProductName = document.getElementById('modal-p-new-product-name').value.trim();
+                
+                if (!existingProductId && !newProductName) {
+                    return showMessage('الرجاء اختيار منتج موجود أو إدخال اسم منتج جديد.');
+                }
+                if (existingProductId && newProductName) {
+                    return showMessage('لا يمكن اختيار منتج موجود وإدخال اسم منتج جديد في نفس الوقت.');
+                }
+
+                const qty = Math.abs(parseInt(document.getElementById('modal-p-qty-stock').value));
+                const cost = Math.abs(parseFloat(document.getElementById('modal-p-cost-stock').value));
+                const warehouseId = document.getElementById('modal-p-warehouse-stock').value;
+                const category = document.getElementById('modal-p-category-stock').value;
+                const supplierId = document.getElementById('modal-p-supplier-stock').value;
+                const supplierName = supplierIdToNameMap.get(supplierId) || 'شراء مباشر';
+                const date = document.getElementById('modal-p-date-stock').value;
+
+                if (isNaN(qty) || isNaN(cost) || !warehouseId || !category) {
+                    return showMessage('الرجاء تعبئة جميع حقول المخزون المطلوبة.');
+                }
+
+                const totalAmount = qty * cost;
+                let productName = '';
+                let productId = null;
+
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        if (existingProductId) {
+                            // Update existing product
+                            const productRef = doc(db, 'products', existingProductId);
+                            transaction.update(productRef, { qty: increment(qty) });
+                            const productDoc = await transaction.get(productRef); // Re-read in transaction
+                            productName = productDoc.data().name;
+                            productId = existingProductId;
+                        } else {
+                            // Add new product
+                            const warehouse = warehousesCache.find(w => w.id === warehouseId);
+                            productName = newProductName;
+                            const newProductData = {
+                                name: productName, category, cost, qty, warehouseId,
+                                warehouseName: warehouse.name,
+                                supplierId: supplierId || null,
+                                supplierName: supplierName,
+                                isOpeningStock: false,
+                                createdAt: serverTimestamp(),
+                                updatedAt: serverTimestamp()
+                            };
+                            const newProdRef = doc(collection(db, 'products'));
+                            transaction.set(newProdRef, newProductData);
+                            productId = newProdRef.id;
+                        }
+
+                        // Create a purchase record for financial tracking
+                        const purchaseData = {
+                            date,
+                            itemName: `شراء بضاعة: ${productName}`,
+                            amount: totalAmount,
+                            supplierId: supplierId || null,
+                            supplierName,
+                            productId: productId,
+                            qty,
+                            cost,
+                            createdAt: serverTimestamp(),
+                            updatedAt: serverTimestamp()
+                        };
+                        const newPurchaseRef = doc(collection(db, 'purchases'));
+                        transaction.set(newPurchaseRef, purchaseData);
+                    });
+
+                    await logActivity('إضافة مخزون', `المنتج: ${productName}, الكمية: ${qty}`);
+                    hideModal();
+                    await refreshProducts();
+                    await refreshPurchases();
+                    await updateDashboard();
+                    showMessage('تمت إضافة المخزون وتسجيل الشراء بنجاح!');
+
+                } catch (error) {
+                    console.error('Stock purchase failed:', error);
+                    showMessage(`حدث خطأ: ${error.message}`);
+                }
             }
         }
         
@@ -4701,237 +5161,3 @@
                 }
                 await handleUserFormSubmit();
             });
-            const roleSelect = document.getElementById('modal-user-role');
-            roleSelect.addEventListener('change', () => displayRolePermissions(roleSelect.value, 'modal-permissions-display'));
-            displayRolePermissions(roleSelect.value, 'modal-permissions-display');
-        }
-
-        async function handleUserFormSubmit() {
-            const email = document.getElementById('modal-user-email').value;
-            const password = document.getElementById('modal-user-password').value;
-            const role = document.getElementById('modal-user-role').value;
-            
-            try {
-                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-                const user = userCredential.user;
-                await setDoc(doc(db, 'users', user.uid), { email, role });
-                await logActivity('إنشاء مستخدم', `البريد الإلكتروني: ${email}, الصلاحية: ${role}`);
-                hideModal();
-                await refreshUsers();
-                showMessage('تم إنشاء المستخدم بنجاح.');
-            } catch(error) {
-                if (error.code == 'auth/email-already-in-use') {
-                    showMessage('هذا البريد الإلكتروني مستخدم بالفعل.');
-                } else if (error.code == 'auth/weak-password') {
-                    showMessage('كلمة المرور ضعيفة جداً. يجب أن تكون 6 أحرف على الأقل.');
-                } else {
-                    showMessage('حدث خطأ أثناء إنشاء المستخدم: ' + error.message);
-                }
-                console.error("User creation error:", error);
-            }
-        }
-        
-        async function refreshUsers() {
-            if (currentUser.role !== 'admin') return;
-            const snapshot = await getDocs(collection(db, 'users'));
-            const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const tableBody = document.getElementById('users-table');
-            tableBody.innerHTML = '';
-            users.forEach(u => {
-                const row = tableBody.insertRow();
-                row.innerHTML = `
-                    <td>${u.email}</td>
-                    <td>${translateRole(u.role)}</td>
-                    <td>
-                        ${ currentUser.auth.uid !== u.id ? `<button class="btn btn-danger text-sm delete-btn" data-id="${u.id}" data-category="user">حذف</button>` : ''}
-                    </td>
-                `;
-            });
-             applyPermissions(currentUser.role);
-        }
-
-        async function logActivity(action, details) {
-            if (currentUser.auth) {
-                try {
-                    await addDoc(collection(db, 'activity_log'), {
-                        userId: currentUser.auth.uid,
-                        userEmail: currentUser.auth.email,
-                        action: action,
-                        details: details,
-                        timestamp: serverTimestamp()
-                    });
-                } catch (e) {
-                    console.error("Error logging activity: ", e);
-                }
-            }
-        }
-        
-        async function refreshActivityLog() {
-            if (currentUser.role !== 'admin') return;
-            const q = query(collection(db, 'activity_log'), orderBy('timestamp', 'desc'), limit(100));
-            const snapshot = await getDocs(q);
-            const logs = snapshot.docs.map(doc => doc.data());
-            const tableBody = document.getElementById('activity-log-table');
-            tableBody.innerHTML = '';
-            logs.forEach(log => {
-                const row = tableBody.insertRow();
-                const logDate = log.timestamp?.toDate ? log.timestamp.toDate().toLocaleString('ar-EG') : 'N/A';
-                row.innerHTML = `
-                    <td class="whitespace-nowrap">${logDate}</td>
-                    <td>${log.userEmail}</td>
-                    <td>${log.action}</td>
-                    <td class="allow-wrap">${log.details}</td>
-                `;
-            });
-        }
-        
-        function applyPermissions(role) {
-            const isVisitor = role === 'visitor';
-            const isUser = role === 'user';
-            const isAdmin = role === 'admin';
-            
-            const allElements = document.querySelectorAll('.edit-btn, .delete-btn, .form-section, #settings-tab-btn, #activity-log-tab-btn, #user-management-section, #employee-management-section, #backup-management-section, #add-quotation-form button[type="submit"], #add-invoice-form button[type="submit"], #add-invoice-item-btn, #add-manual-invoice-item-btn');
-            allElements.forEach(el => el.style.display = 'none');
-
-            if (isVisitor) {
-                // Visitor can only view things. No forms, no settings.
-                document.querySelectorAll('.data-table-wrapper, .dashboard-card').forEach(el => el.style.display = '');
-            }
-
-            if (isUser || isAdmin) {
-                // User can see and use forms and edit/delete buttons
-                document.querySelectorAll('.edit-btn, .delete-btn, .form-section, #add-quotation-form button[type="submit"], #add-invoice-form button[type="submit"], #add-invoice-item-btn, #add-manual-invoice-item-btn').forEach(el => el.style.display = '');
-                 document.querySelectorAll('.data-table-wrapper, .dashboard-card').forEach(el => el.style.display = '');
-            }
-
-            if (isAdmin) {
-                // Admin gets everything
-                 allElements.forEach(el => el.style.display = '');
-            }
-        }
-        
-        function displayRolePermissions() {
-            const role = document.getElementById('user-role-select').value;
-            const displayDiv = document.getElementById('permissions-display');
-            const permissions = {
-                admin: "مدير: صلاحيات كاملة على النظام بما في ذلك إدارة المستخدمين والإعدادات والنسخ الاحتياطي.",
-                user: "مستخدم: يستطيع إضافة وتعديل وحذف البيانات (مبيعات، منتجات، الخ) ولكن لا يمكنه الوصول للإعدادات المتقدمة أو إدارة المستخدمين.",
-                visitor: "زائر: يمكنه فقط عرض البيانات والتقارير دون أي صلاحيات للتعديل أو الإضافة."
-            };
-            displayDiv.textContent = permissions[role];
-            displayDiv.classList.remove('hidden');
-        }
-
-        async function exportBackup() {
-            if (currentUser.role !== 'admin') return showMessage('غير مصرح لك.');
-            
-            showConfirm("سيتم تصدير جميع بيانات التطبيق في ملف واحد. هل تريد المتابعة؟", async () => {
-                const collectionsToBackup = ['products', 'sales', 'purchases', 'expenses', 'customers', 'suppliers', 'invoices', 'quotations', 'returns', 'employees', 'warehouses', 'users'];
-                let backupData = {
-                    version: "1.0",
-                    exportedAt: new Date().toISOString(),
-                    collections: {}
-                };
-
-                for(const collectionName of collectionsToBackup) {
-                    const snapshot = await getDocs(collection(db, collectionName));
-                    backupData.collections[collectionName] = snapshot.docs.map(doc => ({_id: doc.id, ...doc.data()}));
-                }
-                
-                const settingsDoc = await getDoc(doc(db, 'settings', 'appConfig'));
-                if (settingsDoc.exists()) {
-                    backupData.settings = settingsDoc.data();
-                }
-
-                const dataStr = JSON.stringify(backupData, null, 2);
-                const dataBlob = new Blob([dataStr], {type: "application/json"});
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
-                link.href = url;
-                link.click();
-                URL.revokeObjectURL(url);
-                await logActivity('تصدير نسخة احتياطية', 'تم تصدير جميع البيانات.');
-                showMessage("تم تصدير البيانات بنجاح.");
-            });
-        }
-        
-        async function handleImportBackup(event) {
-            if (currentUser.role !== 'admin') return showMessage('غير مصرح لك.');
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const backupData = JSON.parse(e.target.result);
-                    if (!backupData.version || !backupData.collections) throw new Error("Invalid backup file format.");
-                    
-                    showConfirm("تحذير! سيتم حذف جميع البيانات الحالية واستبدالها بالبيانات من الملف. هذا الإجراء لا يمكن التراجع عنه. هل أنت متأكد؟", async () => {
-                        const collectionsToRestore = Object.keys(backupData.collections);
-
-                        // Delete all existing data
-                        for (const collectionName of collectionsToRestore) {
-                            const snapshot = await getDocs(collection(db, collectionName));
-                            const batch = writeBatch(db);
-                            snapshot.docs.forEach(d => batch.delete(d.ref));
-                            await batch.commit();
-                        }
-                        
-                        // Restore new data
-                        for (const collectionName of collectionsToRestore) {
-                             const batch = writeBatch(db);
-                             const items = backupData.collections[collectionName];
-                             items.forEach(item => {
-                                 const docRef = doc(db, collectionName, item._id);
-                                 const {_id, ...data} = item;
-                                 batch.set(docRef, data);
-                             });
-                             await batch.commit();
-                        }
-
-                        // Restore settings
-                        if (backupData.settings) {
-                            await setDoc(doc(db, 'settings', 'appConfig'), backupData.settings);
-                        }
-                        
-                        await logActivity('استيراد نسخة احتياطية', `تم استعادة ${collectionsToRestore.length} مجموعة بيانات.`);
-                        showMessage("تم استعادة البيانات بنجاح. سيتم إعادة تحميل الصفحة.");
-                        setTimeout(() => window.location.reload(), 2000);
-                    });
-                } catch(error) {
-                    console.error("Backup import error:", error);
-                    showMessage("فشل استيراد النسخة الاحتياطية. تأكد من أن الملف صحيح.");
-                } finally {
-                    event.target.value = '';
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const sortable = new Sortable(document.getElementById('dashboard-metrics'), {
-                animation: 150,
-                handle: '.handle', 
-                ghostClass: 'sortable-ghost',
-                onEnd: function (evt) {
-                    const cardOrder = Array.from(evt.to.children).map(card => card.dataset.id);
-                    localStorage.setItem('dashboardCardOrder', JSON.stringify(cardOrder));
-                }
-            });
-            
-            const savedOrder = JSON.parse(localStorage.getItem('dashboardCardOrder'));
-            if (savedOrder) {
-                const container = document.getElementById('dashboard-metrics');
-                savedOrder.forEach(cardId => {
-                    const card = container.querySelector(`[data-id="${cardId}"]`);
-                    if (card) container.appendChild(card);
-                });
-            }
-
-            setupEventListeners();
-        });
-
-    </script>
-</body>
-</html>
