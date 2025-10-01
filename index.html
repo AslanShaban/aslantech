@@ -1214,7 +1214,7 @@
     </div>
 	
     <script type="module">
-        // --- Firebase SDKs (Modern Modular Version) ---
+// --- Firebase SDKs (Modern Modular Version) ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { 
             getAuth, 
@@ -2087,29 +2087,46 @@
 		}
 
         async function refreshAllDataOnLogin() {
-            await loadSettings();
+            const safeRefresh = async (refreshFunction, name) => {
+                try {
+                    await refreshFunction();
+                } catch (error) {
+                    console.error(`Safe-refresh failed for ${name}:`, error);
+                    showMessage(`حدث خطأ أثناء تحميل قسم: ${name}. قد لا تظهر بعض البيانات.`);
+                }
+            };
+
+            await safeRefresh(loadSettings, 'الإعدادات');
+            
             const today = getLocalDate();
             document.getElementById('dashboard-date').value = today;
-            await updateDashboard(today);
-            await Promise.all([
-				refreshWarehouses(),
-                refreshSuppliers(),
-                refreshProducts(), 
-                refreshSales(),
-                refreshReturns(),
-                refreshPurchases(), 
-                refreshExpenses(), 
-                refreshCustomers(),
-                refreshQuotations(),
-                refreshInvoices(), 
-                refreshUsers(),
-                refreshEmployees(),
-                refreshProductTypes(),
-                refreshActivityLog()
-            ]);
-            updateAdvancedDashboardMetrics();
-            // Enable all add buttons now that data is loaded
-            document.querySelectorAll('.add-btn-disabled').forEach(btn => btn.disabled = false);
+            await safeRefresh(() => updateDashboard(today), 'لوحة التحكم الرئيسية');
+
+            // Load foundational data first
+            await safeRefresh(refreshWarehouses, 'المستودعات');
+            await safeRefresh(refreshProductTypes, 'أنواع المنتجات');
+            await safeRefresh(refreshSuppliers, 'الموردين');
+            await safeRefresh(refreshCustomers, 'العملاء');
+            await safeRefresh(refreshEmployees, 'الموظفين');
+            await safeRefresh(refreshUsers, 'المستخدمين');
+            
+            // Then load data that may depend on the above
+            await safeRefresh(refreshProducts, 'المنتجات');
+            await safeRefresh(refreshSales, 'المبيعات');
+            await safeRefresh(refreshReturns, 'المرتجعات');
+            await safeRefresh(refreshPurchases, 'المشتريات');
+            await safeRefresh(refreshExpenses, 'المصاريف');
+            await safeRefresh(refreshQuotations, 'عروض الأسعار');
+            await safeRefresh(refreshInvoices, 'الفواتير');
+            await safeRefresh(refreshActivityLog, 'سجل النشاط');
+            
+            // Finally, update dashboard components that summarize data
+            await safeRefresh(updateAdvancedDashboardMetrics, 'مقاييس لوحة التحكم المتقدمة');
+
+            // Enable all add buttons now that data is loaded and UI is stable
+            document.querySelectorAll('.add-btn-disabled').forEach(btn => {
+                btn.disabled = false;
+            });
         }
 
         // --- Dashboard and Reports ---
@@ -2852,19 +2869,7 @@
                 if (itemDoc.exists()) showQuotationModal({ id: itemDoc.id, ...itemDoc.data() });
                 return;
             }
-            if (target.classList.contains('edit-btn')) {
-                const itemDoc = await getDoc(doc(db, collectionName, id));
-                if (itemDoc.exists()) {
-                    const item = { id: itemDoc.id, ...itemDoc.data()};
-                    itemToEdit = { ...item, category };
-                    const editFunctions = { purchase: preparePurchaseEdit, expense: prepareExpenseEdit, customer: prepareCustomerEdit, supplier: prepareSupplierEdit, employee: prepareEmployeeEdit, warehouse: prepareWarehouseEdit };
-                    if (editFunctions[category]) {
-                        editFunctions[category](item);
-                        const targetTab = ['employee', 'warehouse', 'user'].includes(category) ? 'settings' : collectionName;
-                        switchTab(targetTab);
-                    }
-                }
-            } else if (target.classList.contains('delete-btn')) {
+            if (target.classList.contains('delete-btn')) {
                 showConfirm('هل أنت متأكد من الحذف؟', async () => {
                     if (await deleteItem(collectionName, id)) {
                         const refreshMap = {
@@ -5161,3 +5166,307 @@
                 }
                 await handleUserFormSubmit();
             });
+        }
+        
+        async function handleUserFormSubmit() {
+            const email = document.getElementById('modal-user-email').value;
+            const password = document.getElementById('modal-user-password').value;
+            const role = document.getElementById('modal-user-role').value;
+
+            try {
+                // Use the secondary auth instance to create the user
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+                const user = userCredential.user;
+                
+                // Now, set the user's role in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    email: email,
+                    role: role
+                });
+
+                await logActivity('إنشاء مستخدم', `البريد الإلكتروني: ${email}, الصلاحية: ${role}`);
+                hideModal();
+                await refreshUsers();
+                showMessage('تم إنشاء المستخدم بنجاح!');
+                
+                // Important: Sign out the new user from the secondary app instance
+                // so it doesn't interfere with the currently logged-in admin.
+                await signOut(secondaryAuth);
+                
+            } catch (error) {
+                console.error("Error creating user:", error);
+                if (error.code === 'auth/email-already-in-use') {
+                    showMessage('هذا البريد الإلكتروني مستخدم بالفعل.');
+                } else if (error.code === 'auth/weak-password') {
+                     showMessage('كلمة المرور ضعيفة جداً. يجب أن تتكون من 6 أحرف على الأقل.');
+                } else {
+                    showMessage('حدث خطأ أثناء إنشاء المستخدم: ' + error.message);
+                }
+            }
+        }
+        
+        async function refreshUsers() {
+            if (currentUser.role !== 'admin') {
+                document.getElementById('user-management-section').style.display = 'none';
+                return;
+            }
+            document.getElementById('user-management-section').style.display = 'block';
+
+            const snapshot = await getDocs(collection(db, 'users'));
+            const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            const tableBody = document.getElementById('users-table');
+            tableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${user.email}</td>
+                    <td>${translateRole(user.role)}</td>
+                    <td>
+                        ${ currentUser.auth.uid !== user.id ? `<button class="btn btn-danger text-sm delete-btn" data-id="${user.id}" data-category="users">حذف</button>` : 'لا يمكن حذف المستخدم الحالي' }
+                    </td>
+                `;
+            });
+             applyPermissions(currentUser.role);
+        }
+
+        // --- Permissions ---
+        function applyPermissions(role) {
+            const permissions = {
+                admin: {
+                    can_add: true,
+                    can_edit: true,
+                    can_delete: true,
+                    view_tabs: ['dashboard', 'products', 'sales', 'purchases', 'returns', 'expenses', 'customers', 'suppliers', 'quotations', 'invoices', 'reports', 'settings', 'activity_log']
+                },
+                user: {
+                    can_add: true,
+                    can_edit: true,
+                    can_delete: false,
+                    view_tabs: ['dashboard', 'products', 'sales', 'purchases', 'returns', 'expenses', 'customers', 'suppliers', 'quotations', 'invoices', 'reports']
+                },
+                visitor: {
+                    can_add: false,
+                    can_edit: false,
+                    can_delete: false,
+                    view_tabs: ['dashboard']
+                }
+            };
+            
+            const userPermissions = permissions[role] || permissions.visitor;
+            
+            // Show/hide tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const tab = btn.dataset.tab;
+                btn.style.display = userPermissions.view_tabs.includes(tab) ? 'flex' : 'none';
+            });
+
+            // If the current active tab is now hidden, switch to dashboard
+            const activeTab = document.querySelector('.tab-btn.active');
+            if (activeTab && activeTab.style.display === 'none') {
+                switchTab('dashboard');
+            }
+            
+            // Show/hide sections in settings
+            document.getElementById('user-management-section').style.display = role === 'admin' ? 'block' : 'none';
+            document.getElementById('employee-management-section').style.display = role === 'admin' ? 'block' : 'none';
+            document.getElementById('backup-management-section').style.display = role === 'admin' ? 'block' : 'none';
+            document.getElementById('activity-log-tab-btn').style.display = role === 'admin' ? 'flex' : 'none';
+
+            // Enable/disable add buttons
+            document.querySelectorAll('[id^="show-add-"]').forEach(btn => {
+                btn.disabled = !userPermissions.can_add;
+            });
+
+            // Enable/disable edit buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.disabled = !userPermissions.can_edit;
+                 btn.style.display = userPermissions.can_edit ? 'inline-flex' : 'none';
+            });
+
+            // Enable/disable delete buttons
+            document.querySelectorAll('.delete-btn, #delete-selected-products-btn').forEach(btn => {
+                btn.disabled = !userPermissions.can_delete;
+                btn.style.display = userPermissions.can_delete ? 'inline-flex' : 'none';
+            });
+             document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.style.display = 'inline-flex';
+            });
+        }
+        
+        function displayRolePermissions() {
+            const role = document.getElementById('modal-user-role').value;
+            const displayDiv = document.getElementById('modal-permissions-display');
+            const permissionsText = {
+                admin: 'المدير: صلاحيات كاملة على كل شيء، بما في ذلك إدارة المستخدمين والإعدادات.',
+                user: 'مستخدم: يمكنه إضافة وتعديل معظم البيانات (مبيعات، مشتريات، منتجات)، لكن لا يمكنه الحذف أو الوصول للإعدادات الحساسة.',
+                visitor: 'زائر: يمكنه فقط عرض لوحة المعلومات الرئيسية بدون أي صلاحيات تعديل.'
+            };
+            displayDiv.textContent = permissionsText[role] || '';
+            displayDiv.classList.remove('hidden');
+        }
+
+        // --- Activity Log ---
+        async function logActivity(action, details) {
+            if (!currentUser.auth) return; // Don't log if no user is signed in
+            try {
+                await addDoc(collection(db, 'activity_log'), {
+                    timestamp: serverTimestamp(),
+                    userEmail: currentUser.auth.email,
+                    action: action,
+                    details: details
+                });
+            } catch (error) {
+                console.error("Error logging activity:", error);
+            }
+        }
+        
+        async function refreshActivityLog() {
+             if (currentUser.role !== 'admin') return;
+             const q = query(collection(db, 'activity_log'), orderBy('timestamp', 'desc'), limit(100));
+             const snapshot = await getDocs(q);
+             const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+             const tableBody = document.getElementById('activity-log-table');
+             tableBody.innerHTML = '';
+             logs.forEach(log => {
+                 const row = tableBody.insertRow();
+                 const timestamp = log.timestamp?.toDate ? log.timestamp.toDate().toLocaleString('ar-EG') : 'غير متوفر';
+                 row.innerHTML = `
+                     <td>${timestamp}</td>
+                     <td>${log.userEmail}</td>
+                     <td>${log.action}</td>
+                     <td class="allow-wrap">${log.details}</td>
+                 `;
+             });
+        }
+
+        // --- Backup and Restore ---
+        async function exportBackup() {
+            if (currentUser.role !== 'admin') return showMessage('غير مصرح لك.');
+            showConfirm('هل أنت متأكد من رغبتك في تصدير نسخة احتياطية كاملة؟', async () => {
+                const collectionsToBackup = ['products', 'sales', 'purchases', 'expenses', 'customers', 'suppliers', 'returns', 'quotations', 'invoices', 'settings', 'users', 'employees', 'warehouses', 'product-types'];
+                const backupData = {};
+
+                for (const collectionName of collectionsToBackup) {
+                    const snapshot = await getDocs(collection(db, collectionName));
+                    backupData[collectionName] = snapshot.docs.map(doc => ({ _id: doc.id, ...doc.data() }));
+                }
+
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showMessage('تم تصدير النسخة الاحتياطية بنجاح.');
+            });
+        }
+
+        function handleImportBackup(event) {
+            if (currentUser.role !== 'admin') return showMessage('غير مصرح لك.');
+            const file = event.target.files[0];
+            if (!file) return;
+
+            showConfirm('تحذير: هذه العملية ستحذف جميع البيانات الحالية بشكل نهائي وتستبدلها ببيانات الملف. هل أنت متأكد من المتابعة؟', () => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        
+                        // Delete all existing data
+                        for (const collectionName in backupData) {
+                            const snapshot = await getDocs(collection(db, collectionName));
+                            const batch = writeBatch(db);
+                            snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                            await batch.commit();
+                        }
+
+                        // Import new data
+                        for (const collectionName in backupData) {
+                             const batch = writeBatch(db);
+                             backupData[collectionName].forEach(item => {
+                                 const { _id, ...data } = item;
+                                 // Convert serverTimestamp placeholders back to actual ServerValue
+                                 Object.keys(data).forEach(key => {
+                                     if(data[key] && data[key].__type === 'serverTimestamp') {
+                                         data[key] = serverTimestamp();
+                                     }
+                                 });
+                                 const docRef = doc(db, collectionName, _id);
+                                 batch.set(docRef, data);
+                             });
+                             await batch.commit();
+                        }
+                        
+                        await logActivity('استعادة نسخة احتياطية', `تم استعادة البيانات من ملف: ${file.name}`);
+                        showMessage('تم استعادة النسخة الاحتياطية بنجاح. سيتم إعادة تحميل الصفحة.');
+                        setTimeout(() => window.location.reload(), 2000);
+
+                    } catch (error) {
+                        console.error('Backup restore error:', error);
+                        showMessage('فشل استعادة النسخة الاحتياطية. تأكد من أن الملف صحيح.');
+                    } finally {
+                        event.target.value = ''; // Reset file input
+                    }
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        // --- Draggable Dashboard Cards ---
+        function initializeDragAndDrop() {
+            const container = document.getElementById('dashboard-metrics');
+            if (container) {
+                new Sortable(container, {
+                    animation: 150,
+                    handle: '.handle',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function (evt) {
+                        const cardOrder = Array.from(container.children).map(card => card.dataset.id);
+                        localStorage.setItem('dashboardCardOrder', JSON.stringify(cardOrder));
+                    }
+                });
+                applyCardOrder();
+            }
+        }
+
+        function applyCardOrder() {
+            const container = document.getElementById('dashboard-metrics');
+            const savedOrder = JSON.parse(localStorage.getItem('dashboardCardOrder'));
+            if (savedOrder && container) {
+                savedOrder.forEach(cardId => {
+                    const card = container.querySelector(`[data-id="${cardId}"]`);
+                    if (card) {
+                        container.appendChild(card);
+                    }
+                });
+            }
+        }
+
+        // --- Initial App Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            initializeDragAndDrop();
+        });
+        
+        // --- Auto-Logout Timer (Optional) ---
+        // let inactivityTimer;
+        // function resetTimer() {
+        //     clearTimeout(inactivityTimer);
+        //     inactivityTimer = setTimeout(() => {
+        //         if (currentUser.auth) {
+        //             showMessage("تم تسجيل الخروج تلقائياً بسبب عدم النشاط.");
+        //             signOut(auth);
+        //         }
+        //     }, 30 * 60 * 1000); // 30 minutes
+        // }
+        // window.onload = resetTimer;
+        // document.onmousemove = resetTimer;
+        // document.onkeypress = resetTimer;
+        
+    </script>
+</body>
+</html>
