@@ -1535,22 +1535,13 @@
                         } else {
                             console.warn(`Could not decrement stock for deleted purchase ${id}, product ${itemData.productId} not found or insufficient stock.`);
                         }
-                    } else if (collectionName === 'purchases' && itemData.isStock === true && itemData.productId) {
+                    } else if (collectionName === 'returns' && itemData.productId) {
                         const productRef = doc(db, 'products', itemData.productId);
                         const productDoc = await transaction.get(productRef);
                         if (productDoc.exists() && productDoc.data().qty >= itemData.qty) {
                             transaction.update(productRef, { qty: increment(-itemData.qty) });
                         } else {
-                            console.warn(`Could not decrement stock for deleted purchase ${id}, product ${itemData.productId} not found or insufficient stock.`);
-                        }
-                    } else if (collectionName === 'returns' && itemData.productId) {
-                        const productRef = doc(db, 'products', itemData.productId);
-                        const productDoc = await transaction.get(productRef);
-                        if (productDoc.exists()) {
-                            // For returns, we *decrement* stock on deletion because adding a return *increases* stock.
-                            transaction.update(productRef, { qty: increment(-itemData.qty) });
-                        } else {
-                            console.warn(`Could not update stock for deleted return ${id}, product ${itemData.productId} not found.`);
+                            console.warn(`Could not decrement stock for deleted return ${id}, product ${itemData.productId} not found or insufficient stock.`);
                         }
                     }
                     
@@ -3062,62 +3053,44 @@
                     <div class="flex flex-col">
                         <label for="modal-s-type" class="text-slate-600 mb-1">نوع البيع</label>
                         <select id="modal-s-type" class="select">
-                            <option value="product" ${item?.type === 'product' ? 'selected' : ''}>منتج من المستودع</option>
-                            <option value="service" ${item?.type === 'service' ? 'selected' : ''}>خدمة / منتج آخر</option>
+                            <option value="product" ${item?.type === 'product' ? 'selected' : ''}>منتج</option>
+                            <option value="service" ${item?.type === 'service' ? 'selected' : ''}>خدمة (صيانة)</option>
                         </select>
                     </div>
                      <div class="flex flex-col">
-                        <label for="modal-s-customer" class="text-slate-600 mb-1">العميل (اختياري)</label>
+                        <label for="modal-s-customer" class="text-slate-600 mb-1">العميل</label>
                         <select id="modal-s-customer" class="select">
                             <option value="">اختر عميل</option>
                             ${customerOptions}
                         </select>
                     </div>
-
-                    <!-- Product Fields -->
-                    <div id="modal-s-product-fields" class="contents">
-                        <div class="flex flex-col">
-                            <label for="modal-s-warehouse" class="text-slate-600 mb-1">المستودع</label>
-                            <select id="modal-s-warehouse" class="select" required>
-                                <option value="">اختر مستودع</option>
-                                ${warehouseOptions}
-                            </select>
-                        </div>
-                        <div class="flex flex-col">
-                            <label for="modal-s-product-type" class="text-slate-600 mb-1">نوع المنتج</label>
-                            <select id="modal-s-product-type" class="select" required>
-                                <option value="">اختر المستودع أولاً</option>
-                            </select>
-                        </div>
-                        <div class="flex flex-col">
-                            <label for="modal-s-product" class="text-slate-600 mb-1">المنتج</label>
-                            <select id="modal-s-product" class="select" required>
-                                <option value="">اختر النوع أولاً</option>
-                            </select>
-                        </div>
-                        <div class="flex flex-col">
-                            <label for="modal-s-qty" class="text-slate-600 mb-1">الكمية</label>
-                            <input type="number" id="modal-s-qty" class="input" min="1" value="${item?.qty || 1}" required>
-                        </div>
+                    <div class="flex flex-col" id="modal-s-warehouse-container">
+						<label for="modal-s-warehouse" class="text-slate-600 mb-1">المستودع</label>
+						<select id="modal-s-warehouse" class="select" required>
+							<option value="">اختر مستودع</option>
+                            ${warehouseOptions}
+						</select>
+					</div>
+                    <div class="flex flex-col" id="modal-s-product-container">
+                        <label for="modal-s-product" class="text-slate-600 mb-1">المنتج</label>
+                        <select id="modal-s-product" class="select" required></select>
                     </div>
-
-                    <!-- Service/Other Fields -->
-                    <div id="modal-s-service-fields" class="contents hidden">
-                        <div class="flex flex-col lg:col-span-2">
-                            <label for="modal-s-service-name" class="text-slate-600 mb-1">اسم الخدمة / المنتج الآخر</label>
-                            <input type="text" id="modal-s-service-name" class="input" value="${item?.type === 'service' ? item.name : ''}">
-                        </div>
+                    <div class="flex flex-col hidden" id="modal-s-service-container">
+                        <label for="modal-s-service-name" class="text-slate-600 mb-1">اسم الخدمة</label>
+                        <input type="text" id="modal-s-service-name" class="input" value="${item?.type === 'service' ? item.name : ''}">
                     </div>
-                    
-                    <!-- Common Fields -->
+                    <div class="flex flex-col" id="modal-s-qty-container">
+                        <label for="modal-s-qty" class="text-slate-600 mb-1">الكمية</label>
+                        <input type="number" id="modal-s-qty" class="input" min="1" value="${item?.qty || 1}" required>
+                    </div>
                     <div class="flex flex-col">
-						<label for="modal-s-price" class="text-slate-600 mb-1">سعر البيع</label>
-						<input type="number" id="modal-s-price" class="input" min="0" step="0.01" value="${item?.price || ''}" required>
+						<label for="modal-s-cost" class="text-slate-600 mb-1">سعر التكلفة</label>
+						<input type="number" id="modal-s-cost" class="input" min="0" step="0.01" placeholder="تلقائي للمنتج" value="${item?.cost || ''}" required>
 					</div>
                     <div class="flex flex-col">
-						<label for="modal-s-cost" class="text-slate-600 mb-1">سعر التكلفة (للقطعة)</label>
-						<input type="number" id="modal-s-cost" class="input" min="0" step="0.01" placeholder="تلقائي للمنتج" value="${item?.cost || ''}" readonly>
-					</div>
+                        <label for="modal-s-price" class="text-slate-600 mb-1">سعر البيع</label>
+                        <input type="number" id="modal-s-price" class="input" min="0" step="0.01" value="${item?.price || ''}" required>
+                    </div>
                 </form>
             `;
         }
@@ -3126,7 +3099,7 @@
             const title = item ? 'تعديل عملية بيع' : 'تسجيل عملية بيع';
             const formHTML = getSaleFormHTML(item);
             showModal(title, formHTML, async () => {
-                const form = document.getElementById('modal-sale-form');
+                 const form = document.getElementById('modal-sale-form');
                 if (!form.checkValidity()) {
                     form.reportValidity();
                     return;
@@ -3134,288 +3107,661 @@
                 await handleSaleFormSubmit(item);
             });
 
-            // Post-render logic
+            // Post-render logic to attach event listeners
             const typeSelect = document.getElementById('modal-s-type');
-            const productFields = document.getElementById('modal-s-product-fields');
-            const serviceFields = document.getElementById('modal-s-service-fields');
             const warehouseSelect = document.getElementById('modal-s-warehouse');
-            const productTypeSelect = document.getElementById('modal-s-product-type');
             const productSelect = document.getElementById('modal-s-product');
-            const costInput = document.getElementById('modal-s-cost');
-            const priceInput = document.getElementById('modal-s-price');
 
             const handleTypeChange = () => {
-                const isProduct = typeSelect.value === 'product';
-                productFields.classList.toggle('hidden', !isProduct);
-                serviceFields.classList.toggle('hidden', isProduct);
-                
-                productFields.querySelectorAll('select, input').forEach(el => el.required = isProduct);
-                serviceFields.querySelectorAll('input').forEach(el => el.required = !isProduct);
-                
-                costInput.readOnly = isProduct; // Make it writable for services
-                costInput.value = '';
-                priceInput.value = '';
-                if (!isProduct) {
-                    costInput.placeholder = 'أدخل التكلفة إن وجدت';
-                } else {
-                    costInput.placeholder = 'تلقائي للمنتج';
-                }
-            };
-
-            const handleWarehouseChange = () => {
-                const warehouseId = warehouseSelect.value;
-                productTypeSelect.innerHTML = '<option value="">اختر النوع</option>';
-                productSelect.innerHTML = '<option value="">اختر المنتج</option>';
-                costInput.value = '';
-                priceInput.value = '';
-
-                if (warehouseId) {
-                    const productsInWarehouse = productsCache.filter(p => p.warehouseId === warehouseId && p.qty > 0);
-                    const typesInWarehouse = [...new Set(productsInWarehouse.map(p => p.category))];
-                    
-                    productTypeSelect.innerHTML = '<option value="">اختر النوع</option>';
-                    typesInWarehouse.forEach(type => {
-                        const option = document.createElement('option');
-                        option.value = type;
-                        option.textContent = type;
-                        productTypeSelect.appendChild(option);
-                    });
-                }
+                const isService = typeSelect.value === 'service';
+                document.getElementById('modal-s-product-container').classList.toggle('hidden', isService);
+                document.getElementById('modal-s-qty-container').classList.toggle('hidden', isService);
+                document.getElementById('modal-s-warehouse-container').classList.toggle('hidden', isService);
+                document.getElementById('modal-s-service-container').classList.toggle('hidden', !isService);
+                document.getElementById('modal-s-product').required = !isService;
+                document.getElementById('modal-s-warehouse').required = !isService;
+                document.getElementById('modal-s-service-name').required = isService;
+                document.getElementById('modal-s-qty').required = !isService;
+                document.getElementById('modal-s-cost').readOnly = !isService;
+                if(isService) document.getElementById('modal-s-cost').value = '';
             };
             
-            const handleProductTypeChange = () => {
-                const warehouseId = warehouseSelect.value;
-                const type = productTypeSelect.value;
-                productSelect.innerHTML = '<option value="">اختر المنتج</option>';
-                costInput.value = '';
-                priceInput.value = '';
-
-                if (warehouseId && type) {
-                    const productsOfType = productsCache.filter(p => p.warehouseId === warehouseId && p.category === type && p.qty > 0);
-                    populateSelect('modal-s-product', productsOfType, 'id', 'name', (p) => `${p.name} (المتاح: ${p.qty})`, true);
-                }
-            };
-
             const handleProductChange = () => {
                 const productId = productSelect.value;
                 const product = productsCache.find(p => p.id === productId);
-                costInput.value = product ? product.cost : '';
-                // Do not auto-fill sale price, let the user enter it.
-                // priceInput.value = product ? product.price || '' : '';
+
+                if (product) {
+                    document.getElementById('modal-s-cost').value = product.cost;
+                    const productInstances = productsCache.filter(p => p.name === product.name && p.qty > 0);
+                    const warehouseIdsWithStock = [...new Set(productInstances.map(p => p.warehouseId))];
+                    const warehousesWithProduct = warehousesCache.filter(w => warehouseIdsWithStock.includes(w.id));
+                    populateSelect(warehouseSelect.id, warehousesWithProduct, 'id', 'name', (w) => {
+                        const instance = productInstances.find(p => p.warehouseId === w.id);
+                        return `${w.name} (المتاح: ${instance.qty})`;
+                    }, true);
+                } else {
+                    // This is the fix: if no product is selected, show all warehouses.
+                    populateSelect(warehouseSelect.id, warehousesCache, 'id', 'name', null, true);
+                    document.getElementById('modal-s-cost').value = ''; // Clear cost field
+                }
             };
 
-            // Attach event listeners
             typeSelect.addEventListener('change', handleTypeChange);
-            warehouseSelect.addEventListener('change', handleWarehouseChange);
-            productTypeSelect.addEventListener('change', handleProductTypeChange);
             productSelect.addEventListener('change', handleProductChange);
 
             // Initial state setup
+            populateSelect(productSelect.id, productsCache, 'id', 'name', null, true);
             if (item) {
                 document.getElementById('modal-s-customer').value = item.customerId || '';
-                typeSelect.value = item.type;
-                if (item.type === 'product') {
-                    warehouseSelect.value = item.warehouseId;
-                    handleWarehouseChange();
-                    productTypeSelect.value = item.category;
-                    handleProductTypeChange();
-                    productSelect.value = item.productId;
-                    handleProductChange();
-                }
+                productSelect.value = item.productId || '';
             }
             handleTypeChange();
+            handleProductChange(); // Trigger once on load to populate warehouses for selected item
         }
 
         async function handleSaleFormSubmit(item) {
             const id = item?.id;
             const type = document.getElementById('modal-s-type').value;
 
+            // If editing a product sale, we first add the old quantity back to stock to check availability correctly.
             if (id && item?.type === 'product' && item.productId) {
-                await updateDoc(doc(db, 'products', item.productId), { qty: increment(item.qty) });
+                 await updateDoc(doc(db, 'products', item.productId), { qty: increment(item.qty) });
             }
-
+            
             const customerId = document.getElementById('modal-s-customer').value;
             let customerName = 'غير محدد';
-            if (customerId) {
+            if(customerId) {
                 const customerDoc = await getDoc(doc(db, 'customers', customerId));
-                if (customerDoc.exists()) customerName = customerDoc.data().name;
+                if(customerDoc.exists()) customerName = customerDoc.data().name;
+            }
+
+			const warehouseId = document.getElementById('modal-s-warehouse').value;
+			const warehouse = warehousesCache.find(w => w.id === warehouseId);
+			if (type === 'product' && !warehouse) {
+                // Revert stock if we changed it
+                if (id && item?.type === 'product' && item.productId) {
+                    await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) });
+                }
+                return showMessage("الرجاء اختيار المستودع.");
             }
 
             const salePrice = Math.abs(parseFloat(document.getElementById('modal-s-price').value));
-            let saleName, saleQty, saleCost, amount, productId = null, warehouseId = null, warehouseName = '', category = '';
+            const saleCost = Math.abs(parseFloat(document.getElementById('modal-s-cost').value)) || 0;
+            let saleName, saleQty, amount, productId = null;
 
             if (type === 'product') {
-                warehouseId = document.getElementById('modal-s-warehouse').value;
-                const warehouse = warehousesCache.find(w => w.id === warehouseId);
-                if (!warehouse) {
-                    if (id && item?.type === 'product' && item.productId) { await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) }); }
-                    return showMessage("الرجاء اختيار المستودع.");
-                }
-                warehouseName = warehouse.name;
-                
                 productId = document.getElementById('modal-s-product').value;
                 if (!productId) {
                     if (id && item?.type === 'product' && item.productId) { await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) }); }
                     return showMessage('الرجاء اختيار منتج.');
                 }
-
                 saleQty = Math.abs(parseInt(document.getElementById('modal-s-qty').value));
                 const productRef = doc(db, 'products', productId);
                 const productDoc = await getDoc(productRef);
 
-                if (!productDoc.exists()) {
-                     if (id && item?.type === 'product' && item.productId) { await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) }); }
-                    return showMessage('المنتج المحدد لم يعد موجوداً.');
-                }
-                
-                const productData = productDoc.data();
-                if (productData.qty < saleQty) {
+                if (!productDoc.exists() || productDoc.data().warehouseId !== warehouseId) {
                     if (id && item?.type === 'product' && item.productId) { await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) }); }
-                    return showMessage(`الكمية المتوفرة غير كافية. متاح: ${productData.qty}`);
+                    return showMessage('المنتج المحدد غير موجود في هذا المستودع.');
                 }
-                
-                saleName = productData.name;
-                saleCost = productData.cost;
-                category = productData.category;
-                amount = salePrice * saleQty;
-                
+                if (productDoc.data().qty < saleQty) {
+                     if (id && item?.type === 'product' && item.productId) { await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) }); }
+                    return showMessage(`الكمية المتوفرة غير كافية. متاح: ${productDoc.data().qty}`);
+                }
+                saleName = productDoc.data().name; amount = salePrice * saleQty;
                 await updateDoc(productRef, { qty: increment(-saleQty) });
 
             } else { // type === 'service'
-                saleName = document.getElementById('modal-s-service-name').value;
-                if (!saleName) return showMessage("الرجاء إدخال اسم الخدمة / المنتج الآخر.");
-                saleQty = 1;
-                saleCost = parseFloat(document.getElementById('modal-s-cost').value) || 0;
+                saleName = document.getElementById('modal-s-service-name').value; 
+                if (!saleName) return showMessage("الرجاء إدخال اسم الخدمة.");
+                saleQty = 1; 
                 amount = salePrice;
             }
 
-            const data = {
-                date: document.getElementById('modal-s-date').value,
-                type, name: saleName, qty: saleQty, price: salePrice, cost: saleCost,
-                customerId: customerId || null, customerName, amount,
-                productId, warehouseId, warehouseName, category
+            const data = { 
+                date: document.getElementById('modal-s-date').value, 
+                type, name: saleName, qty: saleQty, price: salePrice, cost: saleCost, customerId: customerId || null, customerName, amount, productId, 
+                warehouseId: type === 'product' ? warehouseId : null, 
+                warehouseName: type === 'product' ? (warehouse ? warehouse.name : '') : '' 
             };
 
             if (await addOrUpdateItem('sales', data, id, { add: `إضافة مبيعات: ${data.name}`, update: `تعديل مبيعات: ${data.name}` })) {
+                
                 if (customerId && appSettings.loyaltyPointsRate > 0) {
                     let pointsChange = 0;
                     const newPoints = Math.floor(amount / appSettings.loyaltyPointsRate);
-                    if (id && item?.customerId === customerId) {
+
+                    if (id && item?.customerId === customerId) { // Editing a sale for the same customer
                         const oldPoints = Math.floor(item.amount / appSettings.loyaltyPointsRate);
                         pointsChange = newPoints - oldPoints;
-                    } else if (id && item?.customerId && item?.customerId !== customerId) {
+                    } else if (id && item?.customerId && item?.customerId !== customerId) { // Customer changed during edit
                         const oldPoints = Math.floor(item.amount / appSettings.loyaltyPointsRate);
                         if (oldPoints > 0) await updateDoc(doc(db, 'customers', item.customerId), { loyaltyPoints: increment(-oldPoints) });
                         pointsChange = newPoints;
-                    } else if (!id) {
+                    } else if (!id) { // New sale
                         pointsChange = newPoints;
                     }
-                    if (pointsChange !== 0) await updateDoc(doc(db, 'customers', customerId), { loyaltyPoints: increment(pointsChange) });
+
+                    if(pointsChange !== 0) await updateDoc(doc(db, 'customers', customerId), { loyaltyPoints: increment(pointsChange) });
                 }
 
                 hideModal();
-                await refreshSales();
+                await refreshSales(); 
                 await refreshProducts();
                 await updateDashboard();
                 await refreshCustomers();
                 showMessage('تم تسجيل عملية البيع بنجاح!');
             } else {
+                // If the final save fails, revert ALL stock changes.
                 if (type === 'product') await updateDoc(doc(db, 'products', productId), { qty: increment(saleQty) });
                 if (id && item?.type === 'product' && item.productId) await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) });
             }
         }
 
-        // --- Return Modal Functions ---
-        function getReturnFormHTML(item = null) {
-            const productOptions = (productsCache || [])
-                .map(p => `<option value="${p.id}" ${item?.productId === p.id ? 'selected' : ''}>${p.name} - ${p.warehouseName}</option>`)
-                .join('');
-
+        // --- Product Type Modal Functions ---
+        function getProductTypeFormHTML(item = null) {
             return `
-                <form id="modal-return-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form id="modal-product-type-form" class="space-y-4">
                     <div class="flex flex-col">
-                        <label for="modal-r-date" class="text-slate-600 mb-1">التاريخ</label>
-                        <input type="date" id="modal-r-date" class="input" value="${item?.date || getLocalDate()}" required>
-                    </div>
-                    <div class="flex flex-col col-span-full">
-                        <label for="modal-r-product" class="text-slate-600 mb-1">المنتج المرتجع</label>
-                        <select id="modal-r-product" class="select" required>
-                            <option value="">اختر منتج</option>
-                            ${productOptions}
-                        </select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="modal-r-qty" class="text-slate-600 mb-1">الكمية المرتجعة</label>
-                        <input type="number" id="modal-r-qty" class="input" min="1" value="${item?.qty || 1}" required>
-                    </div>
-                    <div class="flex flex-col col-span-full">
-                        <label for="modal-r-reason" class="text-slate-600 mb-1">سبب الإرجاع</label>
-                        <textarea id="modal-r-reason" class="input" rows="3">${item?.reason || ''}</textarea>
+                        <label for="modal-pt-name" class="text-slate-600 mb-1">اسم نوع المنتج</label>
+                        <input type="text" id="modal-pt-name" class="input" value="${item?.name || ''}" required>
                     </div>
                 </form>
             `;
         }
 
-        function showReturnModal(item = null) {
-            const title = 'إضافة عملية إرجاع';
-            const formHTML = getReturnFormHTML(item);
+        function showProductTypeModal(item = null) {
+            const title = item ? 'تعديل نوع المنتج' : 'إضافة نوع منتج جديد';
+            const formHTML = getProductTypeFormHTML(item);
             showModal(title, formHTML, async () => {
-                const form = document.getElementById('modal-return-form');
+                const form = document.getElementById('modal-product-type-form');
                 if (!form.checkValidity()) {
                     form.reportValidity();
                     return;
                 }
-                await handleReturnFormSubmit();
+                await handleProductTypeFormSubmit(item?.id);
             });
         }
 
-        async function handleReturnFormSubmit() {
-            const productId = document.getElementById('modal-r-product').value;
-            const qty = Math.abs(parseInt(document.getElementById('modal-r-qty').value));
+        async function handleProductTypeFormSubmit(id = null) {
+            const name = document.getElementById('modal-pt-name').value.trim();
+            if (!name) return showMessage("اسم النوع مطلوب.");
 
-            if (!productId || isNaN(qty)) {
-                return showMessage("الرجاء اختيار منتج وتحديد كمية صالحة.");
-            }
-
-            const productRef = doc(db, 'products', productId);
-            
-            try {
-                let productNameForLog;
-                await runTransaction(db, async (transaction) => {
-                    const productDoc = await transaction.get(productRef);
-                    if (!productDoc.exists()) {
-                        throw new Error("المنتج المحدد لم يعد موجوداً.");
-                    }
-                    const productData = productDoc.data();
-                    productNameForLog = productData.name;
-
-                    transaction.update(productRef, { qty: increment(qty) });
-                    
-                    const returnData = {
-                        date: document.getElementById('modal-r-date').value,
-                        productId: productId,
-                        productName: productData.name,
-                        warehouseId: productData.warehouseId,
-                        warehouseName: productData.warehouseName,
-                        qty: qty,
-                        reason: document.getElementById('modal-r-reason').value,
-                        createdAt: serverTimestamp()
-                    };
-                    const newReturnRef = doc(collection(db, 'returns'));
-                    transaction.set(newReturnRef, returnData);
-                });
-                
-                await logActivity('إضافة مرتجع', `المنتج: ${productNameForLog}, الكمية: ${qty}`);
+            const data = { name };
+            if (await addOrUpdateItem('product-types', data, id, { add: `إضافة نوع منتج: ${name}`, update: `تعديل نوع منتج: ${name}` })) {
                 hideModal();
-                await refreshReturns();
-                await refreshProducts();
-                showMessage('تم تسجيل الإرجاع بنجاح.');
-
-            } catch (error) {
-                console.error("Return submission failed:", error);
-                showMessage("حدث خطأ أثناء تسجيل الإرجاع: " + error.message);
+                await refreshProductTypes();
+                showMessage('تم حفظ نوع المنتج بنجاح!');
             }
         }
+
+        async function refreshProductTypes() {
+            const q = query(collection(db, 'product-types'), orderBy('name'));
+            const snapshot = await getDocs(q);
+            productTypesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            const tableBody = document.getElementById('product-types-table');
+            tableBody.innerHTML = '';
+            productTypesCache.forEach(pt => {
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td class="whitespace-nowrap">${pt.name}</td>
+                    <td class="whitespace-nowrap no-export">
+                        <button class="btn btn-edit text-sm edit-btn" data-id="${pt.id}" data-category="product-type">تعديل</button>
+                        <button class="btn btn-danger text-sm delete-btn" data-id="${pt.id}" data-category="product-types">حذف</button>
+                    </td>`;
+            });
+
+            // Also refresh the category filter on the products page
+            const categoryFilterSelect = document.getElementById('product-category-filter');
+            const currentCategory = categoryFilterSelect.value;
+            categoryFilterSelect.innerHTML = '<option value="">فلترة حسب النوع</option>';
+            productTypesCache.forEach(pt => {
+                const option = document.createElement('option');
+                option.value = pt.name;
+                option.textContent = pt.name;
+                categoryFilterSelect.appendChild(option);
+            });
+            categoryFilterSelect.value = currentCategory;
+
+            applyPermissions(currentUser.role);
+        }
+
+
+        // --- Return Modal Functions (Refactored) ---
+        function getReturnFormHTML(item = null) {
+            const productOptions = (productsCache || []).map(p => `<option value="${p.id}">${p.name} (${p.warehouseName})</option>`).join('');
+
+            return `
+                <form id="modal-return-form" class="space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-slate-600 mb-1">نوع الإرجاع</label>
+                        <div class="flex gap-4 p-2 bg-slate-100 rounded-lg">
+                            <label class="flex-1 text-center p-2 rounded-md cursor-pointer has-[:checked]:bg-white has-[:checked]:shadow">
+                                <input type="radio" name="returnType" value="product" class="sr-only" checked> إرجاع منتج للمخزون
+                            </label>
+                            <label class="flex-1 text-center p-2 rounded-md cursor-pointer has-[:checked]:bg-white has-[:checked]:shadow">
+                                <input type="radio" name="returnType" value="service" class="sr-only"> إرجاع خدمة/بيع يدوي
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Product Return Fields -->
+                    <div id="return-product-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label for="modal-r-product" class="text-slate-600 mb-1">المنتج</label>
+                             <select id="modal-r-product" class="select" required>
+                                <option value="">اختر منتج من المخزون</option>
+                                ${productOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-r-qty" class="text-slate-600 mb-1">الكمية المرتجعة</label>
+                            <input type="number" id="modal-r-qty" class="input" min="1" value="1" required>
+                        </div>
+                    </div>
+
+                    <!-- Service/Manual Return Fields (Initially Hidden) -->
+                    <div id="return-service-fields" class="hidden space-y-4">
+                        <p class="text-sm text-slate-600">ابحث عن عملية البيع الأصلية لإنشاء إدخال مالي معاكس (مرتجع).</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <input type="date" id="service-search-date" class="input" placeholder="بحث بالتاريخ">
+                            <input type="text" id="service-search-name" class="input" placeholder="بحث باسم البند">
+                            <input type="text" id="service-search-customer" class="input" placeholder="بحث باسم العميل">
+                        </div>
+                        <div id="service-search-results" class="data-table-container max-h-40"></div>
+                    </div>
+                    
+                    <div class="flex flex-col col-span-full">
+                        <label for="modal-r-date" class="text-slate-600 mb-1">تاريخ الإرجاع</label>
+                        <input type="date" id="modal-r-date" class="input" value="${getLocalDate()}" required>
+                    </div>
+                    <div class="flex flex-col col-span-full">
+                        <label for="modal-r-reason" class="text-slate-600 mb-1">سبب الإرجاع (اختياري)</label>
+                        <textarea id="modal-r-reason" class="input" rows="2"></textarea>
+                    </div>
+                </form>
+            `;
+        }
+        
+        function showReturnModal() {
+            const title = 'تسجيل عملية إرجاع';
+            const formHTML = getReturnFormHTML();
+            showModal(title, formHTML, async () => {
+                await handleReturnFormSubmit();
+            });
+
+            // Event listener for toggling between return types
+            document.querySelectorAll('input[name="returnType"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const isProductReturn = e.target.value === 'product';
+                    document.getElementById('return-product-fields').style.display = isProductReturn ? 'grid' : 'none';
+                    document.getElementById('return-service-fields').style.display = isProductReturn ? 'none' : 'block';
+                });
+            });
+
+            // Event listeners for service search
+            const searchInputs = ['service-search-date', 'service-search-name', 'service-search-customer'];
+            searchInputs.forEach(id => document.getElementById(id).addEventListener('input', searchSalesForReturn));
+            searchSalesForReturn(); // Initial search
+        }
+
+        async function searchSalesForReturn() {
+            const date = document.getElementById('service-search-date').value;
+            const name = document.getElementById('service-search-name').value.toLowerCase();
+            const customer = document.getElementById('service-search-customer').value.toLowerCase();
+
+            // Search for manual/service sales that are not returns themselves (amount > 0)
+            let conditions = [where('type', '==', 'service'), where('amount', '>', 0)];
+            if (date) conditions.push(where('date', '==', date));
+            
+            const q = query(collection(db, 'sales'), ...conditions, orderBy('date', 'desc'), limit(50));
+            const snapshot = await getDocs(q);
+
+            let sales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            if (name) sales = sales.filter(s => s.name.toLowerCase().includes(name));
+            if (customer) sales = sales.filter(s => s.customerName.toLowerCase().includes(customer));
+
+            const resultsDiv = document.getElementById('service-search-results');
+            resultsDiv.innerHTML = '';
+            if (sales.length === 0) {
+                resultsDiv.innerHTML = '<p class="p-4 text-center text-slate-500">لا توجد عمليات بيع تطابق البحث.</p>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.className = 'data-table';
+            table.innerHTML = `<thead><tr><th>اختر</th><th>التاريخ</th><th>البند</th><th>العميل</th><th>المبلغ</th></tr></thead><tbody></tbody>`;
+            const tbody = table.querySelector('tbody');
+            sales.forEach(s => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><input type="radio" name="saleReturnSelection" value="${s.id}" data-sale='${JSON.stringify(s)}'></td>
+                    <td>${s.date}</td>
+                    <td>${s.name}</td>
+                    <td>${s.customerName}</td>
+                    <td>${s.amount.toFixed(2)}</td>
+                `;
+            });
+            resultsDiv.appendChild(table);
+        }
+
+        async function handleReturnFormSubmit() {
+            const returnType = document.querySelector('input[name="returnType"]:checked').value;
+            const date = document.getElementById('modal-r-date').value;
+            const reason = document.getElementById('modal-r-reason').value.trim();
+
+            if (returnType === 'product') {
+                const productId = document.getElementById('modal-r-product').value;
+                const qty = Math.abs(parseInt(document.getElementById('modal-r-qty').value));
+
+                if (!productId || !qty) return showMessage("الرجاء اختيار منتج وتحديد الكمية.");
+                
+                const product = productsCache.find(p => p.id === productId);
+                if (!product) return showMessage("المنتج المحدد غير صالح.");
+
+                try {
+                    const productRef = doc(db, 'products', productId);
+                    await updateDoc(productRef, { qty: increment(qty) });
+                        
+                    const returnData = { date, reason, type: 'product', productName: product.name, productId: productId, qty, warehouseId: product.warehouseId, warehouseName: product.warehouseName };
+                    await addOrUpdateItem('returns', returnData, null, { add: `إرجاع منتج: ${product.name}` });
+                    
+                    hideModal();
+                    await refreshReturns();
+                    await refreshProducts();
+                    showMessage('تم تسجيل إرجاع المنتج بنجاح وزيادة المخزون.');
+
+                } catch(error) {
+                    console.error("Product return failed:", error);
+                    showMessage("فشل إرجاع المنتج: " + error.message);
+                }
+
+            } else { // Service/Manual Return
+                const selectedSaleRadio = document.querySelector('input[name="saleReturnSelection"]:checked');
+                if (!selectedSaleRadio) return showMessage("الرجاء اختيار عملية بيع لإرجاعها.");
+
+                const originalSale = JSON.parse(selectedSaleRadio.dataset.sale);
+
+                const returnSaleData = {
+                    date,
+                    type: 'service', // All manual returns are logged as service type
+                    name: `مرتجع: ${originalSale.name}`,
+                    amount: -Math.abs(originalSale.amount), // Ensure it's a negative value
+                    price: -Math.abs(originalSale.price),
+                    qty: originalSale.qty,
+                    cost: 0, // No cost impact for service returns
+                    customerId: originalSale.customerId,
+                    customerName: originalSale.customerName,
+                    notes: `مرتبط بالبيع الأصلي بتاريخ ${originalSale.date}`
+                };
+                
+                if (await addOrUpdateItem('sales', returnSaleData, null, { add: `إرجاع بيع يدوي: ${originalSale.name}` })) {
+                    hideModal();
+                    await refreshSales();
+                    await updateDashboard();
+                    showMessage('تم تسجيل المرتجع المالي بنجاح.');
+                }
+            }
+        }
+        
+        // --- Purchase Modal Functions (Refactored for financial entries only) ---
+        function getPurchaseFormHTML(item = null) {
+            const supplierOptions = (supplierIdToNameMap ? Array.from(supplierIdToNameMap.entries()) : []).map(([id, name]) => `<option value="${id}" ${item?.supplierId === id ? 'selected' : ''}>${name}</option>`).join('');
+            const productOptions = (productsCache || []).map(p => `<option value="${p.id}">${p.name} - ${p.warehouseName}</option>`).join('');
+            const warehouseOptions = (warehousesCache || []).map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+
+            return `
+                <form id="modal-purchase-form" class="space-y-4">
+                    <div class="flex flex-col">
+                        <label class="text-slate-600 mb-1">نوع الشراء</label>
+                        <select id="modal-purchase-type" class="select">
+                            <option value="expense">مصروف عام (فاتورة خدمات، الخ)</option>
+                            <option value="stock">إضافة للمخزون (شراء بضاعة)</option>
+                        </select>
+                    </div>
+
+                    <div id="purchase-expense-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col">
+                            <label for="modal-p-date-expense" class="text-slate-600 mb-1">التاريخ</label>
+                            <input type="date" id="modal-p-date-expense" class="input" value="${item?.date || getLocalDate()}" required>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-supplier-expense" class="text-slate-600 mb-1">المورد</label>
+                            <select id="modal-p-supplier-expense" class="select">
+                                <option value="">اختر مورد</option>
+                                ${supplierOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col col-span-full">
+                            <label for="modal-p-item-name-expense" class="text-slate-600 mb-1">اسم البند/الخدمة</label>
+                            <input type="text" id="modal-p-item-name-expense" class="input" value="${item?.itemName || ''}" required>
+                        </div>
+                        <div class="flex flex-col col-span-full">
+                            <label for="modal-p-amount-expense" class="text-slate-600 mb-1">المبلغ الإجمالي</label>
+                            <input type="number" id="modal-p-amount-expense" class="input" min="0" step="0.01" value="${item?.amount || ''}" required>
+                        </div>
+                    </div>
+
+                    <div id="purchase-stock-fields" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                        <div class="col-span-full text-center text-sky-700 font-semibold bg-sky-50 p-2 rounded-lg">قسم إضافة المخزون</div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-date-stock" class="text-slate-600 mb-1">التاريخ</label>
+                            <input type="date" id="modal-p-date-stock" class="input" value="${getLocalDate()}" required>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-supplier-stock" class="text-slate-600 mb-1">المورد</label>
+                            <select id="modal-p-supplier-stock" class="select">
+                                <option value="">اختر مورد</option>
+                                ${supplierOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-product-stock" class="text-slate-600 mb-1">المنتج الموجود</label>
+                            <select id="modal-p-product-stock" class="select">
+                                <option value="">اختر منتج لتزويده</option>
+                                ${productOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-new-product-name" class="text-slate-600 mb-1">أو اسم منتج جديد</label>
+                            <input type="text" id="modal-p-new-product-name" class="input" placeholder="في حال كان المنتج غير موجود">
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-warehouse-stock" class="text-slate-600 mb-1">المستودع</label>
+                            <select id="modal-p-warehouse-stock" class="select" required>
+                                <option value="">اختر مستودع</option>
+                                ${warehouseOptions}
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-category-stock" class="text-slate-600 mb-1">نوع المنتج</label>
+                            <select id="modal-p-category-stock" class="select" required>
+                                <option value="">اختر نوع</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="modal-p-qty-stock" class="text-slate-600 mb-1">الكمية</label>
+                            <input type="number" id="modal-p-qty-stock" class="input" min="1" required>
+                        </div>
+                         <div class="flex flex-col">
+                            <label for="modal-p-cost-stock" class="text-slate-600 mb-1">سعر التكلفة (للقطعة)</label>
+                            <input type="number" id="modal-p-cost-stock" class="input" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                </form>
+            `;
+        }
+
+        function showPurchaseModal(item = null) {
+            const title = item ? 'تعديل عملية شراء' : 'إضافة عملية شراء';
+            const formHTML = getPurchaseFormHTML(item);
+            showModal(title, formHTML, async () => {
+                const form = document.getElementById('modal-purchase-form');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                await handlePurchaseFormSubmit(item?.id);
+            });
+
+            // Post-render logic
+            const purchaseTypeSelect = document.getElementById('modal-purchase-type');
+            const expenseFields = document.getElementById('purchase-expense-fields');
+            const stockFields = document.getElementById('purchase-stock-fields');
+            
+            const handlePurchaseTypeChange = () => {
+                const isExpense = purchaseTypeSelect.value === 'expense';
+                expenseFields.style.display = isExpense ? 'grid' : 'none';
+                stockFields.style.display = isExpense ? 'none' : 'grid';
+
+                // Toggle required attributes for validation
+                expenseFields.querySelectorAll('input, select').forEach(el => el.required = isExpense);
+                stockFields.querySelectorAll('input, select').forEach(el => el.required = !isExpense);
+                
+                // Special cases for non-required fields
+                document.getElementById('modal-p-supplier-expense').required = false;
+                document.getElementById('modal-p-supplier-stock').required = false;
+                document.getElementById('modal-p-product-stock').required = false;
+                document.getElementById('modal-p-new-product-name').required = false;
+            };
+
+            purchaseTypeSelect.addEventListener('change', handlePurchaseTypeChange);
+            
+            // Populate dynamic selects
+            populateSelect('modal-p-category-stock', productTypesCache, 'name', 'name', null, true);
+
+            // Logic for editing: old purchases are always 'expense' type
+            if (item) {
+                purchaseTypeSelect.value = 'expense';
+                document.getElementById('modal-p-supplier-expense').value = item.supplierId || '';
+            }
+            
+            // Initial setup
+            handlePurchaseTypeChange();
+
+            // Link existing product selection to fields
+            document.getElementById('modal-p-product-stock').addEventListener('change', (e) => {
+                const productId = e.target.value;
+                const newProductNameInput = document.getElementById('modal-p-new-product-name');
+                if (productId) {
+                    const product = productsCache.find(p => p.id === productId);
+                    if (product) {
+                        document.getElementById('modal-p-cost-stock').value = product.cost;
+                        document.getElementById('modal-p-category-stock').value = product.category;
+                        document.getElementById('modal-p-warehouse-stock').value = product.warehouseId;
+                        newProductNameInput.value = '';
+                        newProductNameInput.disabled = true;
+                    }
+                } else {
+                    newProductNameInput.disabled = false;
+                }
+            });
+        }
+
+        async function handlePurchaseFormSubmit(id = null) {
+            const purchaseType = document.getElementById('modal-purchase-type').value;
+
+            if (id || purchaseType === 'expense') {
+                // Logic for general expense or editing (old purchases are always expenses)
+                const supplierDocId = document.getElementById('modal-p-supplier-expense').value;
+                const supplierName = supplierIdToNameMap.get(supplierDocId) || 'غير محدد';
+                
+                const data = {
+                    date: document.getElementById('modal-p-date-expense').value,
+                    itemName: document.getElementById('modal-p-item-name-expense').value,
+                    amount: Math.abs(parseFloat(document.getElementById('modal-p-amount-expense').value)),
+                    supplierId: supplierDocId || null,
+                    supplierName: supplierName
+                };
+
+                if (await addOrUpdateItem('purchases', data, id, { add: `إضافة شراء: ${data.itemName}`, update: `تعديل شراء: ${data.itemName}` })) {
+                    hideModal();
+                    await refreshPurchases();
+                    await updateDashboard();
+                    showMessage('تم تسجيل المصروف بنجاح!');
+                }
+            } else { // purchaseType === 'stock'
+                // Logic for adding new stock
+                const existingProductId = document.getElementById('modal-p-product-stock').value;
+                const newProductName = document.getElementById('modal-p-new-product-name').value.trim();
+                
+                if (!existingProductId && !newProductName) {
+                    return showMessage('الرجاء اختيار منتج موجود أو إدخال اسم منتج جديد.');
+                }
+                if (existingProductId && newProductName) {
+                    return showMessage('لا يمكن اختيار منتج موجود وإدخال اسم منتج جديد في نفس الوقت.');
+                }
+
+                const qty = Math.abs(parseInt(document.getElementById('modal-p-qty-stock').value));
+                const cost = Math.abs(parseFloat(document.getElementById('modal-p-cost-stock').value));
+                const warehouseId = document.getElementById('modal-p-warehouse-stock').value;
+                const category = document.getElementById('modal-p-category-stock').value;
+                const supplierId = document.getElementById('modal-p-supplier-stock').value;
+                const supplierName = supplierIdToNameMap.get(supplierId) || 'شراء مباشر';
+                const date = document.getElementById('modal-p-date-stock').value;
+
+                if (isNaN(qty) || isNaN(cost) || !warehouseId || !category) {
+                    return showMessage('الرجاء تعبئة جميع حقول المخزون المطلوبة.');
+                }
+
+                const totalAmount = qty * cost;
+                let productName = '';
+                let productId = null;
+
+                try {
+                    await runTransaction(db, async (transaction) => {
+                        if (existingProductId) {
+                            // Update existing product
+                            const productRef = doc(db, 'products', existingProductId);
+                            transaction.update(productRef, { qty: increment(qty) });
+                            const productDoc = await transaction.get(productRef); // Re-read in transaction
+                            productName = productDoc.data().name;
+                            productId = existingProductId;
+                        } else {
+                            // Add new product
+                            const warehouse = warehousesCache.find(w => w.id === warehouseId);
+                            productName = newProductName;
+                            const newProductData = {
+                                name: productName, category, cost, qty, warehouseId,
+                                warehouseName: warehouse.name,
+                                supplierId: supplierId || null,
+                                supplierName: supplierName,
+                                isOpeningStock: false,
+                                createdAt: serverTimestamp(),
+                                updatedAt: serverTimestamp()
+                            };
+                            const newProdRef = doc(collection(db, 'products'));
+                            transaction.set(newProdRef, newProductData);
+                            productId = newProdRef.id;
+                        }
+
+                        // Create a purchase record for financial tracking
+                        const purchaseData = {
+                            date,
+                            itemName: `شراء بضاعة: ${productName}`,
+                            amount: totalAmount,
+                            supplierId: supplierId || null,
+                            supplierName,
+                            productId: productId,
+                            qty,
+                            cost,
+                            createdAt: serverTimestamp(),
+                            updatedAt: serverTimestamp()
+                        };
+                        const newPurchaseRef = doc(collection(db, 'purchases'));
+                        transaction.set(newPurchaseRef, purchaseData);
+                    });
+
+                    await logActivity('إضافة مخزون', `المنتج: ${productName}, الكمية: ${qty}`);
+                    hideModal();
+                    await refreshProducts();
+                    await refreshPurchases();
+                    await updateDashboard();
+                    showMessage('تمت إضافة المخزون وتسجيل الشراء بنجاح!');
+
+                } catch (error) {
                     console.error('Stock purchase failed:', error);
                     showMessage(`حدث خطأ: ${error.message}`);
                 }
