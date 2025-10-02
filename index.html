@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
 	
-	<!-- مكتبات خارجية -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -275,7 +274,6 @@
 </head>
 <body class="bg-slate-50">
 	
-	<!-- شاشة تسجيل الدخول -->
 	<div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-100">
 		<div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg text-center">
 			<h2 class="text-3xl font-bold text-sky-600">تسجيل الدخول</h2>
@@ -298,9 +296,7 @@
 		</div>
 	</div>
 
-	<!-- حاوية التطبيق الرئيسية -->
-    <div id="app-container" class="hidden md:flex bg-slate-50">
-        <!-- Sidebar -->
+	<div id="app-container" class="hidden md:flex bg-slate-50">
         <aside id="sidebar" class="bg-white shadow-lg w-64 transition-transform duration-300 ease-in-out z-40 fixed top-0 right-0 h-full">
             <div class="p-5 flex items-center justify-center gap-3 border-b">
                 <img id="header-logo" src="" alt="شعار الشركة" class="h-14 max-h-14 object-contain hidden">
@@ -324,7 +320,6 @@
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <div id="main-content" class="flex-1 flex flex-col h-screen">
             <header class="bg-white shadow-md p-4 flex justify-between items-center">
                 <button id="menu-toggle" class="btn btn-primary">
@@ -343,9 +338,7 @@
             </header>
 
             <main class="flex-1 p-4 sm:p-8 overflow-y-auto">
-		        <!-- محتوى التبويبات -->
 		        <div id="tab-content">
-			<!-- تبويب الرئيسية -->
 			<div id="dashboard" class="tab-pane">
 				<div class="form-section">
 					<h3 class="text-2xl font-semibold mb-4">عرض بيانات يوم محدد</h3>
@@ -436,13 +429,11 @@
                     <div class="dashboard-card">
                         <h3 class="text-xl font-semibold mb-4">مؤشرات الأداء الرئيسية</h3>
                         <div id="kpi-container" class="space-y-4">
-                            <!-- KPIs will be injected here -->
-                        </div>
+                            </div>
                     </div>
                 </div>
 			</div>
 
-			<!-- تبويب المستودع (المنتجات) -->
 			<div id="products" class="tab-pane hidden">
 				<h2 class="text-3xl font-bold mb-6 text-center text-slate-800">إدارة المنتجات</h2>
                 <div class="mb-6 flex justify-end">
@@ -519,7 +510,6 @@
 				</div>
 			</div>
 
-			<!-- تبويب المبيعات -->
 			<div id="sales" class="tab-pane hidden">
 				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة المبيعات</h2>
                 <div class="mb-6 flex justify-end">
@@ -557,7 +547,6 @@
 				</div>
 			</div>
 
-			<!-- تبويب المرتجعات -->
 			<div id="returns" class="tab-pane hidden">
 				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة المرتجعات</h2>
                 <div class="mb-6 flex justify-end">
@@ -588,7 +577,6 @@
 				</div>
 			</div>
 
-			<!-- تبويب المشتريات -->
 			<div id="purchases" class="tab-pane hidden">
 				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة المشتريات (المصروفات)</h2>
 				<div class="mb-6 flex justify-end">
@@ -623,7 +611,6 @@
 				</div>
 			</div>
 
-			<!-- تبويب المصاريف -->
 			<div id="expenses" class="tab-pane hidden">
 				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة المصاريف</h2>
                 <div class="mb-6 flex justify-end">
@@ -658,7 +645,6 @@
 				</div>
 			</div>
 
-			<!-- تبويب العملاء -->
 			<div id="customers" class="tab-pane hidden">
 				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة العملاء</h2>
                 <div class="mb-6 flex justify-end">
@@ -689,7 +675,6 @@
 				</div>
 			</div>
 
-			<!-- تبويب الموردين -->
 			<div id="suppliers" class="tab-pane hidden">
 				 <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة الموردين</h2>
                  <div class="mb-6 flex justify-end">
@@ -720,7 +705,6 @@
 				</div>
 			</div>
 
-			<!-- تبويب عروض الأسعار -->
 			<div id="quotations" class="tab-pane hidden">
 				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة عروض الأسعار</h2>
                 <div class="mb-6 flex justify-end">
@@ -754,7 +738,6 @@
 				</div>
 			</div>
 
-			<!-- تبويب الفواتير -->
 			<div id="invoices" class="tab-pane hidden">
 				 <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">إدارة الفواتير</h2>
                  <div class="mb-6 flex justify-end">
@@ -794,8 +777,7 @@
 				</div>
 			</div>
 
-			<!-- تبويب التقارير -->
-			  <div id="reports" class="tab-pane hidden">
+			<div id="reports" class="tab-pane hidden">
 				  <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">التقارير المتقدمة</h2>
 				  <div class="form-section no-print">
 					  <h3 class="text-2xl font-semibold">تحديد فترة التقرير</h3>
@@ -814,7 +796,6 @@
 				  
 				  <div id="report-results" class="hidden">
 					  <div id="printable-content">
-						  <!-- بداية رأس التقرير -->
 						  <div class="p-6 mb-6 bg-white rounded-lg shadow-md">
 							  <div class="flex justify-between items-start pb-4 border-b border-slate-200">
 								  <div class="flex items-center gap-4">
@@ -846,10 +827,7 @@
 								  </div>
 							  </div>
 						  </div>
-						  	<!-- نهاية رأس التقرير -->
-
-						  <!-- بطاقات مؤشرات الأداء الرئيسية -->
-						  <div class="p-6">
+						  	<div class="p-6">
 							  <h4 class="text-xl font-semibold mb-4 text-slate-700">ملخص الأداء</h4>
 							  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 								  <div class="report-kpi-card-new from-sky-500 to-cyan-400">
@@ -898,7 +876,6 @@
                                   </div>
                               </div>
 
-							  <!-- الرسوم البيانية -->
 							  <h4 class="mt-10 text-xl font-semibold mb-4 text-slate-700">تحليلات بيانية</h4>
 							  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
 								  <div class="dashboard-card">
@@ -911,7 +888,6 @@
 								  </div>
 							  </div>
 							  
-							  <!-- الجداول التفصيلية -->
 							  <h4 class="mt-10 text-xl font-semibold mb-4 text-slate-700">بيانات تفصيلية</h4>
 							  <div class="space-y-8">
 								  <div class="dashboard-card">
@@ -971,7 +947,6 @@
 				  </div>
 			  </div>
 
-            <!-- تبويب سجل النشاط -->
             <div id="activity_log" class="tab-pane hidden">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">سجل نشاط المستخدمين</h2>
                 <div class="data-table-wrapper">
@@ -992,7 +967,6 @@
             </div>
 
 
-			<!-- تبويب الإعدادات -->
 			<div id="settings" class="tab-pane hidden">
 				<h2 class="text-3xl font-bold text-slate-800 mb-6 text-center">الإعدادات</h2>
 				 <div class="settings-card">
@@ -1040,7 +1014,6 @@
                      </div>
 				 </div>
 
-				 <!-- قسم إدارة المستودعات -->
 				 <div id="warehouse-management-section" class="settings-card">
 					<h3 class="text-2xl font-semibold mb-4 border-b pb-2">إدارة المستودعات</h3>
                     <div class="mb-6 flex justify-end">
@@ -1065,7 +1038,6 @@
 					</div>
 				</div>
 
-                <!-- قسم إدارة أنواع المنتجات -->
                 <div id="product-types-management-section" class="settings-card">
                     <h3 class="text-2xl font-semibold mb-4 border-b pb-2">إدارة أنواع المنتجات</h3>
                     <div class="mb-6 flex justify-end">
@@ -1087,7 +1059,6 @@
                     </div>
                 </div>
 
-                 <!-- قسم إدارة الموظفين - جديد -->
                  <div id="employee-management-section" class="settings-card" style="display: none;">
                      <h3 class="text-2xl font-semibold mb-4 border-b pb-2">إدارة الموظفين</h3>
                      <div class="mb-6 flex justify-end">
@@ -1129,8 +1100,7 @@
 								  </tr>
 							  </thead>
 							  <tbody id="users-table">
-								  <!-- User rows will be inserted here -->
-							  </tbody>
+								  </tbody>
 						  </table>
 					  </div>
 				 </div>
@@ -1153,7 +1123,6 @@
 		</div>
 	</div>
 
-	<!-- Modals -->
 	<div id="custom-overlay" class="fixed inset-0 z-40 flex items-center justify-center hidden bg-black bg-opacity-50"></div>
 	<div id="custom-alert" class="fixed z-50 hidden w-full max-w-sm p-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg top-1/2 left-1/2">
 		<p id="alert-message" class="mb-4 text-lg font-semibold text-center"></p>
@@ -1197,7 +1166,6 @@
         </form>
 	</div>
 
-    <!-- Generic Modal for Forms -->
     <div id="form-modal-overlay" class="fixed inset-0 z-40 hidden bg-black bg-opacity-60"></div>
     <div id="form-modal" class="fixed z-50 hidden w-full max-w-3xl p-4 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl top-1/2 left-1/2" style="max-height: 90vh; display: none; flex-direction: column;">
         <div class="flex items-center justify-between pb-4 border-b">
@@ -1205,8 +1173,7 @@
             <button id="form-modal-close-btn" class="text-2xl text-slate-500 hover:text-slate-800">&times;</button>
         </div>
         <div id="form-modal-body" class="flex-grow py-4 overflow-y-auto">
-            <!-- Dynamic form content will be injected here -->
-        </div>
+            </div>
         <div class="flex justify-end gap-2 pt-4 border-t">
              <button type="submit" id="form-modal-submit-btn" class="btn btn-primary">حفظ</button>
              <button type="button" id="form-modal-cancel-btn" class="btn bg-slate-300">إلغاء</button>
@@ -2574,7 +2541,6 @@
                 </select>
             </div>
 
-            <!-- Fields for General Expense -->
             <div id="purchase-expense-fields-v2" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex flex-col">
                     <label for="modal-p-date-expense-v2" class="text-slate-600 mb-1">التاريخ</label>
@@ -2597,7 +2563,6 @@
                 </div>
             </div>
 
-            <!-- Fields for Adding Stock -->
             <div id="purchase-stock-fields-v2" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
                 <div class="col-span-full text-center text-sky-700 font-semibold bg-sky-50 p-2 rounded-lg">قسم إضافة المخزون</div>
                  <div class="flex flex-col col-span-full">
@@ -3039,57 +3004,86 @@
         }
 
         // --- Sale Modal Functions ---
+        // START OF REPLACEMENT BLOCK
         function getSaleFormHTML(item = null) {
+            // Pre-populate dropdown options from cached data
             const customerOptions = (customersCache || []).map(c => `<option value="${c.id}" ${item?.customerId === c.id ? 'selected' : ''}>${c.name}</option>`).join('');
             const warehouseOptions = (warehousesCache || []).map(w => `<option value="${w.id}" ${item?.warehouseId === w.id ? 'selected' : ''}>${w.name}</option>`).join('');
             
+            // Determine sale type for editing, default to 'product' for new sales
+            let saleType = item?.type || 'product';
+            if (saleType === 'service' || saleType === 'other') {
+                // Consolidate 'service' and 'other' for form logic
+                saleType = 'manual'; 
+            }
+
             return `
-                <form id="modal-sale-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <form id="modal-sale-form" class="space-y-4">
                     <input type="hidden" id="modal-s-id" value="${item?.id || ''}">
-                    <div class="flex flex-col">
-                        <label for="modal-s-date" class="text-slate-600 mb-1">التاريخ</label>
-                        <input type="date" id="modal-s-date" class="input" value="${item?.date || getLocalDate()}" required>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4">
+                        <div>
+                            <label for="modal-s-date" class="text-slate-600 mb-1">التاريخ</label>
+                            <input type="date" id="modal-s-date" class="input" value="${item?.date || getLocalDate()}" required>
+                        </div>
+                        <div>
+                            <label for="modal-s-type" class="text-slate-600 mb-1">نوع عملية البيع</label>
+                            <select id="modal-s-type" class="select" required>
+                                <option value="product" ${saleType === 'product' ? 'selected' : ''}>مبيعات منتجات</option>
+                                <option value="service" ${saleType === 'manual' && item?.type === 'service' ? 'selected' : ''}>مبيعات خدمات</option>
+                                <option value="other" ${saleType === 'manual' && item?.type === 'other' ? 'selected' : ''}>منتجات أخرى</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="modal-s-customer" class="text-slate-600 mb-1">العميل (اختياري)</label>
+                            <select id="modal-s-customer" class="select">
+                                <option value="">بيع مباشر (بدون عميل)</option>
+                                ${customerOptions}
+                            </select>
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <label for="modal-s-type" class="text-slate-600 mb-1">نوع البيع</label>
-                        <select id="modal-s-type" class="select">
-                            <option value="product" ${item?.type === 'product' ? 'selected' : ''}>منتج</option>
-                            <option value="service" ${item?.type === 'service' ? 'selected' : ''}>خدمة (صيانة)</option>
-                        </select>
+
+                    <div id="product-sale-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="modal-s-warehouse" class="text-slate-600 mb-1">المستودع</label>
+                            <select id="modal-s-warehouse" class="select">
+                                <option value="">اختر المستودع</option>
+                                ${warehouseOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="modal-s-category" class="text-slate-600 mb-1">نوع المنتج</label>
+                            <select id="modal-s-category" class="select">
+                                <option value="">اختر النوع</option>
+                            </select>
+                        </div>
+                        <div class="col-span-full">
+                            <label for="modal-s-product" class="text-slate-600 mb-1">اسم المنتج</label>
+                            <select id="modal-s-product" class="select">
+                                <option value="">اختر المنتج</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="modal-s-qty" class="text-slate-600 mb-1">الكمية</label>
+                            <input type="number" id="modal-s-qty" class="input" min="1" value="${item?.qty || 1}">
+                        </div>
                     </div>
-                     <div class="flex flex-col">
-                        <label for="modal-s-customer" class="text-slate-600 mb-1">العميل</label>
-                        <select id="modal-s-customer" class="select">
-                            <option value="">اختر عميل</option>
-                            ${customerOptions}
-                        </select>
+
+                    <div id="manual-sale-fields" class="hidden grid grid-cols-1 gap-4">
+                        <div>
+                            <label for="modal-s-manual-name" class="text-slate-600 mb-1">اسم البند/الخدمة</label>
+                            <input type="text" id="modal-s-manual-name" class="input" value="${item?.name || ''}">
+                        </div>
                     </div>
-                    <div class="flex flex-col" id="modal-s-warehouse-container">
-						<label for="modal-s-warehouse" class="text-slate-600 mb-1">المستودع</label>
-						<select id="modal-s-warehouse" class="select" required>
-							<option value="">اختر مستودع</option>
-                            ${warehouseOptions}
-						</select>
-					</div>
-                    <div class="flex flex-col" id="modal-s-product-container">
-                        <label for="modal-s-product" class="text-slate-600 mb-1">المنتج</label>
-                        <select id="modal-s-product" class="select" required></select>
-                    </div>
-                    <div class="flex flex-col hidden" id="modal-s-service-container">
-                        <label for="modal-s-service-name" class="text-slate-600 mb-1">اسم الخدمة</label>
-                        <input type="text" id="modal-s-service-name" class="input" value="${item?.type === 'service' ? item.name : ''}">
-                    </div>
-                    <div class="flex flex-col" id="modal-s-qty-container">
-                        <label for="modal-s-qty" class="text-slate-600 mb-1">الكمية</label>
-                        <input type="number" id="modal-s-qty" class="input" min="1" value="${item?.qty || 1}" required>
-                    </div>
-                    <div class="flex flex-col">
-						<label for="modal-s-cost" class="text-slate-600 mb-1">سعر التكلفة</label>
-						<input type="number" id="modal-s-cost" class="input" min="0" step="0.01" placeholder="تلقائي للمنتج" value="${item?.cost || ''}" required>
-					</div>
-                    <div class="flex flex-col">
-                        <label for="modal-s-price" class="text-slate-600 mb-1">سعر البيع</label>
-                        <input type="number" id="modal-s-price" class="input" min="0" step="0.01" value="${item?.price || ''}" required>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                        <div>
+                            <label for="modal-s-cost" class="text-slate-600 mb-1">سعر التكلفة</label>
+                            <input type="number" id="modal-s-cost" class="input" min="0" step="0.01" value="${item?.cost || ''}" required>
+                        </div>
+                        <div>
+                            <label for="modal-s-price" class="text-slate-600 mb-1">سعر البيع</label>
+                            <input type="number" id="modal-s-price" class="input" min="0" step="0.01" value="${item?.price || ''}" required>
+                        </div>
                     </div>
                 </form>
             `;
@@ -3099,7 +3093,7 @@
             const title = item ? 'تعديل عملية بيع' : 'تسجيل عملية بيع';
             const formHTML = getSaleFormHTML(item);
             showModal(title, formHTML, async () => {
-                 const form = document.getElementById('modal-sale-form');
+                const form = document.getElementById('modal-sale-form');
                 if (!form.checkValidity()) {
                     form.reportValidity();
                     return;
@@ -3107,155 +3101,221 @@
                 await handleSaleFormSubmit(item);
             });
 
-            // Post-render logic to attach event listeners
+            // --- Post-render logic to attach event listeners ---
             const typeSelect = document.getElementById('modal-s-type');
-            const warehouseSelect = document.getElementById('modal-s-warehouse');
-            const productSelect = document.getElementById('modal-s-product');
-
-            const handleTypeChange = () => {
-                const isService = typeSelect.value === 'service';
-                document.getElementById('modal-s-product-container').classList.toggle('hidden', isService);
-                document.getElementById('modal-s-qty-container').classList.toggle('hidden', isService);
-                document.getElementById('modal-s-warehouse-container').classList.toggle('hidden', isService);
-                document.getElementById('modal-s-service-container').classList.toggle('hidden', !isService);
-                document.getElementById('modal-s-product').required = !isService;
-                document.getElementById('modal-s-warehouse').required = !isService;
-                document.getElementById('modal-s-service-name').required = isService;
-                document.getElementById('modal-s-qty').required = !isService;
-                document.getElementById('modal-s-cost').readOnly = !isService;
-                if(isService) document.getElementById('modal-s-cost').value = '';
-            };
+            const productFields = document.getElementById('product-sale-fields');
+            const manualFields = document.getElementById('manual-sale-fields');
+            const costInput = document.getElementById('modal-s-cost');
+            const qtyInput = document.getElementById('modal-s-qty');
             
-            const handleProductChange = () => {
-                const productId = productSelect.value;
-                const product = productsCache.find(p => p.id === productId);
+            // Inputs that are specific to product sales
+            const warehouseSelect = document.getElementById('modal-s-warehouse');
+            const categorySelect = document.getElementById('modal-s-category');
+            const productSelect = document.getElementById('modal-s-product');
+            const manualNameInput = document.getElementById('modal-s-manual-name');
 
-                if (product) {
-                    document.getElementById('modal-s-cost').value = product.cost;
-                    const productInstances = productsCache.filter(p => p.name === product.name && p.qty > 0);
-                    const warehouseIdsWithStock = [...new Set(productInstances.map(p => p.warehouseId))];
-                    const warehousesWithProduct = warehousesCache.filter(w => warehouseIdsWithStock.includes(w.id));
-                    populateSelect(warehouseSelect.id, warehousesWithProduct, 'id', 'name', (w) => {
-                        const instance = productInstances.find(p => p.warehouseId === w.id);
-                        return `${w.name} (المتاح: ${instance.qty})`;
-                    }, true);
+            // --- Main handler to control UI based on Sale Type ---
+            const handleSaleTypeChange = () => {
+                const saleType = typeSelect.value;
+                const isProductSale = saleType === 'product';
+
+                productFields.style.display = isProductSale ? 'grid' : 'none';
+                manualFields.style.display = isProductSale ? 'none' : 'grid';
+
+                // Toggle 'required' attribute for validation
+                warehouseSelect.required = isProductSale;
+                categorySelect.required = isProductSale;
+                productSelect.required = isProductSale;
+                qtyInput.required = isProductSale;
+                manualNameInput.required = !isProductSale;
+
+                // Set cost field behavior
+                costInput.readOnly = isProductSale;
+                if (!isProductSale) {
+                    costInput.value = ''; // Clear cost for manual entry
+                    costInput.placeholder = 'أدخل التكلفة يدوياً';
                 } else {
-                    // This is the fix: if no product is selected, show all warehouses.
-                    populateSelect(warehouseSelect.id, warehousesCache, 'id', 'name', null, true);
-                    document.getElementById('modal-s-cost').value = ''; // Clear cost field
+                    costInput.placeholder = 'تلقائي عند اختيار المنتج';
                 }
             };
 
-            typeSelect.addEventListener('change', handleTypeChange);
-            productSelect.addEventListener('change', handleProductChange);
+            // --- Cascading Dropdown Logic ---
+            warehouseSelect.addEventListener('change', () => {
+                const selectedWarehouseId = warehouseSelect.value;
+                categorySelect.innerHTML = '<option value="">اختر النوع</option>';
+                productSelect.innerHTML = '<option value="">اختر المنتج</option>';
+                costInput.value = '';
 
-            // Initial state setup
-            populateSelect(productSelect.id, productsCache, 'id', 'name', null, true);
+                if (selectedWarehouseId) {
+                    const categoriesInWarehouse = [...new Set(productsCache
+                        .filter(p => p.warehouseId === selectedWarehouseId)
+                        .map(p => p.category)
+                    )].filter(Boolean); // Filter out null/undefined categories
+                    
+                    categoriesInWarehouse.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat;
+                        option.textContent = cat;
+                        categorySelect.appendChild(option);
+                    });
+                }
+            });
+
+            categorySelect.addEventListener('change', () => {
+                const selectedWarehouseId = warehouseSelect.value;
+                const selectedCategory = categorySelect.value;
+                productSelect.innerHTML = '<option value="">اختر المنتج</option>';
+                costInput.value = '';
+
+                if (selectedWarehouseId && selectedCategory) {
+                    const products = productsCache.filter(p => p.warehouseId === selectedWarehouseId && p.category === selectedCategory);
+                    products.forEach(p => {
+                        const option = document.createElement('option');
+                        option.value = p.id;
+                        option.textContent = `${p.name} (المتاح: ${p.qty})`;
+                        productSelect.appendChild(option);
+                    });
+                }
+            });
+
+            productSelect.addEventListener('change', () => {
+                const selectedProductId = productSelect.value;
+                const product = productsCache.find(p => p.id === selectedProductId);
+                costInput.value = product ? product.cost : '';
+            });
+
+            // --- Initial State Setup ---
             if (item) {
                 document.getElementById('modal-s-customer').value = item.customerId || '';
-                productSelect.value = item.productId || '';
+                if (item.type === 'product') {
+                    warehouseSelect.value = item.warehouseId || '';
+                    // Trigger changes to populate dependent dropdowns
+                    warehouseSelect.dispatchEvent(new Event('change'));
+                    categorySelect.value = item.category || '';
+                    categorySelect.dispatchEvent(new Event('change'));
+                    productSelect.value = item.productId || '';
+                    productSelect.dispatchEvent(new Event('change'));
+                }
             }
-            handleTypeChange();
-            handleProductChange(); // Trigger once on load to populate warehouses for selected item
+            
+            handleSaleTypeChange(); // Call once to set initial state
+            typeSelect.addEventListener('change', handleSaleTypeChange);
         }
 
         async function handleSaleFormSubmit(item) {
             const id = item?.id;
-            const type = document.getElementById('modal-s-type').value;
+            const saleType = document.getElementById('modal-s-type').value;
 
-            // If editing a product sale, we first add the old quantity back to stock to check availability correctly.
+            // Revert stock change if editing a product sale, to correctly check availability
             if (id && item?.type === 'product' && item.productId) {
-                 await updateDoc(doc(db, 'products', item.productId), { qty: increment(item.qty) });
-            }
-            
-            const customerId = document.getElementById('modal-s-customer').value;
-            let customerName = 'غير محدد';
-            if(customerId) {
-                const customerDoc = await getDoc(doc(db, 'customers', customerId));
-                if(customerDoc.exists()) customerName = customerDoc.data().name;
+                await updateDoc(doc(db, 'products', item.productId), { qty: increment(item.qty) });
             }
 
-			const warehouseId = document.getElementById('modal-s-warehouse').value;
-			const warehouse = warehousesCache.find(w => w.id === warehouseId);
-			if (type === 'product' && !warehouse) {
-                // Revert stock if we changed it
-                if (id && item?.type === 'product' && item.productId) {
-                    await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) });
-                }
-                return showMessage("الرجاء اختيار المستودع.");
+            const customerId = document.getElementById('modal-s-customer').value;
+            let customerName = 'بيع مباشر';
+            if (customerId) {
+                const customer = customersCache.find(c => c.id === customerId);
+                if (customer) customerName = customer.name;
             }
 
             const salePrice = Math.abs(parseFloat(document.getElementById('modal-s-price').value));
             const saleCost = Math.abs(parseFloat(document.getElementById('modal-s-cost').value)) || 0;
-            let saleName, saleQty, amount, productId = null;
-
-            if (type === 'product') {
-                productId = document.getElementById('modal-s-product').value;
-                if (!productId) {
-                    if (id && item?.type === 'product' && item.productId) { await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) }); }
-                    return showMessage('الرجاء اختيار منتج.');
-                }
-                saleQty = Math.abs(parseInt(document.getElementById('modal-s-qty').value));
-                const productRef = doc(db, 'products', productId);
-                const productDoc = await getDoc(productRef);
-
-                if (!productDoc.exists() || productDoc.data().warehouseId !== warehouseId) {
-                    if (id && item?.type === 'product' && item.productId) { await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) }); }
-                    return showMessage('المنتج المحدد غير موجود في هذا المستودع.');
-                }
-                if (productDoc.data().qty < saleQty) {
-                     if (id && item?.type === 'product' && item.productId) { await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) }); }
-                    return showMessage(`الكمية المتوفرة غير كافية. متاح: ${productDoc.data().qty}`);
-                }
-                saleName = productDoc.data().name; amount = salePrice * saleQty;
-                await updateDoc(productRef, { qty: increment(-saleQty) });
-
-            } else { // type === 'service'
-                saleName = document.getElementById('modal-s-service-name').value; 
-                if (!saleName) return showMessage("الرجاء إدخال اسم الخدمة.");
-                saleQty = 1; 
-                amount = salePrice;
-            }
-
-            const data = { 
-                date: document.getElementById('modal-s-date').value, 
-                type, name: saleName, qty: saleQty, price: salePrice, cost: saleCost, customerId: customerId || null, customerName, amount, productId, 
-                warehouseId: type === 'product' ? warehouseId : null, 
-                warehouseName: type === 'product' ? (warehouse ? warehouse.name : '') : '' 
+            
+            let data = {
+                date: document.getElementById('modal-s-date').value,
+                type: saleType,
+                price: salePrice,
+                cost: saleCost,
+                customerId: customerId || null,
+                customerName: customerName
             };
+            
+            let stockUpdateSuccessful = false;
 
-            if (await addOrUpdateItem('sales', data, id, { add: `إضافة مبيعات: ${data.name}`, update: `تعديل مبيعات: ${data.name}` })) {
-                
-                if (customerId && appSettings.loyaltyPointsRate > 0) {
-                    let pointsChange = 0;
-                    const newPoints = Math.floor(amount / appSettings.loyaltyPointsRate);
+            try {
+                if (saleType === 'product') {
+                    const productId = document.getElementById('modal-s-product').value;
+                    const warehouseId = document.getElementById('modal-s-warehouse').value;
+                    
+                    if (!productId || !warehouseId) {
+                        throw new Error('الرجاء اختيار المستودع والمنتج.');
+                    }
+                    
+                    const saleQty = Math.abs(parseInt(document.getElementById('modal-s-qty').value));
+                    const productRef = doc(db, 'products', productId);
+                    const productDoc = await getDoc(productRef);
 
-                    if (id && item?.customerId === customerId) { // Editing a sale for the same customer
-                        const oldPoints = Math.floor(item.amount / appSettings.loyaltyPointsRate);
-                        pointsChange = newPoints - oldPoints;
-                    } else if (id && item?.customerId && item?.customerId !== customerId) { // Customer changed during edit
-                        const oldPoints = Math.floor(item.amount / appSettings.loyaltyPointsRate);
-                        if (oldPoints > 0) await updateDoc(doc(db, 'customers', item.customerId), { loyaltyPoints: increment(-oldPoints) });
-                        pointsChange = newPoints;
-                    } else if (!id) { // New sale
-                        pointsChange = newPoints;
+                    if (!productDoc.exists()) throw new Error('المنتج المحدد غير موجود.');
+                    if (productDoc.data().qty < saleQty) throw new Error(`الكمية المتوفرة غير كافية. متاح: ${productDoc.data().qty}`);
+                    
+                    await updateDoc(productRef, { qty: increment(-saleQty) });
+                    stockUpdateSuccessful = true; // Mark that stock was decremented
+
+                    Object.assign(data, {
+                        name: productDoc.data().name,
+                        qty: saleQty,
+                        amount: salePrice * saleQty,
+                        productId: productId,
+                        warehouseId: warehouseId,
+                        warehouseName: warehousesCache.find(w => w.id === warehouseId)?.name || ''
+                    });
+
+                } else { // 'service' or 'other'
+                    const manualName = document.getElementById('modal-s-manual-name').value;
+                    if (!manualName) throw new Error('الرجاء إدخال اسم البند أو الخدمة.');
+                    
+                    Object.assign(data, {
+                        name: manualName,
+                        qty: 1,
+                        amount: salePrice,
+                        productId: null,
+                        warehouseId: null,
+                        warehouseName: ''
+                    });
+                }
+
+                // --- Final Save and Post-Processing ---
+                if (await addOrUpdateItem('sales', data, id, { add: `إضافة مبيعات: ${data.name}`, update: `تعديل مبيعات: ${data.name}` })) {
+                    // Loyalty points logic (unchanged)
+                    if (customerId && appSettings.loyaltyPointsRate > 0) {
+                        let pointsChange = 0;
+                        const newPoints = Math.floor(data.amount / appSettings.loyaltyPointsRate);
+
+                        if (id && item?.customerId === customerId) {
+                            const oldPoints = Math.floor(item.amount / appSettings.loyaltyPointsRate);
+                            pointsChange = newPoints - oldPoints;
+                        } else if (id && item?.customerId && item?.customerId !== customerId) {
+                            const oldPoints = Math.floor(item.amount / appSettings.loyaltyPointsRate);
+                            if (oldPoints > 0) await updateDoc(doc(db, 'customers', item.customerId), { loyaltyPoints: increment(-oldPoints) });
+                            pointsChange = newPoints;
+                        } else if (!id) {
+                            pointsChange = newPoints;
+                        }
+
+                        if (pointsChange !== 0) await updateDoc(doc(db, 'customers', customerId), { loyaltyPoints: increment(pointsChange) });
                     }
 
-                    if(pointsChange !== 0) await updateDoc(doc(db, 'customers', customerId), { loyaltyPoints: increment(pointsChange) });
+                    hideModal();
+                    await refreshSales();
+                    await refreshProducts();
+                    await updateDashboard();
+                    await refreshCustomers();
+                    showMessage('تم تسجيل عملية البيع بنجاح!');
+                } else {
+                    // This 'else' is crucial for when addOrUpdateItem returns false
+                    throw new Error("فشل حفظ البيانات في قاعدة البيانات.");
                 }
-
-                hideModal();
-                await refreshSales(); 
-                await refreshProducts();
-                await updateDashboard();
-                await refreshCustomers();
-                showMessage('تم تسجيل عملية البيع بنجاح!');
-            } else {
-                // If the final save fails, revert ALL stock changes.
-                if (type === 'product') await updateDoc(doc(db, 'products', productId), { qty: increment(saleQty) });
-                if (id && item?.type === 'product' && item.productId) await updateDoc(doc(db, 'products', item.productId), { qty: increment(-item.qty) });
+            } catch (error) {
+                showMessage(error.message);
+                // --- Revert ALL stock changes on any failure ---
+                if (stockUpdateSuccessful) {
+                    await updateDoc(doc(db, 'products', data.productId), { qty: increment(data.qty) });
+                }
+                // If we were editing, the original stock revert at the top is the final state.
+                // No need to add back the original item's quantity again.
             }
         }
+        // END OF REPLACEMENT BLOCK
 
         // --- Product Type Modal Functions ---
         function getProductTypeFormHTML(item = null) {
@@ -3345,7 +3405,6 @@
                         </div>
                     </div>
 
-                    <!-- Product Return Fields -->
                     <div id="return-product-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="flex flex-col">
                             <label for="modal-r-product" class="text-slate-600 mb-1">المنتج</label>
@@ -3360,7 +3419,6 @@
                         </div>
                     </div>
 
-                    <!-- Service/Manual Return Fields (Initially Hidden) -->
                     <div id="return-service-fields" class="hidden space-y-4">
                         <p class="text-sm text-slate-600">ابحث عن عملية البيع الأصلية لإنشاء إدخال مالي معاكس (مرتجع).</p>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
@@ -3578,8 +3636,7 @@
                             <label for="modal-p-category-stock" class="text-slate-600 mb-1">نوع المنتج</label>
                             <select id="modal-p-category-stock" class="select" required>
                                 <option value="">اختر نوع</option>
-                                <!-- Populated by JS -->
-                            </select>
+                                </select>
                         </div>
                         <div class="flex flex-col">
                             <label for="modal-p-qty-stock" class="text-slate-600 mb-1">الكمية</label>
