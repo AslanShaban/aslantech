@@ -1535,12 +1535,15 @@
 
                 // Asynchronously fetch role and data
                 const initializeAppForUser = async () => {
+                    console.log("PW_DEBUG: Starting initializeAppForUser");
                     try {
                         const userDoc = await getDoc(doc(db, 'users', user.uid));
+                        console.log("PW_DEBUG: Got user document.");
                         if (userDoc.exists()) {
                             currentUser.role = userDoc.data().role;
                         } else {
                             const allUsersSnapshot = await getDocs(query(collection(db, 'users'), limit(1)));
+                            console.log("PW_DEBUG: Checked for other users.");
                             if (allUsersSnapshot.empty) { // First ever user becomes admin
                                 currentUser.role = 'admin';
                                 await setDoc(doc(db, 'users', user.uid), { email: user.email, role: 'admin' }, { merge: true });
@@ -2054,11 +2057,14 @@
 		}
 
         async function refreshAllDataOnLogin() {
+            console.log("PW_DEBUG: Starting refreshAllDataOnLogin");
             const safeRefresh = async (refreshFunction, name) => {
                 try {
+                    console.log(`PW_DEBUG: Starting safeRefresh for ${name}`);
                     await refreshFunction();
+                    console.log(`PW_DEBUG: Finished safeRefresh for ${name}`);
                 } catch (error) {
-                    console.error(`Safe-refresh failed for ${name}:`, error);
+                    console.error(`PW_DEBUG: Safe-refresh failed for ${name}:`, error);
                     showMessage(`حدث خطأ أثناء تحميل قسم: ${name}. قد لا تظهر بعض البيانات.`);
                 }
             };
@@ -2094,6 +2100,7 @@
             document.querySelectorAll('.add-btn-disabled').forEach(btn => {
                 btn.disabled = false;
             });
+            console.log("PW_DEBUG: All data refreshed and buttons enabled.");
         }
 
         // --- Dashboard and Reports ---
